@@ -1,0 +1,202 @@
+{
+  "assignment_permutations": [
+    {
+      "ordered_field_ids": [
+        "A",
+        "B",
+        "C"
+      ],
+      "permutation_id": "ABC"
+    },
+    {
+      "ordered_field_ids": [
+        "A",
+        "C",
+        "B"
+      ],
+      "permutation_id": "ACB"
+    },
+    {
+      "ordered_field_ids": [
+        "B",
+        "A",
+        "C"
+      ],
+      "permutation_id": "BAC"
+    },
+    {
+      "ordered_field_ids": [
+        "B",
+        "C",
+        "A"
+      ],
+      "permutation_id": "BCA"
+    },
+    {
+      "ordered_field_ids": [
+        "C",
+        "A",
+        "B"
+      ],
+      "permutation_id": "CAB"
+    },
+    {
+      "ordered_field_ids": [
+        "C",
+        "B",
+        "A"
+      ],
+      "permutation_id": "CBA"
+    }
+  ],
+  "binary_grayscale_status": {
+    "complement_fields": "binary-grayscale-8",
+    "partition_fields": "binary-grayscale-8",
+    "preview": "illustrative-grayscale-8"
+  },
+  "compatible_workflows": [
+    {
+      "classification": "expected-rejection",
+      "execution_status": "not-authorized",
+      "filename": "workflows/three-layer.horizontal-thirds.v1.asset-inspection.workflow.json",
+      "sha256": "9a44aec9dcfafa8111f7376d8551f8cf72b12898e617165eeb096df9c80d4139",
+      "workflow_id": "three-layer.horizontal-thirds.v1.asset-inspection"
+    }
+  ],
+  "description": "Three mutually exclusive horizontal regions with complete coverage.",
+  "display_name": "Horizontal Thirds",
+  "fields": [
+    {
+      "asset_id": "A",
+      "filename": "three-layer/horizontal-thirds/field-a.png",
+      "role": "partition-field",
+      "sha256": "a3987c252254a08debbdc95244a291244b8cebc4aba90564d782268b7998c3e1"
+    },
+    {
+      "asset_id": "B",
+      "filename": "three-layer/horizontal-thirds/field-b.png",
+      "role": "partition-field",
+      "sha256": "5fe1512a3d0691400ea0b4623d3787ba8abd0929d5dfb987c79d0159d372b9bc"
+    },
+    {
+      "asset_id": "C",
+      "filename": "three-layer/horizontal-thirds/field-c.png",
+      "role": "partition-field",
+      "sha256": "90437159c5480d4591fa87b447b7b3e23974aa27fa2c46650f4af8bf887d5e03"
+    }
+  ],
+  "generator": {
+    "generator_id": "conditioning-layers.influence-field-library.generator",
+    "generator_version": 1,
+    "parameters": {
+      "boundaries_y": [
+        43,
+        85
+      ],
+      "kind": "horizontal_thirds"
+    },
+    "source_sha256": "3cbd830c313e94f9ff8a37daac9fdbffbf0dfaec255b169c546cdf170c9fdadc"
+  },
+  "geometric_variants": [
+    {
+      "operation": "mirror-vertical",
+      "source_to_target_field_mapping": {
+        "A": "C",
+        "B": "B",
+        "C": "A"
+      },
+      "target_pattern_family_id": "three-layer.horizontal-thirds.v1",
+      "variant_id": "mirror-vertical"
+    },
+    {
+      "operation": "rotate-90-clockwise",
+      "source_to_target_field_mapping": {
+        "A": "C",
+        "B": "B",
+        "C": "A"
+      },
+      "target_pattern_family_id": "three-layer.vertical-thirds.v1",
+      "variant_id": "rotate-90-clockwise"
+    },
+    {
+      "operation": "rotate-90-counterclockwise",
+      "source_to_target_field_mapping": {
+        "A": "A",
+        "B": "B",
+        "C": "C"
+      },
+      "target_pattern_family_id": "three-layer.vertical-thirds.v1",
+      "variant_id": "rotate-90-counterclockwise"
+    }
+  ],
+  "image_mode": "grayscale-8",
+  "intended_use": [
+    "EXP-0013 candidate",
+    "three-layer scaling research"
+  ],
+  "known_limitations": [
+    "Three Active Prompt Layers are rejected by the current product.",
+    "No three-layer rendering or performance claim is established."
+  ],
+  "layer_count": 3,
+  "library_version": 1,
+  "partition_relationship": {
+    "complete_coverage": true,
+    "equation": "A + B + C = 255",
+    "overlap_pixel_count": 0,
+    "per_pixel_sum": 255,
+    "unassigned_pixel_count": 0
+  },
+  "pattern_family_id": "three-layer.horizontal-thirds.v1",
+  "pixel_complements": [
+    {
+      "asset_id": "not-A",
+      "equivalent_partition_sum": [
+        "B",
+        "C"
+      ],
+      "expression": "255 - A",
+      "filename": "three-layer/horizontal-thirds/not-a.png",
+      "role": "pixel-complement",
+      "sha256": "0cc4d42e074835418686957bac4d939b61ed1ea76d7dab1d3135a30b7457042f",
+      "source_field_id": "A"
+    },
+    {
+      "asset_id": "not-B",
+      "equivalent_partition_sum": [
+        "A",
+        "C"
+      ],
+      "expression": "255 - B",
+      "filename": "three-layer/horizontal-thirds/not-b.png",
+      "role": "pixel-complement",
+      "sha256": "922ee985ece946507d23106b9c246bda3e6c821fe6b6a86e17e4e6dfb8120b9a",
+      "source_field_id": "B"
+    },
+    {
+      "asset_id": "not-C",
+      "equivalent_partition_sum": [
+        "A",
+        "B"
+      ],
+      "expression": "255 - C",
+      "filename": "three-layer/horizontal-thirds/not-c.png",
+      "role": "pixel-complement",
+      "sha256": "8533a037713018ac57d74cb19607eb66fe8f3b10d2664beb8c96efebd609564e",
+      "source_field_id": "C"
+    }
+  ],
+  "preview": {
+    "asset_id": "three-layer.horizontal-thirds.v1.preview",
+    "filename": "previews/three-layer.horizontal-thirds.v1.png",
+    "role": "composite-preview",
+    "sha256": "cf72a658b2ec4d8d69d2776dc4f98703ac8f6daf6aab70501f602dee91d9545e"
+  },
+  "resolution": {
+    "height": 128,
+    "width": 128
+  },
+  "schema_id": "conditioning-layers.influence-field-family-manifest",
+  "schema_version": 1,
+  "support_status": "validated-product-asset"
+}

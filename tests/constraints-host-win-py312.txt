@@ -1,0 +1,41 @@
+# profile: cpython 3.12.11 win32 win-amd64 64
+# ADR 0027 bounded host-test resolution, observed 2026-09-18.
+# Base authority: 838be84db85da312ba1f0ba7a936fee23d01afcb.
+# Observed mandatory dependency closure for this profile, without extras.
+# Not the entire ComfyUI environment, a resolver run, or an artifact hash lock.
+# Wheel tags are installed metadata constraints, not artifact-byte proof.
+# Provenance and limits: docs/developer.md.
+
+# Direct qualification-test dependencies.
+aiohttp==3.14.0 # wheel: cp312-cp312-win_amd64
+multidict==6.7.1 # wheel: cp312-cp312-win_amd64
+Pillow==12.2.0 # wheel: cp312-cp312-win_amd64
+
+# Mirrors only: BLEND_DEPENDENCIES in blend_component.py remains authority.
+# Preserve +cu129. No artifact/index URL or hash has been established here.
+torch==2.8.0+cu129 # wheel: cp312-cp312-win_amd64
+numpy==2.4.6 # wheel: cp312-cp312-win_amd64
+av==17.0.1 # wheel: cp311-abi3-win_amd64
+
+# Transitive resolution only: aiohttp -> these packages (plus multidict above).
+aiohappyeyeballs==2.6.2 # wheel: py3-none-any
+aiosignal==1.4.0 # wheel: py3-none-any
+attrs==26.1.0 # wheel: py3-none-any
+frozenlist==1.8.0 # wheel: cp312-cp312-win_amd64
+propcache==0.5.2 # wheel: cp312-cp312-win_amd64
+yarl==1.24.2 # wheel: cp312-cp312-win_amd64
+# aiohttp, aiosignal and torch -> typing-extensions; yarl -> idna.
+typing-extensions==4.15.0 # wheel: py3-none-any
+idna==3.18 # wheel: py3-none-any
+
+# Transitive resolution only: torch -> these packages (plus typing-extensions).
+# setuptools is required by torch on Python >=3.12, not an installer request.
+filelock==3.29.1 # wheel: py3-none-any
+sympy==1.14.0 # wheel: py3-none-any
+networkx==3.6.1 # wheel: py3-none-any
+jinja2==3.1.6 # wheel: py3-none-any
+fsspec==2026.4.0 # wheel: py3-none-any
+setuptools==81.0.0 # wheel: py3-none-any
+# sympy -> mpmath; jinja2 -> MarkupSafe.
+mpmath==1.3.0 # wheel: py3-none-any
+MarkupSafe==3.0.3 # wheel: cp312-cp312-win_amd64

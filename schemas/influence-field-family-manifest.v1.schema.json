@@ -1,0 +1,182 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://conditioning-layers.invalid/schemas/influence-field-family-manifest.v1.schema.json",
+  "title": "Conditioning Layers Influence Field Family Manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_id",
+    "schema_version",
+    "library_version",
+    "pattern_family_id",
+    "display_name",
+    "description",
+    "resolution",
+    "image_mode",
+    "layer_count",
+    "fields",
+    "pixel_complements",
+    "assignment_permutations",
+    "geometric_variants",
+    "partition_relationship",
+    "generator",
+    "preview",
+    "binary_grayscale_status",
+    "intended_use",
+    "support_status",
+    "compatible_workflows",
+    "known_limitations"
+  ],
+  "properties": {
+    "schema_id": {"const": "conditioning-layers.influence-field-family-manifest"},
+    "schema_version": {"const": 1},
+    "library_version": {"const": 1},
+    "pattern_family_id": {"type": "string", "pattern": "^(two|three)-layer\\.[a-z0-9-]+\\.v1$"},
+    "display_name": {"type": "string", "minLength": 1},
+    "description": {"type": "string", "minLength": 1},
+    "resolution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["width", "height"],
+      "properties": {
+        "width": {"type": "integer", "minimum": 1},
+        "height": {"type": "integer", "minimum": 1}
+      }
+    },
+    "image_mode": {"const": "grayscale-8"},
+    "layer_count": {"type": "integer", "enum": [2, 3]},
+    "fields": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 3,
+      "items": {"$ref": "#/$defs/asset"}
+    },
+    "pixel_complements": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 3,
+      "items": {
+        "allOf": [
+          {"$ref": "#/$defs/asset"},
+          {
+            "type": "object",
+            "required": ["source_field_id", "expression", "equivalent_partition_sum"]
+          }
+        ]
+      }
+    },
+    "assignment_permutations": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["permutation_id", "ordered_field_ids"],
+        "properties": {
+          "permutation_id": {"type": "string", "pattern": "^[ABC]{2,3}$"},
+          "ordered_field_ids": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 3,
+            "items": {"type": "string", "enum": ["A", "B", "C"]}
+          }
+        }
+      }
+    },
+    "geometric_variants": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["variant_id", "operation", "target_pattern_family_id", "source_to_target_field_mapping"],
+        "properties": {
+          "variant_id": {"type": "string", "minLength": 1},
+          "operation": {"type": "string", "minLength": 1},
+          "target_pattern_family_id": {"type": "string", "minLength": 1},
+          "source_to_target_field_mapping": {
+            "type": "object",
+            "additionalProperties": {"type": "string", "enum": ["A", "B", "C"]}
+          }
+        }
+      }
+    },
+    "partition_relationship": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "equation",
+        "per_pixel_sum",
+        "overlap_pixel_count",
+        "unassigned_pixel_count",
+        "complete_coverage"
+      ],
+      "properties": {
+        "equation": {"type": "string", "minLength": 1},
+        "per_pixel_sum": {"const": 255},
+        "overlap_pixel_count": {"type": "integer", "minimum": 0},
+        "unassigned_pixel_count": {"type": "integer", "minimum": 0},
+        "complete_coverage": {"type": "boolean"}
+      }
+    },
+    "generator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["generator_id", "generator_version", "source_sha256", "parameters"],
+      "properties": {
+        "generator_id": {"const": "conditioning-layers.influence-field-library.generator"},
+        "generator_version": {"const": 1},
+        "source_sha256": {"$ref": "#/$defs/sha256"},
+        "parameters": {"type": "object"}
+      }
+    },
+    "preview": {"$ref": "#/$defs/asset"},
+    "binary_grayscale_status": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["partition_fields", "complement_fields", "preview"],
+      "properties": {
+        "partition_fields": {"const": "binary-grayscale-8"},
+        "complement_fields": {"const": "binary-grayscale-8"},
+        "preview": {"const": "illustrative-grayscale-8"}
+      }
+    },
+    "intended_use": {"type": "array", "items": {"type": "string"}},
+    "support_status": {
+      "type": "string",
+      "enum": ["validated-product-asset", "research-only", "illustrative", "unsupported"]
+    },
+    "compatible_workflows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["workflow_id", "filename", "sha256", "classification", "execution_status"],
+        "properties": {
+          "workflow_id": {"type": "string", "minLength": 1},
+          "filename": {"type": "string", "minLength": 1},
+          "sha256": {"$ref": "#/$defs/sha256"},
+          "classification": {
+            "type": "string",
+            "enum": ["product-validated", "research-only", "illustrative", "expected-rejection"]
+          },
+          "execution_status": {"enum": ["asset-inspection-only", "not-authorized", "qualified"]}
+        }
+      }
+    },
+    "known_limitations": {"type": "array", "items": {"type": "string"}}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "asset": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["asset_id", "filename", "sha256", "role"],
+      "properties": {
+        "asset_id": {"type": "string", "minLength": 1},
+        "filename": {"type": "string", "minLength": 1},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "role": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}

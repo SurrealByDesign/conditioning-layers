@@ -1,0 +1,1044 @@
+{
+  "last_node_id": 23,
+  "last_link_id": 18,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "Note",
+      "pos": [
+        0,
+        40
+      ],
+      "size": [
+        300,
+        109
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "Select a compatible checkpoint/model available in your ComfyUI installation.\nUse Krea 2 with its matching text encoder and VAE; replace all three SELECT selections.\nThree loader warnings are expected until you select those models."
+      ],
+      "title": "IMPORTANT",
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 2,
+      "type": "UNETLoader",
+      "pos": [
+        0,
+        201
+      ],
+      "size": [
+        300,
+        82
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            2
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "UNETLoader"
+      },
+      "widgets_values": [
+        "SELECT_KREA_2_MODEL.safetensors",
+        "default"
+      ]
+    },
+    {
+      "id": 3,
+      "type": "CLIPLoader",
+      "pos": [
+        0,
+        335
+      ],
+      "size": [
+        300,
+        106
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": [
+            1,
+            8,
+            12
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPLoader"
+      },
+      "widgets_values": [
+        "SELECT_KREA_2_TEXT_ENCODER.safetensors",
+        "krea2",
+        "default"
+      ]
+    },
+    {
+      "id": 4,
+      "type": "VAELoader",
+      "pos": [
+        0,
+        493
+      ],
+      "size": [
+        300,
+        58
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            6
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAELoader"
+      },
+      "widgets_values": [
+        "SELECT_COMPATIBLE_VAE.safetensors"
+      ]
+    },
+    {
+      "id": 5,
+      "type": "CLIPTextEncode",
+      "pos": [
+        2580,
+        -310
+      ],
+      "size": [
+        300,
+        88
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 1
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            3
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        ""
+      ],
+      "title": "Empty negative prompt"
+    },
+    {
+      "id": 6,
+      "type": "EmptyLatentImage",
+      "pos": [
+        2580,
+        -170
+      ],
+      "size": [
+        300,
+        106
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            4
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "EmptyLatentImage"
+      },
+      "widgets_values": [
+        1024,
+        1024,
+        1
+      ],
+      "title": "Image size"
+    },
+    {
+      "id": 7,
+      "type": "KSampler",
+      "pos": [
+        2980,
+        40
+      ],
+      "size": [
+        300,
+        262
+      ],
+      "flags": {},
+      "order": 20,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 2
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 18
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 3
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 4
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            5
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "KSampler"
+      },
+      "widgets_values": [
+        2026,
+        "fixed",
+        8,
+        1.0,
+        "euler",
+        "simple",
+        1.0
+      ]
+    },
+    {
+      "id": 8,
+      "type": "VAEDecode",
+      "pos": [
+        2980,
+        354
+      ],
+      "size": [
+        300,
+        46
+      ],
+      "flags": {},
+      "order": 21,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 5
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 6
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            7
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAEDecode"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 9,
+      "type": "SaveImage",
+      "pos": [
+        2980,
+        452
+      ],
+      "size": [
+        300,
+        330
+      ],
+      "flags": {},
+      "order": 22,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 7
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "ConditioningLayers/02_two_fixed_regions"
+      ]
+    },
+    {
+      "id": 10,
+      "type": "Note",
+      "pos": [
+        0,
+        -149
+      ],
+      "size": [
+        780,
+        59
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "TWO FIXED REGIONS — Old-master portrait meets chrome robot\nTwo FIXED layers split the canvas down the middle. Each half belongs to one prompt, in a completely different era and style."
+      ],
+      "title": "CONDITIONING LAYERS — EXAMPLE 02",
+      "color": "#2a363b",
+      "bgcolor": "#3f5159"
+    },
+    {
+      "id": 11,
+      "type": "ConditioningLayersRectangleField",
+      "pos": [
+        1080,
+        710
+      ],
+      "size": [
+        300,
+        178
+      ],
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": [
+            10
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersRectangleField"
+      },
+      "widgets_values": [
+        32.0,
+        64.0,
+        64,
+        128,
+        255,
+        0
+      ],
+      "title": "L1 · Left half (field)"
+    },
+    {
+      "id": 12,
+      "type": "CLIPTextEncode",
+      "pos": [
+        600,
+        640
+      ],
+      "size": [
+        400,
+        150
+      ],
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 8
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            9
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "Renaissance oil portrait of a pale aristocrat in a black velvet doublet and starched white ruff, gold chain, dark umber background, soft candlelight, cracked varnish, old master painting."
+      ],
+      "title": "L1 · Renaissance portrait (prompt)"
+    },
+    {
+      "id": 13,
+      "type": "ConditioningLayersLayer",
+      "pos": [
+        1880,
+        640
+      ],
+      "size": [
+        300,
+        126
+      ],
+      "flags": {},
+      "order": 13,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "link": 9
+        },
+        {
+          "name": "mask",
+          "type": "MASK",
+          "link": 10
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING_LAYER",
+          "type": "CONDITIONING_LAYER",
+          "links": [
+            11
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersLayer"
+      },
+      "widgets_values": [
+        1.0,
+        "FIXED",
+        true
+      ],
+      "title": "L1 · Renaissance portrait"
+    },
+    {
+      "id": 14,
+      "type": "ConditioningLayersAddLayer",
+      "pos": [
+        2220,
+        640
+      ],
+      "size": [
+        220,
+        46
+      ],
+      "flags": {},
+      "order": 14,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "layer",
+          "type": "CONDITIONING_LAYER",
+          "link": 11
+        },
+        {
+          "name": "layers",
+          "type": "CONDITIONING_LAYER_STACK",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING_LAYER_STACK",
+          "type": "CONDITIONING_LAYER_STACK",
+          "links": [
+            16
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersAddLayer"
+      },
+      "widgets_values": [],
+      "title": "Add L1"
+    },
+    {
+      "id": 15,
+      "type": "Note",
+      "pos": [
+        1460,
+        710
+      ],
+      "size": [
+        340,
+        97
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "The left half belongs entirely to the Renaissance oil portrait. The right half belongs entirely to the 1980s chrome-robot advert.\nFIXED means ownership: neither prompt crosses the border at x = 64."
+      ],
+      "title": "WHAT THIS SHOWS",
+      "color": "#223",
+      "bgcolor": "#335"
+    },
+    {
+      "id": 16,
+      "type": "ConditioningLayersRectangleField",
+      "pos": [
+        1080,
+        1048
+      ],
+      "size": [
+        300,
+        178
+      ],
+      "flags": {},
+      "order": 15,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": [
+            14
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersRectangleField"
+      },
+      "widgets_values": [
+        96.0,
+        64.0,
+        64,
+        128,
+        255,
+        0
+      ],
+      "title": "L2 · Right half (field)"
+    },
+    {
+      "id": 17,
+      "type": "CLIPTextEncode",
+      "pos": [
+        600,
+        978
+      ],
+      "size": [
+        400,
+        150
+      ],
+      "flags": {},
+      "order": 16,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 12
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            13
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "1980s airbrushed advertising illustration of a gleaming chrome robot with a hot-pink visor, glossy reflections, neon laser-grid horizon, bold retro sci-fi poster art."
+      ],
+      "title": "L2 · Chrome robot advert (prompt)"
+    },
+    {
+      "id": 18,
+      "type": "ConditioningLayersLayer",
+      "pos": [
+        1880,
+        978
+      ],
+      "size": [
+        300,
+        126
+      ],
+      "flags": {},
+      "order": 17,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "link": 13
+        },
+        {
+          "name": "mask",
+          "type": "MASK",
+          "link": 14
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING_LAYER",
+          "type": "CONDITIONING_LAYER",
+          "links": [
+            15
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersLayer"
+      },
+      "widgets_values": [
+        1.0,
+        "FIXED",
+        true
+      ],
+      "title": "L2 · Chrome robot advert"
+    },
+    {
+      "id": 19,
+      "type": "ConditioningLayersAddLayer",
+      "pos": [
+        2220,
+        978
+      ],
+      "size": [
+        220,
+        46
+      ],
+      "flags": {},
+      "order": 18,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "layer",
+          "type": "CONDITIONING_LAYER",
+          "link": 15
+        },
+        {
+          "name": "layers",
+          "type": "CONDITIONING_LAYER_STACK",
+          "link": 16
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING_LAYER_STACK",
+          "type": "CONDITIONING_LAYER_STACK",
+          "links": [
+            17
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersAddLayer"
+      },
+      "widgets_values": [],
+      "title": "Add L2"
+    },
+    {
+      "id": 20,
+      "type": "Note",
+      "pos": [
+        1460,
+        1048
+      ],
+      "size": [
+        340,
+        84
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "Slide the border: set the L1 Rectangle to center_x 40, width 80, then the L2 Rectangle to center_x 104, width 48. The portrait now owns five eighths of the frame."
+      ],
+      "title": "TRY THIS",
+      "color": "#232",
+      "bgcolor": "#353"
+    },
+    {
+      "id": 21,
+      "type": "Note",
+      "pos": [
+        1460,
+        1194
+      ],
+      "size": [
+        340,
+        84
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "FIXED regions must not overlap. If two FIXED fields are both above zero at even one sample, Compose stops with an error naming both layers. Shrink one region before you grow the other."
+      ],
+      "title": "IMPORTANT",
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 22,
+      "type": "Note",
+      "pos": [
+        600,
+        1190
+      ],
+      "size": [
+        400,
+        59
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "Swap the two prompts between L1 and L2. The portrait and the robot trade sides without touching either field."
+      ],
+      "title": "TRY THIS",
+      "color": "#232",
+      "bgcolor": "#353"
+    },
+    {
+      "id": 23,
+      "type": "ConditioningLayersCompose",
+      "pos": [
+        2220,
+        1096
+      ],
+      "size": [
+        300,
+        26
+      ],
+      "flags": {},
+      "order": 19,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "layers",
+          "type": "CONDITIONING_LAYER_STACK",
+          "link": 17
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            18
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersCompose"
+      },
+      "widgets_values": []
+    }
+  ],
+  "links": [
+    [
+      1,
+      3,
+      0,
+      5,
+      0,
+      "CLIP"
+    ],
+    [
+      2,
+      2,
+      0,
+      7,
+      0,
+      "MODEL"
+    ],
+    [
+      3,
+      5,
+      0,
+      7,
+      2,
+      "CONDITIONING"
+    ],
+    [
+      4,
+      6,
+      0,
+      7,
+      3,
+      "LATENT"
+    ],
+    [
+      5,
+      7,
+      0,
+      8,
+      0,
+      "LATENT"
+    ],
+    [
+      6,
+      4,
+      0,
+      8,
+      1,
+      "VAE"
+    ],
+    [
+      7,
+      8,
+      0,
+      9,
+      0,
+      "IMAGE"
+    ],
+    [
+      8,
+      3,
+      0,
+      12,
+      0,
+      "CLIP"
+    ],
+    [
+      9,
+      12,
+      0,
+      13,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      10,
+      11,
+      0,
+      13,
+      1,
+      "MASK"
+    ],
+    [
+      11,
+      13,
+      0,
+      14,
+      0,
+      "CONDITIONING_LAYER"
+    ],
+    [
+      12,
+      3,
+      0,
+      17,
+      0,
+      "CLIP"
+    ],
+    [
+      13,
+      17,
+      0,
+      18,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      14,
+      16,
+      0,
+      18,
+      1,
+      "MASK"
+    ],
+    [
+      15,
+      18,
+      0,
+      19,
+      0,
+      "CONDITIONING_LAYER"
+    ],
+    [
+      16,
+      14,
+      0,
+      19,
+      1,
+      "CONDITIONING_LAYER_STACK"
+    ],
+    [
+      17,
+      19,
+      0,
+      23,
+      0,
+      "CONDITIONING_LAYER_STACK"
+    ],
+    [
+      18,
+      23,
+      0,
+      7,
+      1,
+      "CONDITIONING"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "1 — MODEL / INPUT",
+      "bounding": [
+        -20,
+        -48,
+        340,
+        623
+      ],
+      "color": "#3f789e",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "id": 2,
+      "title": "2 — PROMPTS",
+      "bounding": [
+        580,
+        538,
+        440,
+        735
+      ],
+      "color": "#8A8",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "id": 3,
+      "title": "3 — INFLUENCE FIELDS",
+      "bounding": [
+        1060,
+        538,
+        340,
+        712
+      ],
+      "color": "#b58b2a",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "id": 4,
+      "title": "5 — COMPOSITION",
+      "bounding": [
+        1860,
+        538,
+        680,
+        608
+      ],
+      "color": "#88A",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "id": 5,
+      "title": "6 — SAMPLING / OUTPUT",
+      "bounding": [
+        2560,
+        -398,
+        740,
+        1204
+      ],
+      "color": "#b06634",
+      "font_size": 24,
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.72,
+      "offset": [
+        76,
+        441
+      ]
+    }
+  },
+  "version": 0.4
+}

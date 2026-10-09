@@ -1,0 +1,1313 @@
+{
+  "last_node_id": 28,
+  "last_link_id": 23,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "Note",
+      "pos": [
+        0,
+        40
+      ],
+      "size": [
+        300,
+        109
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "Select a compatible checkpoint/model available in your ComfyUI installation.\nUse Krea 2 with its matching text encoder and VAE; replace all three SELECT selections.\nThree loader warnings are expected until you select those models."
+      ],
+      "title": "IMPORTANT",
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 2,
+      "type": "UNETLoader",
+      "pos": [
+        0,
+        201
+      ],
+      "size": [
+        300,
+        82
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            2
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "UNETLoader"
+      },
+      "widgets_values": [
+        "SELECT_KREA_2_MODEL.safetensors",
+        "default"
+      ]
+    },
+    {
+      "id": 3,
+      "type": "CLIPLoader",
+      "pos": [
+        0,
+        335
+      ],
+      "size": [
+        300,
+        106
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": [
+            1,
+            13,
+            17
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPLoader"
+      },
+      "widgets_values": [
+        "SELECT_KREA_2_TEXT_ENCODER.safetensors",
+        "krea2",
+        "default"
+      ]
+    },
+    {
+      "id": 4,
+      "type": "VAELoader",
+      "pos": [
+        0,
+        493
+      ],
+      "size": [
+        300,
+        58
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            6
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAELoader"
+      },
+      "widgets_values": [
+        "SELECT_COMPATIBLE_VAE.safetensors"
+      ]
+    },
+    {
+      "id": 5,
+      "type": "CLIPTextEncode",
+      "pos": [
+        3920,
+        -310
+      ],
+      "size": [
+        300,
+        88
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 1
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            3
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        ""
+      ],
+      "title": "Empty negative prompt"
+    },
+    {
+      "id": 6,
+      "type": "EmptyLatentImage",
+      "pos": [
+        3920,
+        -170
+      ],
+      "size": [
+        300,
+        106
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            4
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "EmptyLatentImage"
+      },
+      "widgets_values": [
+        1024,
+        1024,
+        1
+      ],
+      "title": "Image size"
+    },
+    {
+      "id": 7,
+      "type": "KSampler",
+      "pos": [
+        4320,
+        40
+      ],
+      "size": [
+        300,
+        262
+      ],
+      "flags": {},
+      "order": 25,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 2
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 23
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 3
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 4
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            5
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "KSampler"
+      },
+      "widgets_values": [
+        2026,
+        "fixed",
+        8,
+        1.0,
+        "euler",
+        "simple",
+        1.0
+      ]
+    },
+    {
+      "id": 8,
+      "type": "VAEDecode",
+      "pos": [
+        4320,
+        354
+      ],
+      "size": [
+        300,
+        46
+      ],
+      "flags": {},
+      "order": 26,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 5
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 6
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            7
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAEDecode"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 9,
+      "type": "SaveImage",
+      "pos": [
+        4320,
+        452
+      ],
+      "size": [
+        300,
+        330
+      ],
+      "flags": {},
+      "order": 27,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 7
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "ConditioningLayers/04_transform_repeat_fade_remap"
+      ]
+    },
+    {
+      "id": 10,
+      "type": "Note",
+      "pos": [
+        0,
+        -162
+      ],
+      "size": [
+        780,
+        72
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "TRANSFORM · REPEAT · FADE · REMAP — Neon windows of a rain-soaked megablock\nOne Rectangle becomes a whole façade of lit windows. Each processor reshapes the influence FIELD, step by step, before the layer ever sees it."
+      ],
+      "title": "CONDITIONING LAYERS — EXAMPLE 04",
+      "color": "#2a363b",
+      "bgcolor": "#3f5159"
+    },
+    {
+      "id": 11,
+      "type": "ConditioningLayersRectangleField",
+      "pos": [
+        1080,
+        710
+      ],
+      "size": [
+        300,
+        178
+      ],
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": [
+            8
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersRectangleField"
+      },
+      "widgets_values": [
+        64.0,
+        64.0,
+        64,
+        80,
+        255,
+        0
+      ],
+      "title": "L1 · One window (field)"
+    },
+    {
+      "id": 12,
+      "type": "ConditioningLayersFieldRepeat",
+      "pos": [
+        1460,
+        710
+      ],
+      "size": [
+        300,
+        130
+      ],
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "mask",
+          "type": "MASK",
+          "link": 8
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": [
+            9
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersFieldRepeat"
+      },
+      "widgets_values": [
+        4,
+        8,
+        0,
+        0
+      ],
+      "title": "Repeat · one window → 4 × 8 grid"
+    },
+    {
+      "id": 13,
+      "type": "ConditioningLayersFieldTransform",
+      "pos": [
+        1800,
+        710
+      ],
+      "size": [
+        300,
+        226
+      ],
+      "flags": {},
+      "order": 13,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "mask",
+          "type": "MASK",
+          "link": 9
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": [
+            10
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersFieldTransform"
+      },
+      "widgets_values": [
+        1.0,
+        0.62,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        false,
+        false
+      ],
+      "title": "Transform · squeeze onto the tower"
+    },
+    {
+      "id": 14,
+      "type": "ConditioningLayersFieldFade",
+      "pos": [
+        2140,
+        710
+      ],
+      "size": [
+        300,
+        370
+      ],
+      "flags": {},
+      "order": 14,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "mask",
+          "type": "MASK",
+          "link": 10
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": [
+            11
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersFieldFade"
+      },
+      "widgets_values": [
+        "linear",
+        255,
+        40,
+        1.0,
+        270.0,
+        0.0,
+        1.0,
+        0.5,
+        0.5,
+        0.25,
+        0.5,
+        1.0,
+        1.0,
+        0.0
+      ],
+      "title": "Fade · dim the upper floors"
+    },
+    {
+      "id": 15,
+      "type": "ConditioningLayersFieldRemap",
+      "pos": [
+        2480,
+        710
+      ],
+      "size": [
+        300,
+        130
+      ],
+      "flags": {},
+      "order": 15,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "mask",
+          "type": "MASK",
+          "link": 11
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": [
+            12
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersFieldRemap"
+      },
+      "widgets_values": [
+        60,
+        200,
+        0,
+        255
+      ],
+      "title": "Remap · switch off faint windows"
+    },
+    {
+      "id": 16,
+      "type": "ConditioningLayersFieldBlur",
+      "pos": [
+        2820,
+        710
+      ],
+      "size": [
+        300,
+        58
+      ],
+      "flags": {},
+      "order": 16,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "mask",
+          "type": "MASK",
+          "link": 12
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": [
+            15
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersFieldBlur"
+      },
+      "widgets_values": [
+        2
+      ],
+      "title": "Blur · neon glow halo"
+    },
+    {
+      "id": 17,
+      "type": "CLIPTextEncode",
+      "pos": [
+        600,
+        640
+      ],
+      "size": [
+        400,
+        150
+      ],
+      "flags": {},
+      "order": 17,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 13
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            14
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "Rows of glowing magenta and cyan neon apartment windows and holographic shop signs, vivid light bloom on rain-streaked glass."
+      ],
+      "title": "L1 · Neon windows (prompt)"
+    },
+    {
+      "id": 18,
+      "type": "ConditioningLayersLayer",
+      "pos": [
+        3220,
+        640
+      ],
+      "size": [
+        300,
+        126
+      ],
+      "flags": {},
+      "order": 18,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "link": 14
+        },
+        {
+          "name": "mask",
+          "type": "MASK",
+          "link": 15
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING_LAYER",
+          "type": "CONDITIONING_LAYER",
+          "links": [
+            16
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersLayer"
+      },
+      "widgets_values": [
+        1.0,
+        "BLENDED",
+        true
+      ],
+      "title": "L1 · Neon windows"
+    },
+    {
+      "id": 19,
+      "type": "ConditioningLayersAddLayer",
+      "pos": [
+        3560,
+        640
+      ],
+      "size": [
+        220,
+        46
+      ],
+      "flags": {},
+      "order": 19,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "layer",
+          "type": "CONDITIONING_LAYER",
+          "link": 16
+        },
+        {
+          "name": "layers",
+          "type": "CONDITIONING_LAYER_STACK",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING_LAYER_STACK",
+          "type": "CONDITIONING_LAYER_STACK",
+          "links": [
+            21
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersAddLayer"
+      },
+      "widgets_values": [],
+      "title": "Add L1"
+    },
+    {
+      "id": 20,
+      "type": "Note",
+      "pos": [
+        1460,
+        998
+      ],
+      "size": [
+        640,
+        59
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "These nodes reshape the INFLUENCE FIELD, never the picture. Follow the chain: one window → a 4 × 8 grid → squeezed onto the tower → upper floors dimmed → faint windows switched off → a soft neon halo."
+      ],
+      "title": "WHAT THIS SHOWS",
+      "color": "#223",
+      "bgcolor": "#335"
+    },
+    {
+      "id": 21,
+      "type": "Note",
+      "pos": [
+        2140,
+        1142
+      ],
+      "size": [
+        300,
+        84
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "Set Repeat repeats_y to 16 for twice as many, thinner floors. Then set Fade angle_degrees to 90: now the top floors glow brightest and the lowest windows switch off."
+      ],
+      "title": "TRY THIS",
+      "color": "#232",
+      "bgcolor": "#353"
+    },
+    {
+      "id": 22,
+      "type": "Note",
+      "pos": [
+        2480,
+        902
+      ],
+      "size": [
+        640,
+        59
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "Order matters. Remap after Fade switches the dim upper windows off. Move Remap before Fade and every window stays lit, only dimmer."
+      ],
+      "title": "IMPORTANT",
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 23,
+      "type": "ConditioningLayersSolidField",
+      "pos": [
+        1080,
+        1386
+      ],
+      "size": [
+        300,
+        58
+      ],
+      "flags": {},
+      "order": 20,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": [
+            19
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersSolidField"
+      },
+      "widgets_values": [
+        255
+      ],
+      "title": "L2 · Megablock backdrop (field)"
+    },
+    {
+      "id": 24,
+      "type": "CLIPTextEncode",
+      "pos": [
+        600,
+        1316
+      ],
+      "size": [
+        400,
+        150
+      ],
+      "flags": {},
+      "order": 21,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 17
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            18
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "A brutalist concrete apartment megablock at night in pouring rain, rusted pipes, steam vents and dripping fire escapes, wet street reflections, cinematic night photograph."
+      ],
+      "title": "L2 · Megablock backdrop (prompt)"
+    },
+    {
+      "id": 25,
+      "type": "ConditioningLayersLayer",
+      "pos": [
+        3220,
+        1316
+      ],
+      "size": [
+        300,
+        126
+      ],
+      "flags": {},
+      "order": 22,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "link": 18
+        },
+        {
+          "name": "mask",
+          "type": "MASK",
+          "link": 19
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING_LAYER",
+          "type": "CONDITIONING_LAYER",
+          "links": [
+            20
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersLayer"
+      },
+      "widgets_values": [
+        0.35,
+        "BLENDED",
+        true
+      ],
+      "title": "L2 · Megablock backdrop"
+    },
+    {
+      "id": 26,
+      "type": "ConditioningLayersAddLayer",
+      "pos": [
+        3560,
+        1316
+      ],
+      "size": [
+        220,
+        46
+      ],
+      "flags": {},
+      "order": 23,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "layer",
+          "type": "CONDITIONING_LAYER",
+          "link": 20
+        },
+        {
+          "name": "layers",
+          "type": "CONDITIONING_LAYER_STACK",
+          "link": 21
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING_LAYER_STACK",
+          "type": "CONDITIONING_LAYER_STACK",
+          "links": [
+            22
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersAddLayer"
+      },
+      "widgets_values": [],
+      "title": "Add L2"
+    },
+    {
+      "id": 27,
+      "type": "Note",
+      "pos": [
+        1460,
+        1386
+      ],
+      "size": [
+        340,
+        84
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "The backdrop covers the whole canvas at Strength 0.35, so it fills the walls between windows. Inside a bright window the neon layer wins about three quarters of the share."
+      ],
+      "title": "WHAT THIS SHOWS",
+      "color": "#223",
+      "bgcolor": "#335"
+    },
+    {
+      "id": 28,
+      "type": "ConditioningLayersCompose",
+      "pos": [
+        3560,
+        1434
+      ],
+      "size": [
+        300,
+        26
+      ],
+      "flags": {},
+      "order": 24,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "layers",
+          "type": "CONDITIONING_LAYER_STACK",
+          "link": 22
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            23
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersCompose"
+      },
+      "widgets_values": []
+    }
+  ],
+  "links": [
+    [
+      1,
+      3,
+      0,
+      5,
+      0,
+      "CLIP"
+    ],
+    [
+      2,
+      2,
+      0,
+      7,
+      0,
+      "MODEL"
+    ],
+    [
+      3,
+      5,
+      0,
+      7,
+      2,
+      "CONDITIONING"
+    ],
+    [
+      4,
+      6,
+      0,
+      7,
+      3,
+      "LATENT"
+    ],
+    [
+      5,
+      7,
+      0,
+      8,
+      0,
+      "LATENT"
+    ],
+    [
+      6,
+      4,
+      0,
+      8,
+      1,
+      "VAE"
+    ],
+    [
+      7,
+      8,
+      0,
+      9,
+      0,
+      "IMAGE"
+    ],
+    [
+      8,
+      11,
+      0,
+      12,
+      0,
+      "MASK"
+    ],
+    [
+      9,
+      12,
+      0,
+      13,
+      0,
+      "MASK"
+    ],
+    [
+      10,
+      13,
+      0,
+      14,
+      0,
+      "MASK"
+    ],
+    [
+      11,
+      14,
+      0,
+      15,
+      0,
+      "MASK"
+    ],
+    [
+      12,
+      15,
+      0,
+      16,
+      0,
+      "MASK"
+    ],
+    [
+      13,
+      3,
+      0,
+      17,
+      0,
+      "CLIP"
+    ],
+    [
+      14,
+      17,
+      0,
+      18,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      15,
+      16,
+      0,
+      18,
+      1,
+      "MASK"
+    ],
+    [
+      16,
+      18,
+      0,
+      19,
+      0,
+      "CONDITIONING_LAYER"
+    ],
+    [
+      17,
+      3,
+      0,
+      24,
+      0,
+      "CLIP"
+    ],
+    [
+      18,
+      24,
+      0,
+      25,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      19,
+      23,
+      0,
+      25,
+      1,
+      "MASK"
+    ],
+    [
+      20,
+      25,
+      0,
+      26,
+      0,
+      "CONDITIONING_LAYER"
+    ],
+    [
+      21,
+      19,
+      0,
+      26,
+      1,
+      "CONDITIONING_LAYER_STACK"
+    ],
+    [
+      22,
+      26,
+      0,
+      28,
+      0,
+      "CONDITIONING_LAYER_STACK"
+    ],
+    [
+      23,
+      28,
+      0,
+      7,
+      1,
+      "CONDITIONING"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "1 — MODEL / INPUT",
+      "bounding": [
+        -20,
+        -48,
+        340,
+        623
+      ],
+      "color": "#3f789e",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "id": 2,
+      "title": "2 — PROMPTS",
+      "bounding": [
+        580,
+        538,
+        440,
+        952
+      ],
+      "color": "#8A8",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "id": 3,
+      "title": "3 — INFLUENCE FIELDS",
+      "bounding": [
+        1060,
+        538,
+        340,
+        930
+      ],
+      "color": "#b58b2a",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "id": 4,
+      "title": "4 — FIELD PROCESSING",
+      "bounding": [
+        1440,
+        538,
+        1700,
+        566
+      ],
+      "color": "#a1309b",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "id": 5,
+      "title": "5 — COMPOSITION",
+      "bounding": [
+        3200,
+        538,
+        680,
+        946
+      ],
+      "color": "#88A",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "id": 6,
+      "title": "6 — SAMPLING / OUTPUT",
+      "bounding": [
+        3900,
+        -398,
+        740,
+        1204
+      ],
+      "color": "#b06634",
+      "font_size": 24,
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.72,
+      "offset": [
+        76,
+        441
+      ]
+    }
+  },
+  "version": 0.4
+}

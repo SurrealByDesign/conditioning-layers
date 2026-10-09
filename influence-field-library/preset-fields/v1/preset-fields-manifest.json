@@ -1,0 +1,182 @@
+{
+  "format": "conditioning-layers.preset-fields",
+  "version": 1,
+  "selection_order": "presets array order, then polarity_order",
+  "polarity_order": [
+    "dark",
+    "light"
+  ],
+  "png_chunks": [
+    "IHDR",
+    "IDAT",
+    "IEND"
+  ],
+  "generator": {
+    "path": "generator/generate_presets.py",
+    "dependencies": "Python standard library only",
+    "png_encoding": "grayscale-8, filter 0, noninterlaced, zlib level 9"
+  },
+  "presets": [
+    {
+      "version": 1,
+      "field_type": "binary",
+      "width": 128,
+      "height": 128,
+      "bit_depth": 8,
+      "channel_mode": "grayscale-8",
+      "alpha": false,
+      "support_status": "illustrative",
+      "complement_relation": "light = 255 - dark at every sample",
+      "polarity": {
+        "dark": "255 at printed modules/bars; 0 elsewhere",
+        "light": "255 - dark; conventional black-on-white display orientation"
+      },
+      "preset_id": "qr-code",
+      "display_name": "QR Code",
+      "category": "qr",
+      "payload": "https://github.com/SurrealByDesign/conditioning-layers",
+      "provenance": {
+        "name": "Nayuki qrcodegen",
+        "version": "1.8.0",
+        "source": "https://github.com/nayuki/QR-Code-generator/blob/v1.8.0/python/qrcodegen.py",
+        "parameters": "make_bytes(UTF-8 payload); MEDIUM; minversion=maxversion=4; mask=-1; boostecl=False"
+      },
+      "verification": {
+        "method": "Independent decoder on exact retained 128x128 light PNG; structural offline tests",
+        "evidence_path": "qr/decoder-verification.json",
+        "evidence_sha256": "f510a240e59d8bb2591a519fdc39800179b8bd829aea6cdc8a67f4a272c5353c"
+      },
+      "matrix": {
+        "path": "qr/qr-code-matrix.json",
+        "sha256": "77a2a1872118ffab9343078ce5c1098a6bf3965616739e809429acff39ae9e61",
+        "module_bytes_sha256": "c75cd03c5b0abc22dca51649f26c7e776b7d3090a5027855530bef78ce1ad90b"
+      },
+      "geometry": {
+        "model": 2,
+        "qr_version": 4,
+        "ecc": "M",
+        "mode": "byte",
+        "mask_pattern": 2,
+        "logical_modules": [
+          33,
+          33
+        ],
+        "module_pitch": 3,
+        "symbol_x": [
+          14,
+          113
+        ],
+        "symbol_y": [
+          14,
+          113
+        ],
+        "footprint_with_quiet_zone": [
+          2,
+          125
+        ],
+        "quiet_zone_modules_required": 4,
+        "quiet_zone_cells_required": 12,
+        "canvas_margins": {
+          "left": 14,
+          "top": 14,
+          "right": 15,
+          "bottom": 15
+        },
+        "version_information": "No separate version-information blocks below version 7; version 4 is implicit in 33x33 size"
+      },
+      "assets": {
+        "dark": {
+          "id": "qr-code-dark",
+          "display_name": "QR Code  Dark",
+          "path": "qr/qr-code-dark.png",
+          "sha256": "164da40d5bdf703f784d7288d42f1d2ebc6e53abfcf5a7a27f6b68cc3c07aba0"
+        },
+        "light": {
+          "id": "qr-code-light",
+          "display_name": "QR Code  Light",
+          "path": "qr/qr-code-light.png",
+          "sha256": "8a238e24a766666bc4b33710bb057a9a7d5594635c7800f51da2f0d7cf831beb"
+        }
+      }
+    },
+    {
+      "version": 1,
+      "field_type": "binary",
+      "width": 128,
+      "height": 128,
+      "bit_depth": 8,
+      "channel_mode": "grayscale-8",
+      "alpha": false,
+      "support_status": "illustrative",
+      "complement_relation": "light = 255 - dark at every sample",
+      "polarity": {
+        "dark": "255 at printed modules/bars; 0 elsewhere",
+        "light": "255 - dark; conventional black-on-white display orientation"
+      },
+      "preset_id": "upc-000000000000",
+      "display_name": "UPC",
+      "category": "barcode",
+      "upc": "000000000000",
+      "provenance": {
+        "kind": "synthetic/demo barcode",
+        "source": "All-zero demonstration digits selected for Conditioning Layers; no real-product association",
+        "encoding_reference": "https://www.gs1.org/docs/barcodes/GSCN_20-323_Clafiry_Add-on.pdf"
+      },
+      "verification": {
+        "method": "Independent test encoding from UPC run-width table; check digit; full canvas comparison against geometry; supplied 95-module oracle",
+        "check_digit": 0,
+        "weighted_sum_first_11": 0
+      },
+      "modules": "10100011010001101000110100011010001101000110101010111001011100101110010111001011100101110010101",
+      "geometry": {
+        "module_count": 95,
+        "module_pitch_x": 1,
+        "bars_x": [
+          16,
+          111
+        ],
+        "normal_bars_y": [
+          27,
+          96
+        ],
+        "extended_bars_y": [
+          27,
+          101
+        ],
+        "extended_module_ranges": [
+          [
+            0,
+            10
+          ],
+          [
+            45,
+            50
+          ],
+          [
+            85,
+            95
+          ]
+        ],
+        "extension_rule": "Guards and first/last symbol-character dark bars extend 5X",
+        "quiet_zone_modules_required_each_side": 9,
+        "quiet_zone_cells_left": 16,
+        "quiet_zone_cells_right": 17,
+        "human_readable_digits": false
+      },
+      "assets": {
+        "dark": {
+          "id": "upc-000000000000-dark",
+          "display_name": "UPC  Dark",
+          "path": "barcode/upc-000000000000-dark.png",
+          "sha256": "c905feac4478e90b9538dabbf9210c3f50af7f3f57655fb436abc89384a0d446"
+        },
+        "light": {
+          "id": "upc-000000000000-light",
+          "display_name": "UPC  Light",
+          "path": "barcode/upc-000000000000-light.png",
+          "sha256": "8c3d71b9f3378bcc48613b4d632eef77de7c6fa18de1b8434c8be221f52adafa"
+        }
+      }
+    }
+  ]
+}

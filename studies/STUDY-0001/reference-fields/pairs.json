@@ -1,0 +1,133 @@
+{
+  "format": "STUDY-0001 reference-field pairs",
+  "version": 1,
+  "complement_rule": "inverse = 255 - source",
+  "pairs": [
+    {
+      "pair_name": "checkerboard-coarse",
+      "source_filename": "checkerboard-coarse.png",
+      "inverse_filename": "checkerboard-coarse-inverse.png",
+      "dimensions": {
+        "width": 128,
+        "height": 128
+      },
+      "image_mode": "grayscale-8",
+      "field_type": "binary",
+      "source_sha256": "d7b9b070263c55e4233ddd9b21e502794fefb2b211e756e47bbb293fafa2c776",
+      "inverse_sha256": "c904eedcb7a1f0dc7966781da108861a60e2dfcf080a731599c703843dbc766b",
+      "complement_rule": "inverse = 255 - source",
+      "binary_white_overlap_pixels": 0,
+      "binary_unassigned_pixels": 0
+    },
+    {
+      "pair_name": "grid-3x3-center-corners",
+      "source_filename": "grid-3x3-center-corners.png",
+      "inverse_filename": "grid-3x3-center-corners-inverse.png",
+      "dimensions": {
+        "width": 128,
+        "height": 128
+      },
+      "image_mode": "grayscale-8",
+      "field_type": "binary",
+      "source_sha256": "4f17a3d690d885443234a4593248de566552e9af66f7c5be2ede8d23400fac7f",
+      "inverse_sha256": "ba6265c7402e51e98e081fdf40de1cb392f311a8d357e3134fd3e981c759814e",
+      "complement_rule": "inverse = 255 - source",
+      "binary_white_overlap_pixels": 0,
+      "binary_unassigned_pixels": 0
+    },
+    {
+      "pair_name": "grid-3x3-cross",
+      "source_filename": "grid-3x3-cross.png",
+      "inverse_filename": "grid-3x3-cross-inverse.png",
+      "dimensions": {
+        "width": 128,
+        "height": 128
+      },
+      "image_mode": "grayscale-8",
+      "field_type": "binary",
+      "source_sha256": "6ecc18d441ca15ba21ceda738f19cea52c10904074ceee049c372cbdbfe12758",
+      "inverse_sha256": "eef6d52c84724555c0b4be07017db7ef3aeab022641db800c11207671853b7d8",
+      "complement_rule": "inverse = 255 - source",
+      "binary_white_overlap_pixels": 0,
+      "binary_unassigned_pixels": 0
+    },
+    {
+      "pair_name": "horizontal-stripes",
+      "source_filename": "horizontal-stripes.png",
+      "inverse_filename": "horizontal-stripes-inverse.png",
+      "dimensions": {
+        "width": 128,
+        "height": 128
+      },
+      "image_mode": "grayscale-8",
+      "field_type": "binary",
+      "source_sha256": "0c687e6149858c0cd2142a4d7f9d8ce7deda30028884c092322e0ec66809666d",
+      "inverse_sha256": "b742e359ab9565046977cf16857a090d02acda2126ce727bd4cc247f43007255",
+      "complement_rule": "inverse = 255 - source",
+      "binary_white_overlap_pixels": 0,
+      "binary_unassigned_pixels": 0
+    },
+    {
+      "pair_name": "diagonal-split",
+      "source_filename": "diagonal-split.png",
+      "inverse_filename": "diagonal-split-inverse.png",
+      "dimensions": {
+        "width": 128,
+        "height": 128
+      },
+      "image_mode": "grayscale-8",
+      "field_type": "binary",
+      "source_sha256": "480c3b878c2cfcd4a6d706701beb3c443af56ae07c3071b75aacdf1fa8890d62",
+      "inverse_sha256": "339c94472781317bab65409e84e5b30976997ed7cdad00f1f871048b93de672e",
+      "complement_rule": "inverse = 255 - source",
+      "binary_white_overlap_pixels": 0,
+      "binary_unassigned_pixels": 0
+    },
+    {
+      "pair_name": "concentric-rings",
+      "source_filename": "concentric-rings.png",
+      "inverse_filename": "concentric-rings-inverse.png",
+      "dimensions": {
+        "width": 128,
+        "height": 128
+      },
+      "image_mode": "grayscale-8",
+      "field_type": "binary",
+      "source_sha256": "49f66eddea992e7e00b23e7cd7f5f829e5a989c98f1557e73dae5bcb33c20124",
+      "inverse_sha256": "748fc0a74fcd80fb0f3bb4e28a3012a40f15bf634e1a2da895c7d6e517e09340",
+      "complement_rule": "inverse = 255 - source",
+      "binary_white_overlap_pixels": 0,
+      "binary_unassigned_pixels": 0
+    },
+    {
+      "pair_name": "scattered-islands",
+      "source_filename": "scattered-islands.png",
+      "inverse_filename": "scattered-islands-inverse.png",
+      "dimensions": {
+        "width": 128,
+        "height": 128
+      },
+      "image_mode": "grayscale-8",
+      "field_type": "binary",
+      "source_sha256": "8616e47f7d25811f86a949afd0848372d807bfe47136a14988b68e0440d268e8",
+      "inverse_sha256": "8ade2fbb50133a59105266e19b6e4ffa0affbeab07e4529845baddd0070fe36c",
+      "complement_rule": "inverse = 255 - source",
+      "binary_white_overlap_pixels": 0,
+      "binary_unassigned_pixels": 0
+    },
+    {
+      "pair_name": "soft-radial-gradient",
+      "source_filename": "soft-radial-gradient.png",
+      "inverse_filename": "soft-radial-gradient-inverse.png",
+      "dimensions": {
+        "width": 128,
+        "height": 128
+      },
+      "image_mode": "grayscale-8",
+      "field_type": "grayscale",
+      "source_sha256": "c04309f557237dcad798ce8b19ca9869a0955db7725248cfaeb2c3ec4333fe35",
+      "inverse_sha256": "163b26660b5c3c046c927d90b80659b0b2b170ddeacd8098b24b01eec609b8cc",
+      "complement_rule": "inverse = 255 - source"
+    }
+  ]
+}

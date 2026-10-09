@@ -1,0 +1,261 @@
+{
+  "config": {},
+  "extra": {
+    "conditioning_layers_library": {
+      "classification": "expected-rejection",
+      "execution_status": "not-authorized",
+      "pattern_family_id": "three-layer.horizontal-thirds.v1",
+      "workflow_id": "three-layer.horizontal-thirds.v1.asset-inspection"
+    },
+    "frontendVersion": "1.45.21"
+  },
+  "groups": [],
+  "id": "2cd2e004-bd5e-5798-98f0-8f444d64cb67",
+  "last_link_id": 3,
+  "last_node_id": 7,
+  "links": [
+    [
+      1,
+      2,
+      0,
+      3,
+      0,
+      "IMAGE"
+    ],
+    [
+      2,
+      4,
+      0,
+      5,
+      0,
+      "IMAGE"
+    ],
+    [
+      3,
+      6,
+      0,
+      7,
+      0,
+      "IMAGE"
+    ]
+  ],
+  "nodes": [
+    {
+      "flags": {},
+      "id": 1,
+      "inputs": [],
+      "mode": 0,
+      "order": 0,
+      "outputs": [],
+      "pos": [
+        -900,
+        -500
+      ],
+      "properties": {
+        "text": "INFLUENCE FIELD LIBRARY V1 — Horizontal Thirds\n\nPattern family: three-layer.horizontal-thirds.v1\nClassification: expected-rejection\nExecution status: not-authorized\n\nFROZEN REFERENCE SETTINGS (NOT QUEUED BY THIS WORKFLOW)\nBase Prompt: A single centered wide ceramic relief panel in a simple studio photograph on a plain neutral background with soft diffuse lighting, no text.\nLayer A: Matte red ceramic surface. | Strength 1.0 | field-a.png\nLayer B: Glossy blue glazed ceramic surface. | Strength 1.0 | field-b.png\nLayer C: Pale speckled stoneware surface. | Strength 1.0 | field-c.png\nModel: krea2_turbo_bf16.safetensors\nSeed: 27182818 | Euler | Simple | 8 steps | CFG 1.0 | denoise 1.0\nResolution: 1024 x 1024 | batch 1 | negative prompt empty\n\nEXPECTED OBSERVATION\nConfirm asset identity, orientation, partition coverage, and field labels.\nThis workflow contains no model or sampler nodes and performs no image generation.\nThe current product must reject three Active Prompt Layers before submission.\nDo not add an execution chain or treat this as three-layer qualification."
+      },
+      "size": [
+        700,
+        620
+      ],
+      "type": "Note",
+      "widgets_values": [
+        "INFLUENCE FIELD LIBRARY V1 — Horizontal Thirds\n\nPattern family: three-layer.horizontal-thirds.v1\nClassification: expected-rejection\nExecution status: not-authorized\n\nFROZEN REFERENCE SETTINGS (NOT QUEUED BY THIS WORKFLOW)\nBase Prompt: A single centered wide ceramic relief panel in a simple studio photograph on a plain neutral background with soft diffuse lighting, no text.\nLayer A: Matte red ceramic surface. | Strength 1.0 | field-a.png\nLayer B: Glossy blue glazed ceramic surface. | Strength 1.0 | field-b.png\nLayer C: Pale speckled stoneware surface. | Strength 1.0 | field-c.png\nModel: krea2_turbo_bf16.safetensors\nSeed: 27182818 | Euler | Simple | 8 steps | CFG 1.0 | denoise 1.0\nResolution: 1024 x 1024 | batch 1 | negative prompt empty\n\nEXPECTED OBSERVATION\nConfirm asset identity, orientation, partition coverage, and field labels.\nThis workflow contains no model or sampler nodes and performs no image generation.\nThe current product must reject three Active Prompt Layers before submission.\nDo not add an execution chain or treat this as three-layer qualification."
+      ]
+    },
+    {
+      "flags": {},
+      "id": 2,
+      "inputs": [],
+      "mode": 0,
+      "order": 1,
+      "outputs": [
+        {
+          "links": [
+            1
+          ],
+          "name": "IMAGE",
+          "type": "IMAGE"
+        },
+        {
+          "links": [],
+          "name": "MASK",
+          "type": "MASK"
+        }
+      ],
+      "pos": [
+        -100,
+        -350
+      ],
+      "properties": {
+        "Node name for S&R": "LoadImage"
+      },
+      "size": [
+        320,
+        300
+      ],
+      "type": "LoadImage",
+      "widgets_values": [
+        "conditioning-layers-library/three-layer/horizontal-thirds/field-a.png",
+        "image"
+      ]
+    },
+    {
+      "flags": {},
+      "id": 3,
+      "inputs": [
+        {
+          "link": 1,
+          "name": "images",
+          "type": "IMAGE"
+        }
+      ],
+      "mode": 0,
+      "order": 2,
+      "outputs": [],
+      "pos": [
+        320,
+        -350
+      ],
+      "properties": {
+        "Node name for S&R": "PreviewImage"
+      },
+      "size": [
+        320,
+        300
+      ],
+      "type": "PreviewImage",
+      "widgets_values": []
+    },
+    {
+      "flags": {},
+      "id": 4,
+      "inputs": [],
+      "mode": 0,
+      "order": 3,
+      "outputs": [
+        {
+          "links": [
+            2
+          ],
+          "name": "IMAGE",
+          "type": "IMAGE"
+        },
+        {
+          "links": [],
+          "name": "MASK",
+          "type": "MASK"
+        }
+      ],
+      "pos": [
+        -100,
+        -30
+      ],
+      "properties": {
+        "Node name for S&R": "LoadImage"
+      },
+      "size": [
+        320,
+        300
+      ],
+      "type": "LoadImage",
+      "widgets_values": [
+        "conditioning-layers-library/three-layer/horizontal-thirds/field-b.png",
+        "image"
+      ]
+    },
+    {
+      "flags": {},
+      "id": 5,
+      "inputs": [
+        {
+          "link": 2,
+          "name": "images",
+          "type": "IMAGE"
+        }
+      ],
+      "mode": 0,
+      "order": 4,
+      "outputs": [],
+      "pos": [
+        320,
+        -30
+      ],
+      "properties": {
+        "Node name for S&R": "PreviewImage"
+      },
+      "size": [
+        320,
+        300
+      ],
+      "type": "PreviewImage",
+      "widgets_values": []
+    },
+    {
+      "flags": {},
+      "id": 6,
+      "inputs": [],
+      "mode": 0,
+      "order": 5,
+      "outputs": [
+        {
+          "links": [
+            3
+          ],
+          "name": "IMAGE",
+          "type": "IMAGE"
+        },
+        {
+          "links": [],
+          "name": "MASK",
+          "type": "MASK"
+        }
+      ],
+      "pos": [
+        -100,
+        290
+      ],
+      "properties": {
+        "Node name for S&R": "LoadImage"
+      },
+      "size": [
+        320,
+        300
+      ],
+      "type": "LoadImage",
+      "widgets_values": [
+        "conditioning-layers-library/three-layer/horizontal-thirds/field-c.png",
+        "image"
+      ]
+    },
+    {
+      "flags": {},
+      "id": 7,
+      "inputs": [
+        {
+          "link": 3,
+          "name": "images",
+          "type": "IMAGE"
+        }
+      ],
+      "mode": 0,
+      "order": 6,
+      "outputs": [],
+      "pos": [
+        320,
+        290
+      ],
+      "properties": {
+        "Node name for S&R": "PreviewImage"
+      },
+      "size": [
+        320,
+        300
+      ],
+      "type": "PreviewImage",
+      "widgets_values": []
+    }
+  ],
+  "revision": 0,
+  "version": 0.4
+}

@@ -1,0 +1,202 @@
+{
+  "assignment_permutations": [
+    {
+      "ordered_field_ids": [
+        "A",
+        "B",
+        "C"
+      ],
+      "permutation_id": "ABC"
+    },
+    {
+      "ordered_field_ids": [
+        "A",
+        "C",
+        "B"
+      ],
+      "permutation_id": "ACB"
+    },
+    {
+      "ordered_field_ids": [
+        "B",
+        "A",
+        "C"
+      ],
+      "permutation_id": "BAC"
+    },
+    {
+      "ordered_field_ids": [
+        "B",
+        "C",
+        "A"
+      ],
+      "permutation_id": "BCA"
+    },
+    {
+      "ordered_field_ids": [
+        "C",
+        "A",
+        "B"
+      ],
+      "permutation_id": "CAB"
+    },
+    {
+      "ordered_field_ids": [
+        "C",
+        "B",
+        "A"
+      ],
+      "permutation_id": "CBA"
+    }
+  ],
+  "binary_grayscale_status": {
+    "complement_fields": "binary-grayscale-8",
+    "partition_fields": "binary-grayscale-8",
+    "preview": "illustrative-grayscale-8"
+  },
+  "compatible_workflows": [
+    {
+      "classification": "expected-rejection",
+      "execution_status": "not-authorized",
+      "filename": "workflows/three-layer.vertical-thirds.v1.asset-inspection.workflow.json",
+      "sha256": "f6f90181665c5d8806960a66cb5a121c6098a90528c4109b282120b3a677d1aa",
+      "workflow_id": "three-layer.vertical-thirds.v1.asset-inspection"
+    }
+  ],
+  "description": "Three mutually exclusive vertical regions with complete coverage.",
+  "display_name": "Vertical Thirds",
+  "fields": [
+    {
+      "asset_id": "A",
+      "filename": "three-layer/vertical-thirds/field-a.png",
+      "role": "partition-field",
+      "sha256": "50e5a678e3f0ca2dd28b21b3536fbb644e60ee524b13a169ddeab8c22c929099"
+    },
+    {
+      "asset_id": "B",
+      "filename": "three-layer/vertical-thirds/field-b.png",
+      "role": "partition-field",
+      "sha256": "a4f61b2d5b8c0b93d252bb4a808f8d6875fc96cc66c376e2998c94a33185609c"
+    },
+    {
+      "asset_id": "C",
+      "filename": "three-layer/vertical-thirds/field-c.png",
+      "role": "partition-field",
+      "sha256": "f353f4622367d847297a6b4a4ff274589ee0291f3afa0e5201c6cfcfe3a21345"
+    }
+  ],
+  "generator": {
+    "generator_id": "conditioning-layers.influence-field-library.generator",
+    "generator_version": 1,
+    "parameters": {
+      "boundaries_x": [
+        43,
+        85
+      ],
+      "kind": "vertical_thirds"
+    },
+    "source_sha256": "3cbd830c313e94f9ff8a37daac9fdbffbf0dfaec255b169c546cdf170c9fdadc"
+  },
+  "geometric_variants": [
+    {
+      "operation": "mirror-horizontal",
+      "source_to_target_field_mapping": {
+        "A": "C",
+        "B": "B",
+        "C": "A"
+      },
+      "target_pattern_family_id": "three-layer.vertical-thirds.v1",
+      "variant_id": "mirror-horizontal"
+    },
+    {
+      "operation": "rotate-90-clockwise",
+      "source_to_target_field_mapping": {
+        "A": "A",
+        "B": "B",
+        "C": "C"
+      },
+      "target_pattern_family_id": "three-layer.horizontal-thirds.v1",
+      "variant_id": "rotate-90-clockwise"
+    },
+    {
+      "operation": "rotate-90-counterclockwise",
+      "source_to_target_field_mapping": {
+        "A": "C",
+        "B": "B",
+        "C": "A"
+      },
+      "target_pattern_family_id": "three-layer.horizontal-thirds.v1",
+      "variant_id": "rotate-90-counterclockwise"
+    }
+  ],
+  "image_mode": "grayscale-8",
+  "intended_use": [
+    "EXP-0013 candidate",
+    "three-layer scaling research"
+  ],
+  "known_limitations": [
+    "Three Active Prompt Layers are rejected by the current product.",
+    "No three-layer rendering or performance claim is established."
+  ],
+  "layer_count": 3,
+  "library_version": 1,
+  "partition_relationship": {
+    "complete_coverage": true,
+    "equation": "A + B + C = 255",
+    "overlap_pixel_count": 0,
+    "per_pixel_sum": 255,
+    "unassigned_pixel_count": 0
+  },
+  "pattern_family_id": "three-layer.vertical-thirds.v1",
+  "pixel_complements": [
+    {
+      "asset_id": "not-A",
+      "equivalent_partition_sum": [
+        "B",
+        "C"
+      ],
+      "expression": "255 - A",
+      "filename": "three-layer/vertical-thirds/not-a.png",
+      "role": "pixel-complement",
+      "sha256": "f3b278509510230f766d76f13a7e034783a322854a26a87b012d56aebfe88dd9",
+      "source_field_id": "A"
+    },
+    {
+      "asset_id": "not-B",
+      "equivalent_partition_sum": [
+        "A",
+        "C"
+      ],
+      "expression": "255 - B",
+      "filename": "three-layer/vertical-thirds/not-b.png",
+      "role": "pixel-complement",
+      "sha256": "2ba8e8429bf6a0567f1ea026f48489e4b702729a85888635fca8c5e4c4add830",
+      "source_field_id": "B"
+    },
+    {
+      "asset_id": "not-C",
+      "equivalent_partition_sum": [
+        "A",
+        "B"
+      ],
+      "expression": "255 - C",
+      "filename": "three-layer/vertical-thirds/not-c.png",
+      "role": "pixel-complement",
+      "sha256": "bdad167969a55d0e58e40f683b7734dbcbd260e7c7061b156f53c94ac3d5b06b",
+      "source_field_id": "C"
+    }
+  ],
+  "preview": {
+    "asset_id": "three-layer.vertical-thirds.v1.preview",
+    "filename": "previews/three-layer.vertical-thirds.v1.png",
+    "role": "composite-preview",
+    "sha256": "7ac82809a2bc7912b2326ac6ff294a868b3b63f29a4417fd30cbb72257760087"
+  },
+  "resolution": {
+    "height": 128,
+    "width": 128
+  },
+  "schema_id": "conditioning-layers.influence-field-family-manifest",
+  "schema_version": 1,
+  "support_status": "validated-product-asset"
+}

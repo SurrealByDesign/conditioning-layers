@@ -1,0 +1,193 @@
+{
+  "assignment_permutations": [
+    {
+      "ordered_field_ids": [
+        "A",
+        "B",
+        "C"
+      ],
+      "permutation_id": "ABC"
+    },
+    {
+      "ordered_field_ids": [
+        "A",
+        "C",
+        "B"
+      ],
+      "permutation_id": "ACB"
+    },
+    {
+      "ordered_field_ids": [
+        "B",
+        "A",
+        "C"
+      ],
+      "permutation_id": "BAC"
+    },
+    {
+      "ordered_field_ids": [
+        "B",
+        "C",
+        "A"
+      ],
+      "permutation_id": "BCA"
+    },
+    {
+      "ordered_field_ids": [
+        "C",
+        "A",
+        "B"
+      ],
+      "permutation_id": "CAB"
+    },
+    {
+      "ordered_field_ids": [
+        "C",
+        "B",
+        "A"
+      ],
+      "permutation_id": "CBA"
+    }
+  ],
+  "binary_grayscale_status": {
+    "complement_fields": "binary-grayscale-8",
+    "partition_fields": "binary-grayscale-8",
+    "preview": "illustrative-grayscale-8"
+  },
+  "compatible_workflows": [
+    {
+      "classification": "expected-rejection",
+      "execution_status": "not-authorized",
+      "filename": "workflows/three-layer.center-ring-outer.v1.asset-inspection.workflow.json",
+      "sha256": "34afaab7651588ff4ea4b7fe49859b43fe1268f1ace6c08ad2a8300a886c4537",
+      "workflow_id": "three-layer.center-ring-outer.v1.asset-inspection"
+    }
+  ],
+  "description": "Concentric hard partition with a center disk, middle ring, and outer region.",
+  "display_name": "Center Disk / Middle Ring / Outer Field",
+  "fields": [
+    {
+      "asset_id": "A",
+      "filename": "three-layer/center-ring-outer/field-a.png",
+      "role": "partition-field",
+      "sha256": "86affe2a2f40176c167e4ad9c38b79bd4c046d79297ec435c89c6298280d3ad8"
+    },
+    {
+      "asset_id": "B",
+      "filename": "three-layer/center-ring-outer/field-b.png",
+      "role": "partition-field",
+      "sha256": "9323b0400519aaa9144dec3979fc8d6132b398553d31e2ecd510c09b97f963e1"
+    },
+    {
+      "asset_id": "C",
+      "filename": "three-layer/center-ring-outer/field-c.png",
+      "role": "partition-field",
+      "sha256": "2341a3c37b2afae4c50e83d5d83434992a475164ba5b94d0e7a56a8af3998cff"
+    }
+  ],
+  "generator": {
+    "generator_id": "conditioning-layers.influence-field-library.generator",
+    "generator_version": 1,
+    "parameters": {
+      "center_x_doubled": 127,
+      "center_y_doubled": 127,
+      "inner_radius_pixels": 24,
+      "kind": "center_ring_outer",
+      "outer_radius_pixels": 48
+    },
+    "source_sha256": "3cbd830c313e94f9ff8a37daac9fdbffbf0dfaec255b169c546cdf170c9fdadc"
+  },
+  "geometric_variants": [
+    {
+      "operation": "all-right-angle-rotations-and-axis-mirrors",
+      "source_to_target_field_mapping": {
+        "A": "A",
+        "B": "B",
+        "C": "C"
+      },
+      "target_pattern_family_id": "three-layer.center-ring-outer.v1",
+      "variant_id": "rotate-or-mirror-invariant"
+    },
+    {
+      "operation": "assignment-only-center-edge-reversal",
+      "source_to_target_field_mapping": {
+        "A": "C",
+        "B": "B",
+        "C": "A"
+      },
+      "target_pattern_family_id": "three-layer.center-ring-outer.v1",
+      "variant_id": "center-edge-assignment-reversal"
+    }
+  ],
+  "image_mode": "grayscale-8",
+  "intended_use": [
+    "post-simple-gate research candidate",
+    "non-linear topology reference"
+  ],
+  "known_limitations": [
+    "This family is excluded from the initial EXP-0013 simple-partition gate.",
+    "Prior nested/radial research observed geometry artifacts and global collapse.",
+    "Three Active Prompt Layers are rejected by the current product."
+  ],
+  "layer_count": 3,
+  "library_version": 1,
+  "partition_relationship": {
+    "complete_coverage": true,
+    "equation": "A + B + C = 255",
+    "overlap_pixel_count": 0,
+    "per_pixel_sum": 255,
+    "unassigned_pixel_count": 0
+  },
+  "pattern_family_id": "three-layer.center-ring-outer.v1",
+  "pixel_complements": [
+    {
+      "asset_id": "not-A",
+      "equivalent_partition_sum": [
+        "B",
+        "C"
+      ],
+      "expression": "255 - A",
+      "filename": "three-layer/center-ring-outer/not-a.png",
+      "role": "pixel-complement",
+      "sha256": "e1c99d9fc53cc72180594d467b2c7f3770b5d6cfe781d0adff71de3203c754fd",
+      "source_field_id": "A"
+    },
+    {
+      "asset_id": "not-B",
+      "equivalent_partition_sum": [
+        "A",
+        "C"
+      ],
+      "expression": "255 - B",
+      "filename": "three-layer/center-ring-outer/not-b.png",
+      "role": "pixel-complement",
+      "sha256": "a3ae4ddfdca62c51ea847d05e8de8a95fb66115c86849bb8cd846c03b8147662",
+      "source_field_id": "B"
+    },
+    {
+      "asset_id": "not-C",
+      "equivalent_partition_sum": [
+        "A",
+        "B"
+      ],
+      "expression": "255 - C",
+      "filename": "three-layer/center-ring-outer/not-c.png",
+      "role": "pixel-complement",
+      "sha256": "9046272f4f320b199d6da1fb1e07c5edf89877784147505befcb48d02910758a",
+      "source_field_id": "C"
+    }
+  ],
+  "preview": {
+    "asset_id": "three-layer.center-ring-outer.v1.preview",
+    "filename": "previews/three-layer.center-ring-outer.v1.png",
+    "role": "composite-preview",
+    "sha256": "05a303449e2bc36f95fe6f693585b759368989ab17e7b297038ef66f5fa542b5"
+  },
+  "resolution": {
+    "height": 128,
+    "width": 128
+  },
+  "schema_id": "conditioning-layers.influence-field-family-manifest",
+  "schema_version": 1,
+  "support_status": "validated-product-asset"
+}

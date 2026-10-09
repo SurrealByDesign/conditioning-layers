@@ -1,0 +1,8 @@
+# profile: cpython 3.10.11 win32 win-amd64 64
+# ADR 0027 bounded developer-test resolution, observed 2026-09-18.
+# Base authority: 838be84db85da312ba1f0ba7a936fee23d01afcb.
+# Observed distribution metadata, not a resolver run or artifact hash lock.
+# Pillow Requires-Python >=3.10; no mandatory transitive dependencies/extras.
+# The wheel tag is checked as installed metadata, not artifact-byte proof.
+# Provenance and limits: docs/developer.md.
+Pillow==12.2.0 # wheel: cp310-cp310-win_amd64

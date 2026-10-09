@@ -1,0 +1,16 @@
+# ADR 0027 host-dependent qualification tests; not product/core packaging.
+# Scope, provenance and verification: docs/developer.md.
+# Pair with the declared constraints in an isolated test environment.
+-c constraints-host-win-py312.txt
+
+# Direct qualification dependencies: real routes/headers and decoder fixtures.
+aiohttp
+multidict
+Pillow
+
+# Retained runtime dependencies, also exercised directly by host-owned tests.
+# Semantic authority: src/conditioning_layers/comfyui/prediction_mixing/
+# blend_component.py::BLEND_DEPENDENCIES. Constraints must agree with it.
+torch
+numpy
+av

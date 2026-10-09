@@ -1,0 +1,73 @@
+"""Read-only ComfyUI host validation and byte-preserving field staging."""
+
+from .bundle import fingerprint_submission_bundle, prepare_submission_bundle
+from .component_validation import validate_component_files
+from .host_validation import validate_local_host
+from .models import (
+    BUNDLE_VERSION,
+    RUNTIME_PROVENANCE_VERSION,
+    CleanupPlan,
+    CleanupPlanItem,
+    ComfyUIHostConfiguration,
+    ComfyUIHostSnapshot,
+    ComfyUISubmissionBundle,
+    ComponentFileRecord,
+    ComponentRole,
+    ComponentValidationResult,
+    FieldSourceValidationResult,
+    FieldStagingCandidate,
+    FieldStagingResult,
+    HostCompatibilityStatus,
+    HostNodeContractRecord,
+    HostNodeContractSnapshot,
+    HostValidationResult,
+    PortableComponentProvenance,
+    PortableFieldProvenance,
+    RuntimePreparationResult,
+    RuntimeProvenance,
+    StagedAssetRecord,
+    StagingCleanupPolicy,
+    StagingDisposition,
+)
+from .staging import (
+    build_cleanup_plan,
+    stage_field_assets,
+    staging_namespace_for_document,
+    validate_field_sources,
+)
+
+__all__ = [
+    "BUNDLE_VERSION",
+    "RUNTIME_PROVENANCE_VERSION",
+    "CleanupPlan",
+    "CleanupPlanItem",
+    "ComfyUIHostConfiguration",
+    "ComfyUIHostSnapshot",
+    "ComfyUISubmissionBundle",
+    "ComponentFileRecord",
+    "ComponentRole",
+    "ComponentValidationResult",
+    "FieldSourceValidationResult",
+    "FieldStagingCandidate",
+    "FieldStagingResult",
+    "HostCompatibilityStatus",
+    "HostNodeContractRecord",
+    "HostNodeContractSnapshot",
+    "HostValidationResult",
+    "PortableComponentProvenance",
+    "PortableFieldProvenance",
+    "RuntimePreparationResult",
+    "RuntimeProvenance",
+    "StagedAssetRecord",
+    "StagingCleanupPolicy",
+    "StagingDisposition",
+    "build_cleanup_plan",
+    "fingerprint_submission_bundle",
+    "prepare_submission_bundle",
+    "stage_field_assets",
+    "staging_namespace_for_document",
+    "validate_component_files",
+    "validate_field_sources",
+    "validate_local_host",
+]
+

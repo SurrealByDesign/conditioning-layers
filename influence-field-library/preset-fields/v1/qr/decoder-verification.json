@@ -1,0 +1,44 @@
+{
+  "verification_date": "2026-10-08",
+  "encoder": {
+    "name": "Nayuki qrcodegen",
+    "version": "1.8.0",
+    "source": "https://github.com/nayuki/QR-Code-generator/blob/v1.8.0/python/qrcodegen.py",
+    "parameters": "make_bytes(UTF-8 payload); MEDIUM; minversion=maxversion=4; mask=-1; boostecl=False"
+  },
+  "decoder": {
+    "name": "OpenCV QRCodeDetector.detectAndDecode",
+    "version": "4.13.0",
+    "distribution_version": "4.13.0.92"
+  },
+  "asset": "qr/qr-code-light.png",
+  "asset_sha256": "8a238e24a766666bc4b33710bb057a9a7d5594635c7800f51da2f0d7cf831beb",
+  "input_size": [
+    128,
+    128
+  ],
+  "resampling": false,
+  "decoded_payload": "https://github.com/SurrealByDesign/conditioning-layers",
+  "detected_corners": [
+    [
+      [
+        14.0,
+        14.0
+      ],
+      [
+        112.0,
+        14.0
+      ],
+      [
+        112.0,
+        112.0
+      ],
+      [
+        14.0,
+        112.0
+      ]
+    ]
+  ],
+  "result": "PASS",
+  "network_access": false
+}

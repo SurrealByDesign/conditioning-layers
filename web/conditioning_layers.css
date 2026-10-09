@@ -1,0 +1,131 @@
+.conditioning-layers-panel {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  height: 100%;
+  overflow-y: auto;
+  padding: 1rem;
+  color: var(--input-text, #ddd);
+  background: var(--comfy-menu-bg, #202020);
+}
+
+.conditioning-layers-panel * { box-sizing: border-box; }
+.cl-header { display: grid; gap: 0.35rem; }
+.cl-document-controls { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.4rem; }
+.cl-document-controls select {
+  grid-column: span 2;
+  min-width: 0;
+  padding: 0.45rem;
+  border: 1px solid var(--border-color, #666);
+  border-radius: 0.35rem;
+  color: inherit;
+  background: var(--comfy-input-bg, #151515);
+}
+.cl-document-controls input[type="text"] {
+  grid-column: 1 / -1;
+  min-width: 0;
+  padding: 0.45rem;
+  border: 1px solid var(--border-color, #666);
+  border-radius: 0.35rem;
+  color: inherit;
+  background: var(--comfy-input-bg, #151515);
+}
+.cl-title, .cl-section-title { margin: 0; }
+.cl-title { font-size: 1.15rem; }
+.cl-section-title { font-size: 1rem; }
+.cl-experimental {
+  margin: 0;
+  padding: 0.55rem 0.65rem;
+  border-left: 3px solid #d98c20;
+  background: color-mix(in srgb, #d98c20 15%, transparent);
+}
+
+.cl-field { display: grid; gap: 0.3rem; font-size: 0.85rem; }
+.cl-label { font-weight: 600; }
+.cl-field input[type="text"],
+.cl-field input[type="number"],
+.cl-field select,
+.cl-field textarea {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid var(--border-color, #555);
+  border-radius: 0.35rem;
+  color: inherit;
+  background: var(--comfy-input-bg, #151515);
+}
+
+.cl-stack { display: grid; gap: 0.7rem; }
+.cl-guidance { margin: 0; color: #b9b9b9; font-size: 0.78rem; line-height: 1.4; }
+.cl-capabilities { font-size: 0.8rem; }
+.cl-capabilities summary { cursor: pointer; }
+.cl-capabilities[open] > * + * { margin-top: 0.5rem; }
+.cl-layer {
+  display: grid;
+  gap: 0.55rem;
+  padding: 0.7rem;
+  border: 1px solid var(--border-color, #555);
+  border-radius: 0.45rem;
+  background: var(--comfy-menu-secondary-bg, #292929);
+}
+.cl-layer-heading { display: flex; align-items: center; gap: 0.4rem; }
+.cl-layer-heading .cl-field { display: flex; align-items: center; margin-right: auto; }
+.cl-order {
+  display: grid;
+  place-items: center;
+  min-width: 1.8rem;
+  height: 1.8rem;
+  border-radius: 50%;
+  background: #525252;
+}
+.cl-button, .cl-icon-button {
+  border: 1px solid var(--border-color, #666);
+  border-radius: 0.35rem;
+  padding: 0.45rem 0.65rem;
+  color: inherit;
+  background: #3b3b3b;
+  cursor: pointer;
+}
+.cl-button:disabled, .cl-icon-button:disabled { cursor: not-allowed; opacity: 0.5; }
+.cl-button-primary { background: #3568a8; font-weight: 700; }
+.cl-remove { color: #ffb5b5; }
+.cl-file-name, .cl-empty, .cl-status { color: #b9b9b9; font-size: 0.82rem; }
+.cl-preview {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0.45rem;
+  border: 1px dashed var(--border-color, #555);
+  border-radius: 0.35rem;
+  background: var(--comfy-input-bg, #151515);
+}
+.cl-preview-img {
+  display: block;
+  width: 96px;
+  height: 96px;
+  object-fit: contain;
+  border-radius: 0.25rem;
+  background: repeating-conic-gradient(#2c2c2c 0% 25%, #202020 0% 50%) 0 0 / 16px 16px;
+  image-rendering: pixelated;
+}
+.cl-preview-loading .cl-preview-img { opacity: 0.4; }
+.cl-preview-placeholder { color: #b9b9b9; font-size: 0.82rem; }
+.cl-preview-invalid { border-color: #a85252; }
+.cl-preview-invalid .cl-preview-placeholder { color: #ffb5b5; }
+.cl-preview-meta { color: #9d9d9d; font-size: 0.75rem; }
+.cl-status { margin: 0; }
+.cl-document-status, .cl-seed-summary, .cl-last-run {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.cl-document-status { color: #b8dbbe; }
+.cl-document-status[data-dirty="true"] { color: #ffd590; font-weight: 600; }
+.cl-seed-summary, .cl-last-run { color: #b9b9b9; }
+.cl-findings { display: grid; gap: 0.35rem; margin: 0; padding-left: 1.25rem; }
+.cl-error { color: #ffb5b5; }
+.cl-warning { color: #ffd590; }
+.cl-output { display: grid; gap: 0.4rem; }
+.cl-output img { display: block; width: 100%; height: auto; border-radius: 0.45rem; }
+.cl-output-link { color: #9ecbff; }

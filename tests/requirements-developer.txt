@@ -1,0 +1,7 @@
+# ADR 0027 developer-test dependencies; not neutral-core requirements.
+# Scope, provenance and verification: docs/developer.md.
+# Pair with the declared constraints in an isolated test environment.
+-c constraints-developer-win-py310.txt
+
+# Image decoding fixtures use PIL.
+Pillow

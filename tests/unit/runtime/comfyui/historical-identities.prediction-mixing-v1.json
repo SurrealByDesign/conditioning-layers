@@ -1,0 +1,327 @@
+{
+  "cases": {
+    "one_active_prompt_layer": {
+      "active_layer_ids": [
+        "a"
+      ],
+      "bundle_fingerprint": "830d81623f098adf025d6c23d8d058955aad05bb8d010f9b84d32e1099c8e71d",
+      "execution_provenance_fingerprint": "6e71e85077a2958fdb3b00097440fec6d8150bd15558b5f98c9af41e9e57085c",
+      "execution_provenance_sha256": "457eca2bdbdc092e5b1655de376aaf31094c4f76bd05e763ee823064ace884d2",
+      "graph": {
+        "1": {
+          "class_type": "UNETLoader",
+          "inputs": {
+            "unet_name": "krea2_turbo_bf16.safetensors",
+            "weight_dtype": "default"
+          }
+        },
+        "10": {
+          "class_type": "VAEDecode",
+          "inputs": {
+            "samples": [
+              "8",
+              0
+            ],
+            "vae": [
+              "9",
+              0
+            ]
+          }
+        },
+        "11": {
+          "class_type": "SaveImage",
+          "inputs": {
+            "filename_prefix": "conditioning-layers/document-1/request-1",
+            "images": [
+              "10",
+              0
+            ]
+          }
+        },
+        "2": {
+          "class_type": "CLIPLoader",
+          "inputs": {
+            "clip_name": "qwen3vl_4b_fp8_scaled.safetensors",
+            "device": "default",
+            "type": "krea2"
+          }
+        },
+        "3": {
+          "class_type": "CLIPTextEncode",
+          "inputs": {
+            "clip": [
+              "2",
+              0
+            ],
+            "text": "A coherent studio scene\n\nRegional prompt a"
+          }
+        },
+        "4": {
+          "class_type": "CLIPTextEncode",
+          "inputs": {
+            "clip": [
+              "2",
+              0
+            ],
+            "text": ""
+          }
+        },
+        "5": {
+          "class_type": "LoadImageMask",
+          "inputs": {
+            "channel": "red",
+            "image": "conditioning-layers/document-1/a.png"
+          }
+        },
+        "6": {
+          "class_type": "ConditioningSetMask",
+          "inputs": {
+            "conditioning": [
+              "3",
+              0
+            ],
+            "mask": [
+              "5",
+              0
+            ],
+            "set_cond_area": "default",
+            "strength": 1.0
+          }
+        },
+        "7": {
+          "class_type": "EmptyLatentImage",
+          "inputs": {
+            "batch_size": 1,
+            "height": 1024,
+            "width": 1024
+          }
+        },
+        "8": {
+          "class_type": "KSampler",
+          "inputs": {
+            "cfg": 1.0,
+            "denoise": 1.0,
+            "latent_image": [
+              "7",
+              0
+            ],
+            "model": [
+              "1",
+              0
+            ],
+            "negative": [
+              "4",
+              0
+            ],
+            "positive": [
+              "6",
+              0
+            ],
+            "sampler_name": "euler",
+            "scheduler": "simple",
+            "seed": 18472639,
+            "steps": 8
+          }
+        },
+        "9": {
+          "class_type": "VAELoader",
+          "inputs": {
+            "vae_name": "qwen_image_vae.safetensors"
+          }
+        }
+      },
+      "graph_fingerprint": "92359c001fd676819460d6305f0eb318a758aab6c1ae3c6b254c94afc14f47ba",
+      "result_identity_fingerprint": "3c2ea79154635fc1292f73e56a263bf0fc7a0ff4e0f5ab3fb3b915b1bf3965bb",
+      "runtime_provenance_sha256": "8907c0672041e2c89997dd8053532c1a60fd5ca14ff3b3cca4d2726ef5abbf83",
+      "translation_fingerprint": "aef6159d6093ec0990baa35de817b1a4302c24caa5f16a5b269b031a9414afe5",
+      "translation_plan_sha256": "c6ade3a080c20cb85d635a106f6273aa8408055491adeb6e94e6b9145bbdfcbf",
+      "workflow_provenance_sha256": "6dc95f5b64fe47aaa90994d5888e05ad11ade606be2b2597db0fbd81616d3987"
+    },
+    "two_active_prompt_layers": {
+      "active_layer_ids": [
+        "a",
+        "b"
+      ],
+      "bundle_fingerprint": "7cd05f76bbff2089e315b9dc49b21b4491177ef085626404f067a4769926c708",
+      "execution_provenance_fingerprint": "58e8adab2ea70bfca061f2c00482436f1ae0d95e25e6e74bff33250cf807b582",
+      "execution_provenance_sha256": "4b87d0ca8db3fe9bebb7490d8962472251f1697305d287f6b10960fb6038e05f",
+      "graph": {
+        "1": {
+          "class_type": "UNETLoader",
+          "inputs": {
+            "unet_name": "krea2_turbo_bf16.safetensors",
+            "weight_dtype": "default"
+          }
+        },
+        "10": {
+          "class_type": "ConditioningCombine",
+          "inputs": {
+            "conditioning_1": [
+              "8",
+              0
+            ],
+            "conditioning_2": [
+              "9",
+              0
+            ]
+          }
+        },
+        "11": {
+          "class_type": "EmptyLatentImage",
+          "inputs": {
+            "batch_size": 1,
+            "height": 1024,
+            "width": 1024
+          }
+        },
+        "12": {
+          "class_type": "KSampler",
+          "inputs": {
+            "cfg": 1.0,
+            "denoise": 1.0,
+            "latent_image": [
+              "11",
+              0
+            ],
+            "model": [
+              "1",
+              0
+            ],
+            "negative": [
+              "5",
+              0
+            ],
+            "positive": [
+              "10",
+              0
+            ],
+            "sampler_name": "euler",
+            "scheduler": "simple",
+            "seed": 18472639,
+            "steps": 8
+          }
+        },
+        "13": {
+          "class_type": "VAELoader",
+          "inputs": {
+            "vae_name": "qwen_image_vae.safetensors"
+          }
+        },
+        "14": {
+          "class_type": "VAEDecode",
+          "inputs": {
+            "samples": [
+              "12",
+              0
+            ],
+            "vae": [
+              "13",
+              0
+            ]
+          }
+        },
+        "15": {
+          "class_type": "SaveImage",
+          "inputs": {
+            "filename_prefix": "conditioning-layers/document-1/request-1",
+            "images": [
+              "14",
+              0
+            ]
+          }
+        },
+        "2": {
+          "class_type": "CLIPLoader",
+          "inputs": {
+            "clip_name": "qwen3vl_4b_fp8_scaled.safetensors",
+            "device": "default",
+            "type": "krea2"
+          }
+        },
+        "3": {
+          "class_type": "CLIPTextEncode",
+          "inputs": {
+            "clip": [
+              "2",
+              0
+            ],
+            "text": "A coherent studio scene\n\nRegional prompt a"
+          }
+        },
+        "4": {
+          "class_type": "CLIPTextEncode",
+          "inputs": {
+            "clip": [
+              "2",
+              0
+            ],
+            "text": "A coherent studio scene\n\nRegional prompt b"
+          }
+        },
+        "5": {
+          "class_type": "CLIPTextEncode",
+          "inputs": {
+            "clip": [
+              "2",
+              0
+            ],
+            "text": ""
+          }
+        },
+        "6": {
+          "class_type": "LoadImageMask",
+          "inputs": {
+            "channel": "red",
+            "image": "conditioning-layers/document-1/a.png"
+          }
+        },
+        "7": {
+          "class_type": "LoadImageMask",
+          "inputs": {
+            "channel": "red",
+            "image": "conditioning-layers/document-1/b.png"
+          }
+        },
+        "8": {
+          "class_type": "ConditioningSetMask",
+          "inputs": {
+            "conditioning": [
+              "3",
+              0
+            ],
+            "mask": [
+              "6",
+              0
+            ],
+            "set_cond_area": "default",
+            "strength": 1.0
+          }
+        },
+        "9": {
+          "class_type": "ConditioningSetMask",
+          "inputs": {
+            "conditioning": [
+              "4",
+              0
+            ],
+            "mask": [
+              "7",
+              0
+            ],
+            "set_cond_area": "default",
+            "strength": 1.0
+          }
+        }
+      },
+      "graph_fingerprint": "8b7350a5786d66c56ec5a83c4b10ed48f45c9fa2e1eba59c840f4537b2d81738",
+      "result_identity_fingerprint": "4f018a522f869bb250f03a760b5d0c98feb5768bd75ed60c263ca846dcccb5bc",
+      "runtime_provenance_sha256": "b4284402c952984bde5b75fab57905031d5ca18f5f800ff0a8aed57783eb174e",
+      "translation_fingerprint": "eac2e45c169b4322c00b8041de9a4c6ac4b500f4ee135167356a9e0f476f8bae",
+      "translation_plan_sha256": "189e4959c5088030128bbfe5c461feb30e4de5a1c7bed9c51e6973c3107251d2",
+      "workflow_provenance_sha256": "3596a25486072dde483fc19d8803c60a86fcd45cabeb935b24adc51b4d47dc4c"
+    }
+  },
+  "fixture_id": "conditioning-layers.historical-identities.prediction-mixing.v1",
+  "fixture_version": 1,
+  "profile_identifier": "comfyui-0.28.0.prediction-mixing.v1"
+}

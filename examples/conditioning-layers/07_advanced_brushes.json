@@ -1,0 +1,2132 @@
+{
+  "last_node_id": 46,
+  "last_link_id": 38,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "Note",
+      "pos": [
+        0,
+        40
+      ],
+      "size": [
+        300,
+        109
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "Select a compatible checkpoint/model available in your ComfyUI installation.\nUse Krea 2 with its matching text encoder and VAE; replace all three SELECT selections.\nThree loader warnings are expected until you select those models."
+      ],
+      "title": "IMPORTANT",
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 2,
+      "type": "UNETLoader",
+      "pos": [
+        0,
+        201
+      ],
+      "size": [
+        300,
+        82
+      ],
+      "flags": {},
+      "order": 13,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            2
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "UNETLoader"
+      },
+      "widgets_values": [
+        "SELECT_KREA_2_MODEL.safetensors",
+        "default"
+      ]
+    },
+    {
+      "id": 3,
+      "type": "CLIPLoader",
+      "pos": [
+        0,
+        335
+      ],
+      "size": [
+        300,
+        106
+      ],
+      "flags": {},
+      "order": 14,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": [
+            1,
+            8,
+            12,
+            17,
+            22,
+            27,
+            32
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPLoader"
+      },
+      "widgets_values": [
+        "SELECT_KREA_2_TEXT_ENCODER.safetensors",
+        "krea2",
+        "default"
+      ]
+    },
+    {
+      "id": 4,
+      "type": "VAELoader",
+      "pos": [
+        0,
+        493
+      ],
+      "size": [
+        300,
+        58
+      ],
+      "flags": {},
+      "order": 15,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            6
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAELoader"
+      },
+      "widgets_values": [
+        "SELECT_COMPATIBLE_VAE.safetensors"
+      ]
+    },
+    {
+      "id": 5,
+      "type": "CLIPTextEncode",
+      "pos": [
+        2580,
+        -310
+      ],
+      "size": [
+        300,
+        88
+      ],
+      "flags": {},
+      "order": 16,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 1
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            3
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        ""
+      ],
+      "title": "Empty negative prompt"
+    },
+    {
+      "id": 6,
+      "type": "EmptyLatentImage",
+      "pos": [
+        2580,
+        -170
+      ],
+      "size": [
+        300,
+        106
+      ],
+      "flags": {},
+      "order": 17,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            4
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "EmptyLatentImage"
+      },
+      "widgets_values": [
+        1024,
+        1024,
+        1
+      ],
+      "title": "Image size"
+    },
+    {
+      "id": 7,
+      "type": "KSampler",
+      "pos": [
+        2980,
+        40
+      ],
+      "size": [
+        300,
+        262
+      ],
+      "flags": {},
+      "order": 43,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 2
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 38
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 3
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 4
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            5
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "KSampler"
+      },
+      "widgets_values": [
+        2026,
+        "fixed",
+        8,
+        1.0,
+        "euler",
+        "simple",
+        1.0
+      ]
+    },
+    {
+      "id": 8,
+      "type": "VAEDecode",
+      "pos": [
+        2980,
+        354
+      ],
+      "size": [
+        300,
+        46
+      ],
+      "flags": {},
+      "order": 44,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 5
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 6
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            7
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAEDecode"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 9,
+      "type": "SaveImage",
+      "pos": [
+        2980,
+        452
+      ],
+      "size": [
+        300,
+        330
+      ],
+      "flags": {},
+      "order": 45,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 7
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "ConditioningLayers/07_advanced_brushes"
+      ]
+    },
+    {
+      "id": 10,
+      "type": "Note",
+      "pos": [
+        0,
+        -162
+      ],
+      "size": [
+        780,
+        72
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "ADVANCED BRUSHES — Hotdog nebula\nFive Painted Fields, five advanced brushes, one ridiculous galaxy. Each row is one layer; open its Painted Field to keep painting with the brush that made it."
+      ],
+      "title": "CONDITIONING LAYERS — EXAMPLE 07",
+      "color": "#2a363b",
+      "bgcolor": "#3f5159"
+    },
+    {
+      "id": 11,
+      "type": "ConditioningLayersSolidField",
+      "pos": [
+        1080,
+        710
+      ],
+      "size": [
+        300,
+        58
+      ],
+      "flags": {},
+      "order": 18,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": [
+            10
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersSolidField"
+      },
+      "widgets_values": [
+        255
+      ],
+      "title": "L1 · Deep space (field)"
+    },
+    {
+      "id": 12,
+      "type": "CLIPTextEncode",
+      "pos": [
+        600,
+        640
+      ],
+      "size": [
+        400,
+        150
+      ],
+      "flags": {},
+      "order": 19,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 8
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            9
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "Deep space at night, black velvet void sprinkled with faint distant galaxies, 1970s airbrushed science-fiction paperback cover art."
+      ],
+      "title": "L1 · Deep space backdrop (prompt)"
+    },
+    {
+      "id": 13,
+      "type": "ConditioningLayersLayer",
+      "pos": [
+        1880,
+        640
+      ],
+      "size": [
+        300,
+        126
+      ],
+      "flags": {},
+      "order": 20,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "link": 9
+        },
+        {
+          "name": "mask",
+          "type": "MASK",
+          "link": 10
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING_LAYER",
+          "type": "CONDITIONING_LAYER",
+          "links": [
+            11
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersLayer"
+      },
+      "widgets_values": [
+        0.5,
+        "BLENDED",
+        true
+      ],
+      "title": "L1 · Deep space backdrop"
+    },
+    {
+      "id": 14,
+      "type": "ConditioningLayersAddLayer",
+      "pos": [
+        2220,
+        640
+      ],
+      "size": [
+        220,
+        46
+      ],
+      "flags": {},
+      "order": 21,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "layer",
+          "type": "CONDITIONING_LAYER",
+          "link": 11
+        },
+        {
+          "name": "layers",
+          "type": "CONDITIONING_LAYER_STACK",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING_LAYER_STACK",
+          "type": "CONDITIONING_LAYER_STACK",
+          "links": [
+            16
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersAddLayer"
+      },
+      "widgets_values": [],
+      "title": "Add L1"
+    },
+    {
+      "id": 15,
+      "type": "Note",
+      "pos": [
+        1460,
+        710
+      ],
+      "size": [
+        340,
+        72
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "Each Painted Field stores the brush that painted it. Open any field and that brush is ready, so new strokes match the old ones."
+      ],
+      "title": "WHAT THIS SHOWS",
+      "color": "#223",
+      "bgcolor": "#335"
+    },
+    {
+      "id": 16,
+      "type": "Note",
+      "pos": [
+        1460,
+        844
+      ],
+      "size": [
+        340,
+        72
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "Open one field at a time, change ONE brush setting, and stamp in an empty spot to compare before and after. Cancel throws the test away."
+      ],
+      "title": "TRY THIS",
+      "color": "#232",
+      "bgcolor": "#353"
+    },
+    {
+      "id": 17,
+      "type": "ConditioningLayersPaintedField",
+      "pos": [
+        1080,
+        1144
+      ],
+      "size": [
+        300,
+        110
+      ],
+      "flags": {},
+      "order": 22,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": [
+            14
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersPaintedField",
+        "fieldEditor": {
+          "tool": "paint",
+          "size": 72,
+          "influence": 255,
+          "hardness": 0,
+          "amount": 100,
+          "influenceUnit": "percent",
+          "shape": "procedural",
+          "spacing": "custom",
+          "spacing_percent": 45,
+          "procedural_version": 1,
+          "procedural_type": "noise",
+          "procedural_seed": 31,
+          "procedural_frequency": 3,
+          "procedural_persistence": 55,
+          "procedural_noise_high": 80
+        }
+      },
+      "widgets_values": [
+        "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAAAAADmVT4XAAAen0lEQVR4nLWb5VtbSRuHiyVAkIQkkBB3I+5GnAgSXAME1yS4u3twKdDSFq3s3/hecwLttkDLtm+fT7twXTs/Zs6Zc8/9zL569X+tqOiYWBgsLiY66qnfxMHg8fEJCQmJiYik5JTUVCQSifz/jv8qChon9okAIEJsHDz+fnQkKg0D1f85AEgQHRPzZIBXr6JjYfEJYPxUFBqbgcPj8Xjc/zsAlCEqOvqZBHHxCdD4mAw8gUQmk8mkvxAgsuBPJoiKhScgklKQ6AwCmUpnMBh02t8J8Co6Jib6qZ/HxicmJSPT0jPJdBaHy+Vy2H8pAFiEpwMgwALgSHQOXygSiYSCvxUg6umnIC4hsgA0dpZUqVarFLK/FAB6H2MerUMULDE5NQ2LJzMFMq3JajVn6/7W8FFR0bHwhMTEeFhszLfViIYngTeAQOVIdDZPgTfPZftLo0dFRcXCk1BodBoyGZGYALuPEJeQgkKnZ5KZAqUlr7ymprIk728EiIYqLhGZTiQRMzOwaDQSEQeeiJj4JBQmI5NE54j1rjJ/a2ujr+QvBYiJiYUnoTNpLBaDRiGTMrGpCbA4WEISEpORSaZzRSpLga81EOhorPoLASIJYuHJGCKDK8jicThsBiUTm4ZMRSLTsDgSgyfRmHPLGzp7erpbfH8jAJQgFp6EITJ5IolEJBRm8TkMGjkzA4vB4MgcqcFRUF7f2g0CVP+VANBLCEtCExg8kVShkIOSSbI4VDwGnU7J0rlKfU3tXYFgsLOx7HcHeKhnfxkdh0jLZPBEMqVardEask3ZOimHiEFhqWJLSUNnqKcnGOhury38zQDQc/44xP0P7t+CtEw6VyRVqnX6bKvD6bRqBBQMEkOTO2u6BkZGBntD3c3VBb8bIAba56IfB4iOvAOxsVAAaAZ0RrPd6XbbtUJqelo6Q+mpD41OTU2MDARb/iBAXFwsAJ8fViEqMnpcHAwGS0wjMgUSuVKt1ZtsdoctWymg4tMzOdr8ht6JuYWF2fGBzlrv7weIoN8PDwGEZID94PHxiWgSWyhTqFQanSE726BTirk0IpGaZSxs7JtcWNtYmZ/s8f/uMxAV/Sx7AiiE2DMRTeZKFCqVUqXRalRysYDDpNMYXJmluLlvcnlre3tzcbil6PcCRBj3qQAQjMTBIPZEU/hSpUqpkCuVMhGPRafRGRy+WJtT3tI/tRLeP9zfmGj/7a048rl9tASR38VE2DONzJMolHKZVCYV8Zg0MpXByZIqTXnVHUPTK9tHJ0fh6c7S3w1wDx3PJIiDJwD0IrCyJFKpRCKVZHGZNBqDkyVR6exF/tD43NpOJMBvbkQPAz2HfjEgQAoSS2byssQSmVwm5rMYDLZArNAaXeVtw3Or4f2j44PNqc7yPwrwKurHE8D9hMTAExAAfTLJdE6WTKXVyEU8Nlcglqv1plxfaHp99+D4+Gh3faKz4g8D/HgAuN8WYuITkyLsyeYLVdlmk04uFAglcrXOaC1oHFo9OD0/e32wvTLeWflnAV79yJ73e3MsxJ7pmVTAnnqH22nVK6RytdaQbXYUt03tvL388O7sILw81vmnX0PoJBb77Sx4/zGIg9gTR2LwZVqTLb+o0GMzaA3ZFqs9x10RWDi5+Xh39fYovDLeXfNno0fYMxGBgOAzJgoEAj+DIVIg9mSLNVaPt6Syojgvx5bjzivwFpU2DK6ff/zn883F8c7qRKD2T8ePioEhkBgsBpWajEiMj7vn0YRksABkBl9uyi3z1dbUVJYWeYsrauobm9t7Z3ffff7n09X5webiaNcfENEDeyakYokUMhGfgcWkJcfHgEzxEPuRaByR1lFS39reUlfr89U2tAUHRiemFrZPrz59vn13HF6aHmj7AyaMHMRjYQgUnsriAPikEDNQSXAYPCEpFQ3YkyNUmvOqW7qDXc0Nza2doeHp5a3d/aOzDzd3dx9Od5amhgO/S0RfpwAESMukcwRCAY/LYdFIOEwaCsgHHJHOlWjMnjJ/R6gn0NbcERocn984fHt5dXV1fXtz9fZgbXoo1Ob73Y/RtzmAAnCFEqlYJBJm8dgMKgmfjsGkk9gSvaOgvK61GwRoCwxOzK3uvbn5/OXT3c3V1YfT7YWRUEdDxc8PJj8jv6/ol4jC07hCqUKpUCgUSoVczKcTsGlYEk+TU3LPnl3NHT0jU3Nr+29uvnz5eHP5/uLieGN6oLO5tsT9y0mOfiLFv9EvNgEZCaDWaLQGk8VsVPIp6Sg0KSu7yN8Z6u0NBQIdDR29I5OzK7tnV3d3N5cX56cn+6vjoVZ/VWHOLwJEyC/68fgQ+QH0i01A4qgcEECrN1ocLpddL6JlINFksa2iY2BkdKi/J9jqb+8ZHJtaCh9fXF2+f3t6fLC3uTjS3VRbnm//RYBYQH4Q+n0/+/9CvwQkLjIDWoPZluN22Q1iBg6NpcqcNYGRqanJseGe9rqWrp6hsdm1vddv3pyeHO6GN5YmBzrqq0tyrb8KAINB0u1H9APjx0XQLwGZyeCL5Uq1Rp9ttdttJrWQQcjAM5Xu2tDY7MLiwuRwwO9v6e4dnFjY3Ds6PNgNb6wuTQ8FWmori9yWXy1BHAwWG/P4KXzQjsA6ogisLKlCpVJrDcZsvVYp5tJJRCpfl1cfGp9f3Vxfmh5oqWlo6+4dnlraDIc311cX52dGe9r8NRVFbvPPA9xrx6e5KxYW0Y4oIkcsV6mUSrVGrZKJ+Bwmnc7kSExef2h8cWtnJ7wy3lHua2zr7BmeXlheXpyfmRwb7u1sqC4v+9UM3C/2c9IvFh4PtCeKyJEoAHsq7tmTBthTbS9p6hlf2to/OgzPBioqaxvAZjQ2OTE23N8T6Gz1V5cVFxXm/tqQ/EQ7xsDiIe1J4IjlSrlMIpOK+SwahUIH7Gl0V7QOTC6FD06OdxdCVWVVvtqG1q5gT0+go6Whrra6otibn5eX5/xlgJ9px7j4RGDdcAy+WCqViKUSEY8F/n6BRKm1FtQGxmZXtw9PjnfmQ1VFpeXllb76xuYmv6+8uLDQW5Dncbs9Hs9LAgDt+OQUxMUnRqwbnSMQiaUKuSSLw2AC9tQYckqaB2dXt/aPjg/Ds6HqAm+ht7C4tLyiotTrybE7cpygXO6XBXgs/SL/GhdBTzyZwREIpSqtVinhc7gCkUyty3ZVdU+u7R4enxztbUwHazwet8vl8uTm5bkdFqMh22KzO3Jy/kOAx+gHWT/IuhHpXKFMpTZazAaVWCCUKMB5OLeuf+ng7Pz89GhnbSroy3XYLWaz2WK1mo06jUafbbHn5DidLtfLAjxox6hvPwA/gyMg9KSwhAq92Wb3uB1GlUyh1hmyLXZv02j4zdXl+zdH26uTwdp8S7Zep9FotOCYKFOoDWabAyyC42XDR0XFgAcuMR4cSKO/0lh8EkBPIp0nM9jzvN7i4vwck95gstgcTndZ+8zB1aePN+9OdtemQ/WFVq1KLpOCEotEYoUWchY59l/sA9/+2Nj45DQM5kE7RtgTlghpTwpLqLF5K3w1lZVlBS5HjifPW1RSVt+3fHr35cvt+9e769M9/iKbVi4S8Pl8AZ/H5QnESp3J6nDYzIZfB4A+ujEwBApHIgPtiEGnJkLwGZeQkobNIJAZPKkxt6KhrbXRV11eUlRaWdvQ0tbRO7P99uM/n6/fHm4tTQTrC21amYjPZjCYTAaDyeZLlLpsszlbr3pRgJiY2PhkDIHOjmhHPCYlARYHT0hGYXEECoMn1tiL6toDgXZ/XW1tXWN7aGh8amYx/PrDx89370+2l2eGOnwFVo1UyGfToDYJmcbiixVqrVatEL/gEQAB4uJTsCQmL0vA47C/akcUOuK9ddb8qubunlBXk7+5rSs0PLMSPjg8OXt/c3d7eba7MjUcaqrINakkWTw2jQAaRZlECpObJZZKxVncXweISA8QgMUXSSViEdCOTEg7orF4Kk+e7SysamgPhEJdzU0dwQh7Xl1fX1/f3F5dHK3PDPW01xU7DXIhn8OkZmKwWGw6jkCmMdlcLptJ+xX53R9/YuDJGBKTL5YB7ahQgD2PTcGh0Rk0kTG3vK65ozsQDHT4W7oHxmeXd86uPv/z+ePN1eXl2e7SWE9nY1WBTSvhc1h0Mg6NQqWlYdJBz4pCIZMI3z43j1P8G/1gSWgiCAC0o85oMmdrJSwCGpVOlzvKm7t7IO3Y6m8LDk3OroAAXz7dAvZ8HZ4b6mqpK/OYVUIOk0YhYJEpoGOZhsGmZ+BwGenYH8nvOfSDIdAEBl8kU2qAdsxxOS0qHgmNTGeqc+sCQ6MjA72hrsb6ttDwxMxS+OT97d3N5bvz05ODjanetobqIqdRIWBSSXgsMgmRlATapkgUKGTqA92AE+5P0Q8BzYBcqdEZLXaX22VV88nYNBxbW9DUNwa0Y3+gqa412D86Ob9x8ObD5bs3gD23FseDzbUVBQ6DjEcnZqBTExMirVsQIykpCYH4Jv1in5R+gLwg9ENgSGxAXhB72u1Wg5xHwaUT+cai5oHJuYWFmbH+dl9TR2hgdHpl+/j8/PT4YDe8uTw12NVQU5Zv10m5VDw6OQEGhyr+a91LvzgowJPP/z36IbAUrkiuBNrRmJ1t0CiEbCqJRBdbSlsGppfWN1bmx4N1dc2doYGxubWdg8N9iD1nRoKt9VUluTadhENJT00A0wkVDAaL/MOrn0u/qK/SD4Gl8qX32lGtBJsKg05n8pX28raB6ZXwzvbG/EBDVX1LZ2hwYmEtwp5zM2N97f6ayuJcq1bCIWOT4dERyfyv+jbXz0s/ONRwxtIEMqAdFUqFVMhl0ml0Jkcg1bur2gdnVncOjvbWRpvLqv0tHcHBibnFpYW56YnRod7OxprysuJcm17KpaSnwGO+vlbR98L93w/cMwlA+w2RnIKhCqQKpVwqlUmFXAaVTGVwhTK1paC2a2R2bef49dHmeGtxRY2/qa27f2R8fHSoL9jVAbFnoTfPYVQK6HhkYmzUt/f70UjRz+BvDAyyjmkkjvBBO3IYVBoYX2XIKWnqm1zY2Ds+Odwcby0qraj21Te1d4dC3e3Nfl9NVXmEPd1WrYRNxCTDY5/e7u4n+xn3C0uINHwpLEg7KgB8M5icLIlSa/JUd44trG0fHB/tr4+1FheWlJVVVNf6Gxv9NeVFBQUF+bkeN4BPp0kpoOGQCNjTdBkJ8Ai/I9MUDb9HTyqLlyWSq7VquZDL5mVJFBq9pcDfP7e1d3h8fLizMtpakl/gLYDgs7zE63HY7uHT5fa4HXoxiwg+oz9P8GOASLsRkYyEGr58sUKlybaYtDKhQCRVqPXZtqKWsY3js/Ozk4OtpeHWMrfb7YIG9LgcZqPBaLYC9nS63G6nWcGjZqCS4uOeT/Do+sVX6wihJ40rURstVqfbadEpZAqNzmCy5JR3zR28u/xwcbq/uTjcVuF02Cwmk8lstpgMWjWAU5sDYk+nw6TOomeiUxJhT2w4X0eLjoUlJCYmwGGx0GR8tY6QdGMJVWZXvtdbXOi2GrQQ+uXk1fSunN1+urs8P9xaGu2o8piz9VqNWq3RqJVymUwFwAssQo7NrFcKmQRsKgL+9BQ8SL/EVDQGjUpJSkyMj41oRyDd0rB4Ep0rNbiKq33VVRVFuQ6705PnLSyuaBnduvj0z6frt0eQeM01aVVyqQSUWCgUydQGsz3HmWO3ZuuUEj6TmI6E1uBxggffEp+CySSRCLh0DBqVDL+3nqnodDyRyspS2Qp9zW3N9UA7FgL0a27pHFw8vPzyz8fLs72N+eH2qlyTSioU8Hg8Po/H5fJEco3RYrfbzAaNXMRn0YjpqKSE5/ZcsPxxicgMMpPNpFPJJEIGCgGPi4MjUtDpeBKNLZAb3RVNXcGulrraWl9dU0fP0Njk9PLu+fWnT9dvDzcXJnuby93ZSkkWjwXupzDoDCZIYDAB9pSClgUpMyMtOQH2XIDomBhYIgpPZfOz+FwOm0kjZqCRSAAPwPqKlEZncV1bsCfYXt/Y0tbVOzq3ur1/cPLm8ubu9v1JeGFisKu+JEcvFwm4TAqRRCKRyBRos9IA9hQAf5eZgQUBHn93v74CkHPjZImlYpFQKOCy6BQiJP2ITKHGmlvia+4M9QTa/cD4TC6GTy6urgD53Vye7y1PDASaIfICrpCcgcPhcHgCGfQLxBIR+PPJBDxY2JREOFAuTyaIio6LKC+JXAn6zQq5TMSjE7BoDIGtsBVWN7R2BoLB7raG9tDw5Pz6wcXtly+fbq+vrt6dbM0OBdrqyzwmpZDHYdKI6eCWFjYDT6QyWGwwm2QCPgOLTkOlpoCn8Ef0+ZogNj41g8rJkihUGuCcTCaDUkDNQKURePp8X3ugpycUCHQ1NHX2jU3Pbxxe3H35/PH68t3F28PVyb6Oppoip0HGZzNoZDwaiUSh0tDYjEwiiUwmETOhxxqFTE1JRiTCH3U8v9JnTHxqOoUNAmj1BrPd6XIYJQwcKo0gMJe29g2PAOnXVtfY2T8Kec/ru7vrD2/PXx/vLY0GmusrCuw6CZdBIeIwqckpKYD70AA+M9KxGDQYPCU5OQmRmABdbIn6fru7p8+Y+NQMCgeQl1Zvsua43DnZUiYejSaJbJWdw5NA+vV21Dd09A6NTy9vn7y7jKDf7vrcUGdDTWmuVSNiUzPT05Ij1PdwZQ8J/vIkBAKBSExMSIiHfx/g1f3oEC3Fp+JooOOt0uiA9LNbtGImIQNHlzmqu0dn5hcWJoeDjfWt3b1D4/Mb+6dvAPrthNcXxvva6qqK3Ga1kEVKRyVFrg1CIIWA0BMBBoYKDoc96jpH+j4QfMJT8QxBRPrps01GvVrKZ5CJZI7aXRMYnVvZXFucHmqraWgN9A1PQgZsfye8vrI4NdDV7KsodJlUQiYBnQSP/Lf+BZ/QsLB7EASC9/u94F47AvhMzWQB9ATST6NWSLK4oOXLEhnyagOj85vb2+HVye4qX2N7oHdkZnkzvLW5vrI4NzUcbK2rLvdCATLTENAQcd9V7H19ZcEflEv0g3ZMJbDFCiUk/RQSAZtBozHYPKHCUugPji1u7h0ebM/31FTUNrZ19Y7MLC4D9BsfHQq1+6vKywpdZrWIRUAj4qIfwWf0o/rxDBADXbdEpODBDChkUqlMLGDTKBQamy9W6J2lTb0TC5v7Jyd7S32+0qq6xpbOnqGxifHRwb5gd0dLfVVpUaHXbdVJIfiNiXpB/bgNQC3vpOQMekT6SaTg60Gjg5O81pxX3QE6Pgcnx3tL/bVFZVW+Okg7hrrbm+prfVVlxQV5eXm5OdlKAR2HTIx7sqP8iwItb0RSStq99JND0g/Mv1yttxU19E0vb+4eHR/uLPTVeotLy8qrfPWNTY311WVFXm8E/Twej10vYZMwyfH/LcH9ZMTCH7Qfky9RaoD0Y3N4wP8Zc8rax1a294+Oj/a35nrr8gq83oh2LC8pcDts37Sj26wS0HAAvJ7BnifHv18PcN0yBYXBEWksrkxvNhtUEkGWWK7SGkzu6uDc7uuz89Oj3fWZnvp8j8cNxsvNzXXZzcYIHEHa0XXPnonw58DrmQBRUa+i4h46ziy+WGV1uexGlVSm0uqNZmte/eDa6YfL92+Od9Zmevxeh8NmMZvMFguEfhq9yQq0o8vlctqMMi75F+z5dICoaHDbEQV1nCVqg7uoKD/HpNMZzVabw1nUPL7z/uPHm3ev99Zn+hqL7RD6Ae0I0E+hgcDL6cxx2ExaOY+Ku//q/6cA0cB7otAQe6jNOYUVlWVel93u8uR7i4p9gbmj6y9f7j6c7m/M9jeVOPQapQwckqQA/STKe+1oMxvBVQUaHp368jWAxz6oSKjjjCcx+AqTu7ii2lddXlxYVF5d19DcEhjfOLv95/PtxfH2ylRvQ4lDJxdnCfg8Ph/SjhKl3mRz2K0mvUom5AITlYp4cYDUSMM5Clz3BPBJY4u0OcW+xqb6ulpfrb+lq39kfHJu/ej93eePl6e7q3Oj3XWFdq1MJOAwItqRwRZIVfpss9moVUoEHAaViMcgEU/D7xOVmY5CwGKiY+EQ/JJoLIHclFfd3NXd5m9q6QgMTC5u7Owfnl6Ab/+b/bXZ0d7W6nyLWpLFZ9NJ99qRLZAA7aiSg44NRHHP0fcTxaAS01HJSUnQlQcijSNUGJyl/s5QT1dze6B/ZHZ17+wDaDjf3F6/O96aH+nt9Jd5TAqRgMuiEXAR7UgFl2WkEpGAw6SSAPykIZMi7PmCCAIem0EB3X80Gosjs0Uai7vE1wLdduzqH51ZCr++/PTl88fb66vLN/srE31dzTWFDr1UwGUzKHiI/IB2pDPZXA4AXwIuHYtOQ6YmA/Z8Wjj8UDIgPwVcBgmHQWdQ+Gq7t7K+pSMQCna1BgYnZ5e2QYBPt1cf3l2c7SyMBNr8FXlWjYjLooOpQ32nHSH0S0MBAEpCxEPnu18nUGm0er1OJWIRwG1Hkclb29oVDAYC3R2twaHx6cWt4/e3H2+v3r85e320NdPf0egrcZuUWSwamZCelpwMtCMK0o6P0A+w5wveBB3oXTjMwPohMVRZTlV739Bgf08w0NwS6B+ZmFvfP/9w9eHi/PXR/vbKZE9LfVWh06jgM0h4DDIp4vsetOOP6PfM/2nxQxlNtofbjigsXeGpC41MTIwO9Qeam9qDA6NTy9vH5+Cv39/eWp0dDjT5ygscBjmPlolJSfxGfg/a8Xv0e1EA0PLOcZjVAioOg2dp8ht6x2fmZqdH+trrmoD0m13bOTw62NveXFueG+tpb6guzbfrZTwq+Or/SH6P0O8lAfRGs9lk1Eh5NEImmW/wNvZNzK+sL82MBush7Tg+vxYOb22sLS3MTgx0NfqqSvKgABmp8Y/J7yv6xT5Jfk+WVqfTqqCeL4XKkpqLmvoml7bCW2tzg00P0m9peWlhdmp8ZKC7ubaivCTPbpDzQYCYx9rxEfu94C1QQewLDtMcodpR1tI/uRreO9hdG2srv5d+ExPjIwM9wa72Rl9FcVFhfk62MouRiYp0jv6lHV9Efo8KuutHo1Ah+DN6qoB43T48OQpPdZQA6dfcEejpCXa1NtbV1lSWFhZA0k8n5ZCwyfE/k34vrshtx8j4OqsX6jjvHL0+2p7uLC0pK6+ormtoamqorSwp9HoL8nI9gPxcZlUWHY9CwF8OHc8XuO/JotNZfKBTnGUtgzNLm3tHJwdbU51l3kIvaAFWVJQV5Tnt36SfJ8cgZZOwKYk/k34vLbVKmsVhsfkioLQ8NYHJlfDe0fHR3vpERznUcXZ7cvM8Tmv2d9LPouRTcf8NvJ6rbINGmsUTiGRKrcGS7x9Y2j1+fXpyuLM63lHhtFtBw9litWTrNf+Sfi6HRStkEDD/gXuerxy7SSMTS0HH22QrapkIn7179/YUuu1Y5TYZIw1nrUohk6t02ffSz24xqMQsIhb5/5gCb77TrFWBy5ZWu6usa+7o6u7m8s1heHm8qybXpFZEGs4S0Tfp5wDoJc0C5/DkZ5zbf6nyskK31Wx1ON25eYV1fStnd18+3VycgNuOvnyzWirk8yHy4/KFMiD9HHZLBL3opOed23+p6uqK4vzcguLyKl+dv3syHPGeYAa6ffkWEIDFYAL0Y3HBe2I2mwzQJV06mZCR9hPz++KqqfVVV0ZO/APD0+vHl58+371/vbM6O9RenQfNAIsKkR/UIVFpdRplRDoScOnoyAnozxLU1Pkbm1q7+sZmlzc2d48vrj9+vDrfW50Z7WkC3lOcxWNRMwH6AeknEEmkEiGfTY9AHCqinv8sQXV9U3ugb3hmdff124t3H65vb68vjtZnwee4OAd0nLlMCh50nDPwJCqDzeFyAPhGtBsy5eXs+ZMArYH+sRlw1+/T5093N9c3l2c7i2O9XY2V+TaNRMBl08m4NEj64TKJZAqFQrp3jhD/PCH9/mPVNLT3DAPr9/bmCwSf79+dbM4MdrfWlXpMSvCdpBLSURHpB5FfRjpkPAH6Jd1fKP6jBDWNHb2jU3Ore+fXHz8B+Dw/O1ybiHScDTI+gM8MVHJE+iEfo198/J9OQbW/HWjHpe3X76+vIfg8CC+PBprqIt6TTsJjUUnfkV9ShDkjCAa/v3D4+wEq69oCfSMT8xsHZxcX56+P93fDK9NDnX7gPbViDgWcdGE/NJx/B/2erXJfQ1ugf3hqKXx4cnK0v7O1vjI7Gmqrqyz2WDRiNgmbmhD3reP8++j3bJVW+Brbg/2jM6vh3d3trfXlxbnxvo4GH7jtqBaxiJgk2K/J708CFJZU1jV1BMBGtLa2sjQ/MzU20N3sq4QCiKEAjxrOv4N+z1Z+YWl1PdgKR6ZmZqbGhwd6Q51NvvKS4iKPVSflkrEp8IcW+x/uuc9UXgGwIP7mjmDfwEBvsLO1saGuuqyooCA/P6IdUb+nHV9cuXnekrLKqpr6ptb2tmZ/TUVpSXFhQZ7Hk5vrseki2jH2Lyb4H9TkzW6gBj/SAAAAAElFTkSuQmCC"
+      ],
+      "title": "L2 · Nebula (field)"
+    },
+    {
+      "id": 18,
+      "type": "CLIPTextEncode",
+      "pos": [
+        600,
+        1074
+      ],
+      "size": [
+        400,
+        150
+      ],
+      "flags": {},
+      "order": 23,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 12
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            13
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "Swirling magenta and teal nebula clouds of glowing cosmic gas, soft airbrushed gradients."
+      ],
+      "title": "L2 · Nebula clouds (prompt)"
+    },
+    {
+      "id": 19,
+      "type": "ConditioningLayersLayer",
+      "pos": [
+        1880,
+        1074
+      ],
+      "size": [
+        300,
+        126
+      ],
+      "flags": {},
+      "order": 24,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "link": 13
+        },
+        {
+          "name": "mask",
+          "type": "MASK",
+          "link": 14
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING_LAYER",
+          "type": "CONDITIONING_LAYER",
+          "links": [
+            15
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersLayer"
+      },
+      "widgets_values": [
+        1.0,
+        "BLENDED",
+        true
+      ],
+      "title": "L2 · Nebula clouds"
+    },
+    {
+      "id": 20,
+      "type": "ConditioningLayersAddLayer",
+      "pos": [
+        2220,
+        1074
+      ],
+      "size": [
+        220,
+        46
+      ],
+      "flags": {},
+      "order": 25,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "layer",
+          "type": "CONDITIONING_LAYER",
+          "link": 15
+        },
+        {
+          "name": "layers",
+          "type": "CONDITIONING_LAYER_STACK",
+          "link": 16
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING_LAYER_STACK",
+          "type": "CONDITIONING_LAYER_STACK",
+          "links": [
+            21
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersAddLayer"
+      },
+      "widgets_values": [],
+      "title": "Add L2"
+    },
+    {
+      "id": 21,
+      "type": "Note",
+      "pos": [
+        1460,
+        1144
+      ],
+      "size": [
+        340,
+        72
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "Click Edit Field… on any Painted Field (or double-click its thumbnail). Done keeps your strokes; Cancel throws them away."
+      ],
+      "title": "TRY THIS",
+      "color": "#232",
+      "bgcolor": "#353"
+    },
+    {
+      "id": 22,
+      "type": "Note",
+      "pos": [
+        1460,
+        1278
+      ],
+      "size": [
+        340,
+        84
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "Brush: Shape Procedural ▸ Noise (Frequency 3, Octaves 3, Hardness 0, Spacing Custom 45%). One diagonal stroke lays down a soft cloud band. Raise Noise Low to 55 for thinner wisps."
+      ],
+      "title": "TRY THIS",
+      "color": "#232",
+      "bgcolor": "#353"
+    },
+    {
+      "id": 23,
+      "type": "ConditioningLayersPaintedField",
+      "pos": [
+        1080,
+        1590
+      ],
+      "size": [
+        300,
+        110
+      ],
+      "flags": {},
+      "order": 26,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": [
+            19
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersPaintedField",
+        "fieldEditor": {
+          "tool": "paint",
+          "size": 12,
+          "influence": 255,
+          "hardness": 100,
+          "amount": 100,
+          "influenceUnit": "percent",
+          "shape": "custom",
+          "custom_tip": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAQAAAD9CzEMAAABlklEQVR4nO2Y226CUBBFVxPwUqsGbaRenvwA//9rfLI1pbZEoRXExMYtmvahCg3HlKSzw0AInMXsgQPB2mE2rFxHV6kCMbEpQIU7YGcScKsKckQ+gC1AaBpgmwTUzQIsAXKd88cqKL9FFrWS98B4Bf+As1HDwRbApo9PVCzgnh7OqYIxPh6L4gD3DHFxaArQ4oaGbtYMiCyAGj1cHujS1itzxFLrhPCyUVkAjtTFpaMKBsox7zjMswCqVKhgS1aarTQft5q06dDT0D0gIpBtCdtUSZqTNCds2BAfAHfcSvWTalq+qqrs6LKaDJkQfdNay1EfUngAGA1Lbu4/RMKzFrUYMZA58ILHEzNWJ2N+tigFnP8Q6TPmhqX8bwIebywJeGSarcmXwsenoRszYgg8seRVe/1sFl2KCE+PVUzABJgR4POMl2W6yNbkhR6rd4YacsVj0VPFHhHi4AqwZVr8ZLc3ak6iYZPLrf0NAF37oYIc8Q8oGJCwVjYGuIJF65JbdIUelN+ij5IDNgJsTAJCs4Bc/1kO8QkrB7bKShF2QAAAAABJRU5ErkJggg=="
+        }
+      },
+      "widgets_values": [
+        "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAAAAADmVT4XAAAB6UlEQVR4nO2aPY6DQAyFicRPCQ0StBSUpKGhQhyAlhNwnNwgB0ibI67ERpGQNYlHjP2yWX9lmrzE9sPMmygyjpAkYAFFARZQ12ABTQMWMI64706Kuhmv17GpC04nnk5gAXEcWsAGvwRpKiKA34R5LiKAN4anOM0vlzyNg/cB04g8BWQZXwDfij1KUJZ8AXw8mlDG3TzGsOskBHgY0TBICOCTL4vMyDLIyqYbltttGbqm9JiF7xGwgSzBL+gmDDKGPm5KCGFEh9w0hBUf+hGH/r4HMm7qAbqRzU3NTeFNiB9D+EurzGL75P0yHsJNX2DnIvAW+0PnIl8oYANZgg14E8LHEG5E8CNqwzBCILwzvaeqwALaFiyg78ECpgksYJ6x339e1/P+k/CploOsavtpXu/3dZ76tnpOo1CqxRcglGq5oCUQSrWc7JpQMNVyshtDhABiRNolIFas3IT0YaQ2hg/I41jNiAzDMAzD+ATgj37t5Yegvf4RtBfgHYhXgM8SEOmXgB5tKzchPdxXHkMabygbETzgsZTRUkZ4E1rKaCmjYRj/A7Eli5vwiq2Z3IRXbNHmJrxirxqchFf0ZYuT8IoK4Ca8UiWg8aKD8E3oClgdhB9DTwFSRsQugRjoawb4ixbwqyYKl21+ACNhU3cdqVUyAAAAAElFTkSuQmCC"
+      ],
+      "title": "L3 · Star glints (field)"
+    },
+    {
+      "id": 24,
+      "type": "CLIPTextEncode",
+      "pos": [
+        600,
+        1520
+      ],
+      "size": [
+        400,
+        150
+      ],
+      "flags": {},
+      "order": 27,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 17
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            18
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "Brilliant four-pointed star glints and sharp white lens flares, airbrushed highlights."
+      ],
+      "title": "L3 · Star glints (prompt)"
+    },
+    {
+      "id": 25,
+      "type": "ConditioningLayersLayer",
+      "pos": [
+        1880,
+        1520
+      ],
+      "size": [
+        300,
+        126
+      ],
+      "flags": {},
+      "order": 28,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "link": 18
+        },
+        {
+          "name": "mask",
+          "type": "MASK",
+          "link": 19
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING_LAYER",
+          "type": "CONDITIONING_LAYER",
+          "links": [
+            20
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersLayer"
+      },
+      "widgets_values": [
+        1.0,
+        "BLENDED",
+        true
+      ],
+      "title": "L3 · Star glints"
+    },
+    {
+      "id": 26,
+      "type": "ConditioningLayersAddLayer",
+      "pos": [
+        2220,
+        1520
+      ],
+      "size": [
+        220,
+        46
+      ],
+      "flags": {},
+      "order": 29,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "layer",
+          "type": "CONDITIONING_LAYER",
+          "link": 20
+        },
+        {
+          "name": "layers",
+          "type": "CONDITIONING_LAYER_STACK",
+          "link": 21
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING_LAYER_STACK",
+          "type": "CONDITIONING_LAYER_STACK",
+          "links": [
+            26
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersAddLayer"
+      },
+      "widgets_values": [],
+      "title": "Add L3"
+    },
+    {
+      "id": 27,
+      "type": "Note",
+      "pos": [
+        1460,
+        1590
+      ],
+      "size": [
+        340,
+        84
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "Custom Tip: an original four-point sparkle stored inside this workflow, so no image file is needed. Advanced ▸ Custom Tip ▸ Import Tip PNG… swaps in your own."
+      ],
+      "title": "WHAT THIS SHOWS",
+      "color": "#223",
+      "bgcolor": "#335"
+    },
+    {
+      "id": 28,
+      "type": "ConditioningLayersPaintedField",
+      "pos": [
+        1080,
+        1928
+      ],
+      "size": [
+        300,
+        110
+      ],
+      "flags": {},
+      "order": 30,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": [
+            24
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersPaintedField",
+        "fieldEditor": {
+          "tool": "paint",
+          "size": 80,
+          "influence": 255,
+          "hardness": 100,
+          "amount": 100,
+          "influenceUnit": "percent",
+          "shape": "procedural",
+          "procedural_version": 1,
+          "procedural_particle_shape": "hotdog",
+          "procedural_particle_size": 95,
+          "procedural_particle_rotation": 10
+        }
+      },
+      "widgets_values": [
+        "data:image/png;base64,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"
+      ],
+      "title": "L4 · Hotdog constellation (field)"
+    },
+    {
+      "id": 29,
+      "type": "CLIPTextEncode",
+      "pos": [
+        600,
+        1858
+      ],
+      "size": [
+        400,
+        150
+      ],
+      "flags": {},
+      "order": 31,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 22
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            23
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "A giant hotdog-shaped constellation traced in glowing gold starlight lines, connected stars."
+      ],
+      "title": "L4 · Hotdog constellation (prompt)"
+    },
+    {
+      "id": 30,
+      "type": "ConditioningLayersLayer",
+      "pos": [
+        1880,
+        1858
+      ],
+      "size": [
+        300,
+        126
+      ],
+      "flags": {},
+      "order": 32,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "link": 23
+        },
+        {
+          "name": "mask",
+          "type": "MASK",
+          "link": 24
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING_LAYER",
+          "type": "CONDITIONING_LAYER",
+          "links": [
+            25
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersLayer"
+      },
+      "widgets_values": [
+        1.0,
+        "BLENDED",
+        true
+      ],
+      "title": "L4 · Hotdog constellation"
+    },
+    {
+      "id": 31,
+      "type": "ConditioningLayersAddLayer",
+      "pos": [
+        2220,
+        1858
+      ],
+      "size": [
+        220,
+        46
+      ],
+      "flags": {},
+      "order": 33,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "layer",
+          "type": "CONDITIONING_LAYER",
+          "link": 25
+        },
+        {
+          "name": "layers",
+          "type": "CONDITIONING_LAYER_STACK",
+          "link": 26
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING_LAYER_STACK",
+          "type": "CONDITIONING_LAYER_STACK",
+          "links": [
+            31
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersAddLayer"
+      },
+      "widgets_values": [],
+      "title": "Add L4"
+    },
+    {
+      "id": 32,
+      "type": "Note",
+      "pos": [
+        1460,
+        1928
+      ],
+      "size": [
+        340,
+        84
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "Hotdog, Count 1: one huge stamp of the line-art template (Hotdog Size 95%, Hotdog Rotation 10°). Its outline becomes a constellation. Click once anywhere for a second one."
+      ],
+      "title": "WHAT THIS SHOWS",
+      "color": "#223",
+      "bgcolor": "#335"
+    },
+    {
+      "id": 33,
+      "type": "Note",
+      "pos": [
+        1460,
+        2074
+      ],
+      "size": [
+        340,
+        84
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "The Hotdog template is line art: each stamp paints the outline of a hotdog, not a filled silhouette. That is why these prompts ask for glowing lines, comets and cut-outs."
+      ],
+      "title": "IMPORTANT",
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 34,
+      "type": "ConditioningLayersPaintedField",
+      "pos": [
+        1080,
+        2386
+      ],
+      "size": [
+        300,
+        110
+      ],
+      "flags": {},
+      "order": 34,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": [
+            29
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersPaintedField",
+        "fieldEditor": {
+          "tool": "paint",
+          "size": 88,
+          "influence": 255,
+          "hardness": 100,
+          "amount": 100,
+          "influenceUnit": "percent",
+          "shape": "procedural",
+          "mirror_horizontal": true,
+          "procedural_version": 1,
+          "procedural_seed": 7,
+          "procedural_particle_shape": "hotdog",
+          "procedural_particle_size": 80,
+          "procedural_particle_rotation": 35,
+          "procedural_rotation_jitter": 60,
+          "hotdog_count": 9,
+          "hotdog_spread": 90
+        }
+      },
+      "widgets_values": [
+        "data:image/png;base64,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"
+      ],
+      "title": "L5 · Meteor shower (field)"
+    },
+    {
+      "id": 35,
+      "type": "CLIPTextEncode",
+      "pos": [
+        600,
+        2316
+      ],
+      "size": [
+        400,
+        150
+      ],
+      "flags": {},
+      "order": 35,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 27
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            28
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "A shower of flaming hotdog meteors, each outline blazing orange-white like a comet, pulp science-fiction illustration."
+      ],
+      "title": "L5 · Meteor shower (prompt)"
+    },
+    {
+      "id": 36,
+      "type": "ConditioningLayersLayer",
+      "pos": [
+        1880,
+        2316
+      ],
+      "size": [
+        300,
+        126
+      ],
+      "flags": {},
+      "order": 36,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "link": 28
+        },
+        {
+          "name": "mask",
+          "type": "MASK",
+          "link": 29
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING_LAYER",
+          "type": "CONDITIONING_LAYER",
+          "links": [
+            30
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersLayer"
+      },
+      "widgets_values": [
+        1.0,
+        "BLENDED",
+        true
+      ],
+      "title": "L5 · Meteor shower"
+    },
+    {
+      "id": 37,
+      "type": "ConditioningLayersAddLayer",
+      "pos": [
+        2220,
+        2316
+      ],
+      "size": [
+        220,
+        46
+      ],
+      "flags": {},
+      "order": 37,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "layer",
+          "type": "CONDITIONING_LAYER",
+          "link": 30
+        },
+        {
+          "name": "layers",
+          "type": "CONDITIONING_LAYER_STACK",
+          "link": 31
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING_LAYER_STACK",
+          "type": "CONDITIONING_LAYER_STACK",
+          "links": [
+            36
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersAddLayer"
+      },
+      "widgets_values": [],
+      "title": "Add L5"
+    },
+    {
+      "id": 38,
+      "type": "Note",
+      "pos": [
+        1460,
+        2386
+      ],
+      "size": [
+        340,
+        84
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "Hotdog, Count 9 in one click: Spread 90% scatters the meteors, Hotdog Rotation 35° plus Rotation Jitter 60 tumbles them, Mirror H flips the set and Hotdog Size 80% sets each meteor's size."
+      ],
+      "title": "WHAT THIS SHOWS",
+      "color": "#223",
+      "bgcolor": "#335"
+    },
+    {
+      "id": 39,
+      "type": "Note",
+      "pos": [
+        1460,
+        2532
+      ],
+      "size": [
+        340,
+        84
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "Brush Library… ▸ Import Preset JSON… ▸ presets/hotdog_meteor_shower.brush.json, select it, then Apply. It matches this row's brush exactly. Opening the workflow does not install it."
+      ],
+      "title": "TRY THIS",
+      "color": "#232",
+      "bgcolor": "#353"
+    },
+    {
+      "id": 40,
+      "type": "ConditioningLayersPaintedField",
+      "pos": [
+        1080,
+        2844
+      ],
+      "size": [
+        300,
+        110
+      ],
+      "flags": {},
+      "order": 38,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": [
+            34
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersPaintedField",
+        "fieldEditor": {
+          "tool": "paint",
+          "size": 52,
+          "influence": 255,
+          "hardness": 100,
+          "amount": 100,
+          "influenceUnit": "percent",
+          "shape": "procedural",
+          "procedural_version": 1,
+          "procedural_seed": 3,
+          "procedural_particle_shape": "hotdog",
+          "procedural_particle_size": 85,
+          "procedural_particle_aspect": 1.6,
+          "hotdog_count": 2,
+          "hotdog_invert": true
+        }
+      },
+      "widgets_values": [
+        "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAAAAADmVT4XAAABy0lEQVR4nO3aOUsDURSG4QuOK0hSKCoIBlywsJIUqcRKBC0t1FIQrEJArERcOn9AGsFCAtZiYSGKrWshWKlVIEogUWOMSyT3SAQxAzNxAjPnBPmeMkXm5TJ3qk8pcNekHa4AsoMA1gCd/31wIc8eUOgjotfdVsMwxnKfRLqGNcA4okRT8oyI5rqJqD212px6ztazBbwVKE09tKh7df+eHtiaoiV9RXTJdwKxlpeLWf/o7XHx3A/OIyO1+0/3dSd8AW1WV0DvMb6EwxYBBustWBg8NT193dgx3QJvvw8//xuPzYfDkY1riwfxBJT5ElZJQEY04CNU/GkzFAwOuR0Qt1MS0LCtqYsSd4XHQEC7HeAAPRAlx2mGsmlaY7uepQHv00Q5X6N/xYt3wElA1Mtb4CSg+GGUDSAKd07kRAPETwABogEAAAAAAAAAAAAAAAAAAABQbWR30LbjLwSwBkjuoJVSsjvo4gmI7qCVUrI7aKWU7A7a+hYw7qCtAxh30EqpynbQHqR9/6vjHbRXAWW+hFUSkBENKNlBH7ofUNkOOn/jesBfzDvoDv4ptnkHvezjD4javR1cAaYdtEhA6Q5aKED8BBAgGgAA8O99AdZvSFvXLmvPAAAAAElFTkSuQmCC"
+      ],
+      "title": "L6 · Stencil signboards (field)"
+    },
+    {
+      "id": 41,
+      "type": "CLIPTextEncode",
+      "pos": [
+        600,
+        2774
+      ],
+      "size": [
+        400,
+        150
+      ],
+      "flags": {},
+      "order": 39,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 32
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            33
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "Floating retro diner signboards glowing hot pink with chrome frames, a hotdog silhouette cut out of each board."
+      ],
+      "title": "L6 · Stencil signboards (prompt)"
+    },
+    {
+      "id": 42,
+      "type": "ConditioningLayersLayer",
+      "pos": [
+        1880,
+        2774
+      ],
+      "size": [
+        300,
+        126
+      ],
+      "flags": {},
+      "order": 40,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "link": 33
+        },
+        {
+          "name": "mask",
+          "type": "MASK",
+          "link": 34
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING_LAYER",
+          "type": "CONDITIONING_LAYER",
+          "links": [
+            35
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersLayer"
+      },
+      "widgets_values": [
+        1.0,
+        "BLENDED",
+        true
+      ],
+      "title": "L6 · Stencil signboards"
+    },
+    {
+      "id": 43,
+      "type": "ConditioningLayersAddLayer",
+      "pos": [
+        2220,
+        2774
+      ],
+      "size": [
+        220,
+        46
+      ],
+      "flags": {},
+      "order": 41,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "layer",
+          "type": "CONDITIONING_LAYER",
+          "link": 35
+        },
+        {
+          "name": "layers",
+          "type": "CONDITIONING_LAYER_STACK",
+          "link": 36
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING_LAYER_STACK",
+          "type": "CONDITIONING_LAYER_STACK",
+          "links": [
+            37
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersAddLayer"
+      },
+      "widgets_values": [],
+      "title": "Add L6"
+    },
+    {
+      "id": 44,
+      "type": "Note",
+      "pos": [
+        1460,
+        2844
+      ],
+      "size": [
+        340,
+        72
+      ],
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "Invert Template turns each Hotdog stamp inside out: a glowing signboard with the hotdog drawing cut out of it, so deep space shows through the lines."
+      ],
+      "title": "WHAT THIS SHOWS",
+      "color": "#223",
+      "bgcolor": "#335"
+    },
+    {
+      "id": 45,
+      "type": "Note",
+      "pos": [
+        1460,
+        2978
+      ],
+      "size": [
+        340,
+        72
+      ],
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "Turn Invert Template off and click once in empty space: the same brush now paints two hotdog outlines instead of two signboards."
+      ],
+      "title": "TRY THIS",
+      "color": "#232",
+      "bgcolor": "#353"
+    },
+    {
+      "id": 46,
+      "type": "ConditioningLayersCompose",
+      "pos": [
+        2220,
+        3208
+      ],
+      "size": [
+        300,
+        26
+      ],
+      "flags": {},
+      "order": 42,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "layers",
+          "type": "CONDITIONING_LAYER_STACK",
+          "link": 37
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            38
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersCompose"
+      },
+      "widgets_values": []
+    }
+  ],
+  "links": [
+    [
+      1,
+      3,
+      0,
+      5,
+      0,
+      "CLIP"
+    ],
+    [
+      2,
+      2,
+      0,
+      7,
+      0,
+      "MODEL"
+    ],
+    [
+      3,
+      5,
+      0,
+      7,
+      2,
+      "CONDITIONING"
+    ],
+    [
+      4,
+      6,
+      0,
+      7,
+      3,
+      "LATENT"
+    ],
+    [
+      5,
+      7,
+      0,
+      8,
+      0,
+      "LATENT"
+    ],
+    [
+      6,
+      4,
+      0,
+      8,
+      1,
+      "VAE"
+    ],
+    [
+      7,
+      8,
+      0,
+      9,
+      0,
+      "IMAGE"
+    ],
+    [
+      8,
+      3,
+      0,
+      12,
+      0,
+      "CLIP"
+    ],
+    [
+      9,
+      12,
+      0,
+      13,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      10,
+      11,
+      0,
+      13,
+      1,
+      "MASK"
+    ],
+    [
+      11,
+      13,
+      0,
+      14,
+      0,
+      "CONDITIONING_LAYER"
+    ],
+    [
+      12,
+      3,
+      0,
+      18,
+      0,
+      "CLIP"
+    ],
+    [
+      13,
+      18,
+      0,
+      19,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      14,
+      17,
+      0,
+      19,
+      1,
+      "MASK"
+    ],
+    [
+      15,
+      19,
+      0,
+      20,
+      0,
+      "CONDITIONING_LAYER"
+    ],
+    [
+      16,
+      14,
+      0,
+      20,
+      1,
+      "CONDITIONING_LAYER_STACK"
+    ],
+    [
+      17,
+      3,
+      0,
+      24,
+      0,
+      "CLIP"
+    ],
+    [
+      18,
+      24,
+      0,
+      25,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      19,
+      23,
+      0,
+      25,
+      1,
+      "MASK"
+    ],
+    [
+      20,
+      25,
+      0,
+      26,
+      0,
+      "CONDITIONING_LAYER"
+    ],
+    [
+      21,
+      20,
+      0,
+      26,
+      1,
+      "CONDITIONING_LAYER_STACK"
+    ],
+    [
+      22,
+      3,
+      0,
+      29,
+      0,
+      "CLIP"
+    ],
+    [
+      23,
+      29,
+      0,
+      30,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      24,
+      28,
+      0,
+      30,
+      1,
+      "MASK"
+    ],
+    [
+      25,
+      30,
+      0,
+      31,
+      0,
+      "CONDITIONING_LAYER"
+    ],
+    [
+      26,
+      26,
+      0,
+      31,
+      1,
+      "CONDITIONING_LAYER_STACK"
+    ],
+    [
+      27,
+      3,
+      0,
+      35,
+      0,
+      "CLIP"
+    ],
+    [
+      28,
+      35,
+      0,
+      36,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      29,
+      34,
+      0,
+      36,
+      1,
+      "MASK"
+    ],
+    [
+      30,
+      36,
+      0,
+      37,
+      0,
+      "CONDITIONING_LAYER"
+    ],
+    [
+      31,
+      31,
+      0,
+      37,
+      1,
+      "CONDITIONING_LAYER_STACK"
+    ],
+    [
+      32,
+      3,
+      0,
+      41,
+      0,
+      "CLIP"
+    ],
+    [
+      33,
+      41,
+      0,
+      42,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      34,
+      40,
+      0,
+      42,
+      1,
+      "MASK"
+    ],
+    [
+      35,
+      42,
+      0,
+      43,
+      0,
+      "CONDITIONING_LAYER"
+    ],
+    [
+      36,
+      37,
+      0,
+      43,
+      1,
+      "CONDITIONING_LAYER_STACK"
+    ],
+    [
+      37,
+      43,
+      0,
+      46,
+      0,
+      "CONDITIONING_LAYER_STACK"
+    ],
+    [
+      38,
+      46,
+      0,
+      7,
+      1,
+      "CONDITIONING"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "1 — MODEL / INPUT",
+      "bounding": [
+        -20,
+        -48,
+        340,
+        623
+      ],
+      "color": "#3f789e",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "id": 2,
+      "title": "6 — SAMPLING / OUTPUT",
+      "bounding": [
+        2560,
+        -398,
+        740,
+        1204
+      ],
+      "color": "#b06634",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "id": 3,
+      "title": "L1 · Deep space backdrop — Solid Field",
+      "bounding": [
+        580,
+        552,
+        1880,
+        388
+      ],
+      "color": "#8A8",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "id": 4,
+      "title": "L2 · Nebula clouds — Procedural Noise brush",
+      "bounding": [
+        580,
+        986,
+        1880,
+        400
+      ],
+      "color": "#b58b2a",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "id": 5,
+      "title": "L3 · Star glints — Custom Tip",
+      "bounding": [
+        580,
+        1432,
+        1880,
+        292
+      ],
+      "color": "#a1309b",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "id": 6,
+      "title": "L4 · Hotdog constellation — Hotdog, Count 1",
+      "bounding": [
+        580,
+        1770,
+        1880,
+        412
+      ],
+      "color": "#88A",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "id": 7,
+      "title": "L5 · Meteor shower — Hotdog, Count 9 (Brush Library preset)",
+      "bounding": [
+        580,
+        2228,
+        1880,
+        412
+      ],
+      "color": "#b06634",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "id": 8,
+      "title": "L6 · Stencil signboards — Hotdog, Invert Template",
+      "bounding": [
+        580,
+        2686,
+        1880,
+        388
+      ],
+      "color": "#8AA",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "id": 9,
+      "title": "5 — COMPOSE",
+      "bounding": [
+        2200,
+        3120,
+        340,
+        138
+      ],
+      "color": "#88A",
+      "font_size": 24,
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.72,
+      "offset": [
+        76,
+        441
+      ]
+    }
+  },
+  "version": 0.4
+}

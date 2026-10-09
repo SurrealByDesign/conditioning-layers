@@ -1,0 +1,133 @@
+{
+  "assignment_permutations": [
+    {
+      "ordered_field_ids": [
+        "A",
+        "B"
+      ],
+      "permutation_id": "AB"
+    },
+    {
+      "ordered_field_ids": [
+        "B",
+        "A"
+      ],
+      "permutation_id": "BA"
+    }
+  ],
+  "binary_grayscale_status": {
+    "complement_fields": "binary-grayscale-8",
+    "partition_fields": "binary-grayscale-8",
+    "preview": "illustrative-grayscale-8"
+  },
+  "compatible_workflows": [
+    {
+      "classification": "illustrative",
+      "execution_status": "asset-inspection-only",
+      "filename": "workflows/two-layer.left-right.v1.asset-inspection.workflow.json",
+      "sha256": "0488cda9ee5385d9080eef0ace51c15dade89a031041787f48d4401ebbd70e0c",
+      "workflow_id": "two-layer.left-right.v1.asset-inspection"
+    }
+  ],
+  "description": "Exact hard partition at the vertical center line.",
+  "display_name": "Left / Right",
+  "fields": [
+    {
+      "asset_id": "A",
+      "filename": "two-layer/left-right/field-a.png",
+      "role": "partition-field",
+      "sha256": "0c519e60efdffbfebbbe2c60235a0f03fb10af8f33d1d3f59c900739ae0fd3e0"
+    },
+    {
+      "asset_id": "B",
+      "filename": "two-layer/left-right/field-b.png",
+      "role": "partition-field",
+      "sha256": "b649d32ce6f7481291adaa4b7e68988ade1d9ec53e9624bbf52dd92be628ee4d"
+    }
+  ],
+  "generator": {
+    "generator_id": "conditioning-layers.influence-field-library.generator",
+    "generator_version": 1,
+    "parameters": {
+      "kind": "vertical_split",
+      "split_x": 64
+    },
+    "source_sha256": "3cbd830c313e94f9ff8a37daac9fdbffbf0dfaec255b169c546cdf170c9fdadc"
+  },
+  "geometric_variants": [
+    {
+      "operation": "mirror-horizontal",
+      "source_to_target_field_mapping": {
+        "A": "B",
+        "B": "A"
+      },
+      "target_pattern_family_id": "two-layer.left-right.v1",
+      "variant_id": "mirror-horizontal"
+    },
+    {
+      "operation": "rotate-90-clockwise",
+      "source_to_target_field_mapping": {
+        "A": "A",
+        "B": "B"
+      },
+      "target_pattern_family_id": "two-layer.top-bottom.v1",
+      "variant_id": "rotate-90-clockwise"
+    }
+  ],
+  "image_mode": "grayscale-8",
+  "intended_use": [
+    "product reference",
+    "two-layer spatial assignment"
+  ],
+  "known_limitations": [
+    "A hard center boundary can produce seams, contact, or fusion.",
+    "Asset validation does not guarantee prompt confinement."
+  ],
+  "layer_count": 2,
+  "library_version": 1,
+  "partition_relationship": {
+    "complete_coverage": true,
+    "equation": "A + B = 255",
+    "overlap_pixel_count": 0,
+    "per_pixel_sum": 255,
+    "unassigned_pixel_count": 0
+  },
+  "pattern_family_id": "two-layer.left-right.v1",
+  "pixel_complements": [
+    {
+      "asset_id": "not-A",
+      "equivalent_partition_sum": [
+        "B"
+      ],
+      "expression": "255 - A",
+      "filename": "two-layer/left-right/not-a.png",
+      "role": "pixel-complement",
+      "sha256": "b649d32ce6f7481291adaa4b7e68988ade1d9ec53e9624bbf52dd92be628ee4d",
+      "source_field_id": "A"
+    },
+    {
+      "asset_id": "not-B",
+      "equivalent_partition_sum": [
+        "A"
+      ],
+      "expression": "255 - B",
+      "filename": "two-layer/left-right/not-b.png",
+      "role": "pixel-complement",
+      "sha256": "0c519e60efdffbfebbbe2c60235a0f03fb10af8f33d1d3f59c900739ae0fd3e0",
+      "source_field_id": "B"
+    }
+  ],
+  "preview": {
+    "asset_id": "two-layer.left-right.v1.preview",
+    "filename": "previews/two-layer.left-right.v1.png",
+    "role": "composite-preview",
+    "sha256": "4ddf481284b380a53adf93cc0d0d59723e3756026c6ef16c670fd3870f3069ad"
+  },
+  "resolution": {
+    "height": 128,
+    "width": 128
+  },
+  "schema_id": "conditioning-layers.influence-field-family-manifest",
+  "schema_version": 1,
+  "support_status": "validated-product-asset"
+}

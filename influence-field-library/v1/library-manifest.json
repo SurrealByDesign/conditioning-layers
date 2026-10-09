@@ -1,0 +1,50 @@
+{
+  "families": [
+    {
+      "layer_count": 2,
+      "manifest_filename": "manifests/two-layer.left-right.v1.manifest.json",
+      "manifest_sha256": "670c51744b538c4ae4b47df11f1d96391feacc303fdf78e8eaf9aeb8d80bb205",
+      "pattern_family_id": "two-layer.left-right.v1",
+      "support_status": "validated-product-asset"
+    },
+    {
+      "layer_count": 2,
+      "manifest_filename": "manifests/two-layer.top-bottom.v1.manifest.json",
+      "manifest_sha256": "ef1e7c264d616ffc5d1bd351c4de8949556d1142f4abd7a065d24fcabb737745",
+      "pattern_family_id": "two-layer.top-bottom.v1",
+      "support_status": "validated-product-asset"
+    },
+    {
+      "layer_count": 3,
+      "manifest_filename": "manifests/three-layer.vertical-thirds.v1.manifest.json",
+      "manifest_sha256": "190313ac487dbcde37e2c2e5d9fc6b6e3cd3147b82718caacb2bc3f799232dc2",
+      "pattern_family_id": "three-layer.vertical-thirds.v1",
+      "support_status": "validated-product-asset"
+    },
+    {
+      "layer_count": 3,
+      "manifest_filename": "manifests/three-layer.horizontal-thirds.v1.manifest.json",
+      "manifest_sha256": "5fbf94ec7d3e690b753fc71f32419f3d2180025401e559bb944591b548bc9d30",
+      "pattern_family_id": "three-layer.horizontal-thirds.v1",
+      "support_status": "validated-product-asset"
+    },
+    {
+      "layer_count": 3,
+      "manifest_filename": "manifests/three-layer.center-ring-outer.v1.manifest.json",
+      "manifest_sha256": "2b72d198fa06966e113d4c33a5ef58fc42d1832a014ba5f18d2a25162a3584e1",
+      "pattern_family_id": "three-layer.center-ring-outer.v1",
+      "support_status": "validated-product-asset"
+    }
+  ],
+  "generator": {
+    "generator_id": "conditioning-layers.influence-field-library.generator",
+    "generator_version": 1,
+    "source_sha256": "3cbd830c313e94f9ff8a37daac9fdbffbf0dfaec255b169c546cdf170c9fdadc"
+  },
+  "library_id": "conditioning-layers.influence-field-library",
+  "library_version": 1,
+  "manifest_schema": {
+    "filename": "schemas/influence-field-family-manifest.v1.schema.json",
+    "sha256": "909d814ded950f82d2439cf0311c99fadf9f8c3bbc14f41e6c29368ebb7e1800"
+  }
+}

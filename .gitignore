@@ -1,0 +1,49 @@
+# Python and tests
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.venv/
+venv/
+env/
+# Local secrets and configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets.local.*
+# Editors and operating systems
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+Desktop.ini
+# Local dependencies, hosts, models and smoke scratch
+node_modules/
+.browser-profile*/
+browser-profiles/
+.smoke*/
+.qualification*/
+.local-host*/
+.tmp-host*/
+.e1-host*/
+/ComfyUI/
+comfyui-local/
+models/
+checkpoints/
+*.safetensors
+*.ckpt
+input/
+output/
+user/
+scratch/
+tmp/
+*.log
+
+# Keep local release notes and validation artifacts out of distributions
+/.release-internal/
+/docs/PUBLIC_*_REPORT.md

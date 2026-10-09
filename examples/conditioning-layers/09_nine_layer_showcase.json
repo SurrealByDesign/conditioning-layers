@@ -1,0 +1,3131 @@
+{
+  "last_node_id": 66,
+  "last_link_id": 59,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "Note",
+      "pos": [
+        0,
+        40
+      ],
+      "size": [
+        300,
+        109
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "Select a compatible checkpoint/model available in your ComfyUI installation.\nUse Krea 2 with its matching text encoder and VAE; replace all three SELECT selections.\nThree loader warnings are expected until you select those models."
+      ],
+      "title": "IMPORTANT",
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 2,
+      "type": "UNETLoader",
+      "pos": [
+        0,
+        201
+      ],
+      "size": [
+        300,
+        82
+      ],
+      "flags": {},
+      "order": 15,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            2
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "UNETLoader"
+      },
+      "widgets_values": [
+        "SELECT_KREA_2_MODEL.safetensors",
+        "default"
+      ]
+    },
+    {
+      "id": 3,
+      "type": "CLIPLoader",
+      "pos": [
+        0,
+        335
+      ],
+      "size": [
+        300,
+        106
+      ],
+      "flags": {},
+      "order": 16,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": [
+            1,
+            8,
+            12,
+            17,
+            23,
+            30,
+            38,
+            43,
+            48,
+            53
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPLoader"
+      },
+      "widgets_values": [
+        "SELECT_KREA_2_TEXT_ENCODER.safetensors",
+        "krea2",
+        "default"
+      ]
+    },
+    {
+      "id": 4,
+      "type": "VAELoader",
+      "pos": [
+        0,
+        493
+      ],
+      "size": [
+        300,
+        58
+      ],
+      "flags": {},
+      "order": 17,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            6
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAELoader"
+      },
+      "widgets_values": [
+        "SELECT_COMPATIBLE_VAE.safetensors"
+      ]
+    },
+    {
+      "id": 5,
+      "type": "CLIPTextEncode",
+      "pos": [
+        3560,
+        -310
+      ],
+      "size": [
+        300,
+        88
+      ],
+      "flags": {},
+      "order": 18,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 1
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            3
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        ""
+      ],
+      "title": "Empty negative prompt"
+    },
+    {
+      "id": 6,
+      "type": "EmptyLatentImage",
+      "pos": [
+        3560,
+        -170
+      ],
+      "size": [
+        300,
+        106
+      ],
+      "flags": {},
+      "order": 19,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            4
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "EmptyLatentImage"
+      },
+      "widgets_values": [
+        1024,
+        1024,
+        1
+      ],
+      "title": "Image size"
+    },
+    {
+      "id": 7,
+      "type": "KSampler",
+      "pos": [
+        3960,
+        40
+      ],
+      "size": [
+        300,
+        262
+      ],
+      "flags": {},
+      "order": 63,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 2
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 59
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 3
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 4
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            5
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "KSampler"
+      },
+      "widgets_values": [
+        2026,
+        "fixed",
+        8,
+        1.0,
+        "euler",
+        "simple",
+        1.0
+      ]
+    },
+    {
+      "id": 8,
+      "type": "VAEDecode",
+      "pos": [
+        3960,
+        354
+      ],
+      "size": [
+        300,
+        46
+      ],
+      "flags": {},
+      "order": 64,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 5
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 6
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            7
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAEDecode"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 9,
+      "type": "SaveImage",
+      "pos": [
+        3960,
+        452
+      ],
+      "size": [
+        300,
+        330
+      ],
+      "flags": {},
+      "order": 65,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 7
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "ConditioningLayers/09_nine_layer_showcase"
+      ]
+    },
+    {
+      "id": 10,
+      "type": "Note",
+      "pos": [
+        0,
+        -174
+      ],
+      "size": [
+        600,
+        84
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "NINE-LAYER SURREAL SHOWCASE — Night market under the neon moon\nA retro-futurist night market on an alien world, where every region keeps its own style: photoreal stalls, an oil-painted traveler, watercolor twilight, charcoal smoke, vector neon, chrome hotdog ornaments."
+      ],
+      "title": "CONDITIONING LAYERS — EXAMPLE 09",
+      "color": "#2a363b",
+      "bgcolor": "#3f5159"
+    },
+    {
+      "id": 11,
+      "type": "Note",
+      "pos": [
+        640,
+        -162
+      ],
+      "size": [
+        340,
+        72
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "Nine independently controlled conditioning layers combine geometry, gradients, procedural fields, patterns and painting in one scene."
+      ],
+      "title": "WHAT THIS SHOWS",
+      "color": "#223",
+      "bgcolor": "#335"
+    },
+    {
+      "id": 12,
+      "type": "Note",
+      "pos": [
+        1020,
+        -162
+      ],
+      "size": [
+        340,
+        72
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "Disable layers one at a time, change their prompts, or open the Painted Fields together to see which part of the scene each layer owns."
+      ],
+      "title": "TRY THIS",
+      "color": "#232",
+      "bgcolor": "#353"
+    },
+    {
+      "id": 13,
+      "type": "Note",
+      "pos": [
+        1400,
+        -149
+      ],
+      "size": [
+        340,
+        59
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "This workflow is intentionally large. Start with Examples 01–08 if you're learning the system."
+      ],
+      "title": "IMPORTANT",
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 14,
+      "type": "ConditioningLayersRectangleField",
+      "pos": [
+        1080,
+        710
+      ],
+      "size": [
+        300,
+        178
+      ],
+      "flags": {},
+      "order": 20,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": [
+            10
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersRectangleField"
+      },
+      "widgets_values": [
+        64.0,
+        81.0,
+        128,
+        94,
+        255,
+        0
+      ],
+      "title": "L1 · Lower three quarters (field)"
+    },
+    {
+      "id": 15,
+      "type": "CLIPTextEncode",
+      "pos": [
+        600,
+        640
+      ],
+      "size": [
+        400,
+        150
+      ],
+      "flags": {},
+      "order": 21,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 8
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            9
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "A crowded retro-futurist night market on an alien world, lantern-lit food stalls and chrome kiosks along a wet stone street, photoreal cinematic film still."
+      ],
+      "title": "L1 · Market street (prompt)"
+    },
+    {
+      "id": 16,
+      "type": "ConditioningLayersLayer",
+      "pos": [
+        2860,
+        640
+      ],
+      "size": [
+        300,
+        126
+      ],
+      "flags": {},
+      "order": 22,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "link": 9
+        },
+        {
+          "name": "mask",
+          "type": "MASK",
+          "link": 10
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING_LAYER",
+          "type": "CONDITIONING_LAYER",
+          "links": [
+            11
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersLayer"
+      },
+      "widgets_values": [
+        0.55,
+        "BLENDED",
+        true
+      ],
+      "title": "L1 · Market street"
+    },
+    {
+      "id": 17,
+      "type": "ConditioningLayersAddLayer",
+      "pos": [
+        3200,
+        640
+      ],
+      "size": [
+        220,
+        46
+      ],
+      "flags": {},
+      "order": 23,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "layer",
+          "type": "CONDITIONING_LAYER",
+          "link": 11
+        },
+        {
+          "name": "layers",
+          "type": "CONDITIONING_LAYER_STACK",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING_LAYER_STACK",
+          "type": "CONDITIONING_LAYER_STACK",
+          "links": [
+            16
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersAddLayer"
+      },
+      "widgets_values": [],
+      "title": "Add L1"
+    },
+    {
+      "id": 18,
+      "type": "Note",
+      "pos": [
+        1460,
+        710
+      ],
+      "size": [
+        340,
+        72
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "L1 lays the photoreal market street across the lower three quarters of the frame. L2 hangs a vector-neon moon in the sky above it."
+      ],
+      "title": "WHAT THIS SHOWS",
+      "color": "#223",
+      "bgcolor": "#335"
+    },
+    {
+      "id": 19,
+      "type": "ConditioningLayersRadialGradientField",
+      "pos": [
+        1080,
+        1116
+      ],
+      "size": [
+        300,
+        178
+      ],
+      "flags": {},
+      "order": 24,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": [
+            14
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersRadialGradientField"
+      },
+      "widgets_values": [
+        92.0,
+        20.0,
+        26.0,
+        26.0,
+        255,
+        0
+      ],
+      "title": "L2 · Moon glow (field)"
+    },
+    {
+      "id": 20,
+      "type": "CLIPTextEncode",
+      "pos": [
+        600,
+        1046
+      ],
+      "size": [
+        400,
+        150
+      ],
+      "flags": {},
+      "order": 25,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 12
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            13
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "A colossal glowing magenta moon ringed with neon halos, flat vector neon poster style."
+      ],
+      "title": "L2 · Neon moon (prompt)"
+    },
+    {
+      "id": 21,
+      "type": "ConditioningLayersLayer",
+      "pos": [
+        2860,
+        1046
+      ],
+      "size": [
+        300,
+        126
+      ],
+      "flags": {},
+      "order": 26,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "link": 13
+        },
+        {
+          "name": "mask",
+          "type": "MASK",
+          "link": 14
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING_LAYER",
+          "type": "CONDITIONING_LAYER",
+          "links": [
+            15
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersLayer"
+      },
+      "widgets_values": [
+        1.0,
+        "BLENDED",
+        true
+      ],
+      "title": "L2 · Neon moon"
+    },
+    {
+      "id": 22,
+      "type": "ConditioningLayersAddLayer",
+      "pos": [
+        3200,
+        1046
+      ],
+      "size": [
+        220,
+        46
+      ],
+      "flags": {},
+      "order": 27,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "layer",
+          "type": "CONDITIONING_LAYER",
+          "link": 15
+        },
+        {
+          "name": "layers",
+          "type": "CONDITIONING_LAYER_STACK",
+          "link": 16
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING_LAYER_STACK",
+          "type": "CONDITIONING_LAYER_STACK",
+          "links": [
+            21
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersAddLayer"
+      },
+      "widgets_values": [],
+      "title": "Add L2"
+    },
+    {
+      "id": 23,
+      "type": "Note",
+      "pos": [
+        1460,
+        1116
+      ],
+      "size": [
+        340,
+        84
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "The radial field is brightest at the moon's center and fades to nothing at its rim, so the vector-neon style melts into the watercolor sky instead of ending at a hard edge."
+      ],
+      "title": "WHAT THIS SHOWS",
+      "color": "#223",
+      "bgcolor": "#335"
+    },
+    {
+      "id": 24,
+      "type": "ConditioningLayersPaintedField",
+      "pos": [
+        1080,
+        1522
+      ],
+      "size": [
+        300,
+        110
+      ],
+      "flags": {},
+      "order": 28,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": [
+            19
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersPaintedField",
+        "fieldEditor": {
+          "tool": "paint",
+          "size": 12,
+          "influence": 255,
+          "hardness": 85,
+          "amount": 100,
+          "influenceUnit": "percent"
+        }
+      },
+      "widgets_values": [
+        "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAAAAADmVT4XAAAB3ElEQVR4nO3ZvWrCYBTG8UQHQTpJJ0eHFnF2ElQyFbwAL8BVUHD1AoRAtlyAXZy8AHddncUh4OgguDgoTU+pH7XGnGw+r8PzXwxZzo/3DTFRy2KMMcYYY4wxxhhjjDHGGGOMPXOO6zomx4ciIqExgiPnTAnCCyA0M/9vAUwtgXsFuEYA/hXgE2Bifmp2BcxSBuZ78i8PL+jJTT30/OLmFrApggGeRPKw87PLKGCZhQKK+yhgj92DWnS+SA0KcO4B2C8kAgh4RoAYB3yZBsjQNEDeTQOAl4ECwAk0AOxC1ADyaQ5wflN8NQY4nwK9qMbeio8f31VzgLfTQWAMYH2cjhBrEA8IcEvg3wN8JGB0P19kZFVRW9CJmy/SOS3B4xfAPsQDDrZVDQLAJViJny9SefzsY8oO/O4BpoEGGIAAQw2AeiabaIAJCDDXAHMQYKUBViDAVgNsQQDlPiRywMy3tfkiNgSQ0QEZCCCnA3IQQEEHFCCAsg4oQwANHdCAAFo6oAUB9HVAHwKIeSC9hPnnZKwDxhDAVAdMIYCFDlhAAGsdsIYAdjpgBwGEOgDy40Bany+SBgBekgAvAEA+CZAHAEpJgBIAUE8C1AGAZhKgCQB0kwBdAKCdBGg/YOAPPfdNV9/BytwAAAAASUVORK5CYII="
+      ],
+      "title": "L3 · Oil-painted traveler (field)"
+    },
+    {
+      "id": 25,
+      "type": "CLIPTextEncode",
+      "pos": [
+        600,
+        1452
+      ],
+      "size": [
+        400,
+        150
+      ],
+      "flags": {},
+      "order": 29,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 17
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            18
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "A cloaked wandering traveler holding a brass lantern, rendered as a Renaissance oil painting with visible brushstrokes and warm chiaroscuro."
+      ],
+      "title": "L3 · Oil-painted traveler (prompt)"
+    },
+    {
+      "id": 26,
+      "type": "ConditioningLayersLayer",
+      "pos": [
+        2860,
+        1452
+      ],
+      "size": [
+        300,
+        126
+      ],
+      "flags": {},
+      "order": 30,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "link": 18
+        },
+        {
+          "name": "mask",
+          "type": "MASK",
+          "link": 19
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING_LAYER",
+          "type": "CONDITIONING_LAYER",
+          "links": [
+            20
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersLayer"
+      },
+      "widgets_values": [
+        1.0,
+        "FIXED",
+        true
+      ],
+      "title": "L3 · Oil-painted traveler"
+    },
+    {
+      "id": 27,
+      "type": "ConditioningLayersAddLayer",
+      "pos": [
+        3200,
+        1452
+      ],
+      "size": [
+        220,
+        46
+      ],
+      "flags": {},
+      "order": 31,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "layer",
+          "type": "CONDITIONING_LAYER",
+          "link": 20
+        },
+        {
+          "name": "layers",
+          "type": "CONDITIONING_LAYER_STACK",
+          "link": 21
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING_LAYER_STACK",
+          "type": "CONDITIONING_LAYER_STACK",
+          "links": [
+            27
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersAddLayer"
+      },
+      "widgets_values": [],
+      "title": "Add L3"
+    },
+    {
+      "id": 28,
+      "type": "Note",
+      "pos": [
+        1460,
+        1522
+      ],
+      "size": [
+        340,
+        84
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "L3 is FIXED: the oil-painted traveler owns every sample of the painted silhouette, so the photoreal market cannot blend into them. Keep other FIXED fields away from it."
+      ],
+      "title": "IMPORTANT",
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 29,
+      "type": "Note",
+      "pos": [
+        1460,
+        1668
+      ],
+      "size": [
+        340,
+        72
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "Open this field, choose Add Field…, and add L7, L8 and L9: four fields in one session, one editable at a time, the others shown as overlays."
+      ],
+      "title": "TRY THIS",
+      "color": "#232",
+      "bgcolor": "#353"
+    },
+    {
+      "id": 30,
+      "type": "ConditioningLayersLinearGradientField",
+      "pos": [
+        1080,
+        1968
+      ],
+      "size": [
+        300,
+        178
+      ],
+      "flags": {},
+      "order": 32,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": [
+            22
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersLinearGradientField"
+      },
+      "widgets_values": [
+        64.0,
+        0.5,
+        64.0,
+        127.5,
+        255,
+        40
+      ],
+      "title": "L4 · Top to bottom (field)"
+    },
+    {
+      "id": 31,
+      "type": "ConditioningLayersFieldFade",
+      "pos": [
+        1460,
+        1968
+      ],
+      "size": [
+        300,
+        370
+      ],
+      "flags": {},
+      "order": 33,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "mask",
+          "type": "MASK",
+          "link": 22
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": [
+            25
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersFieldFade"
+      },
+      "widgets_values": [
+        "circular",
+        70,
+        255,
+        1.0,
+        0.0,
+        0.0,
+        1.0,
+        0.5,
+        0.62,
+        0.3,
+        0.9,
+        1.6,
+        1.0,
+        0.0
+      ],
+      "title": "Fade · warm pocket over the stalls"
+    },
+    {
+      "id": 32,
+      "type": "CLIPTextEncode",
+      "pos": [
+        600,
+        1898
+      ],
+      "size": [
+        400,
+        150
+      ],
+      "flags": {},
+      "order": 34,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 23
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            24
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "Cold teal alien twilight sky with drifting clouds, loose watercolor washes on textured paper."
+      ],
+      "title": "L4 · Watercolor twilight (prompt)"
+    },
+    {
+      "id": 33,
+      "type": "ConditioningLayersLayer",
+      "pos": [
+        2860,
+        1898
+      ],
+      "size": [
+        300,
+        126
+      ],
+      "flags": {},
+      "order": 35,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "link": 24
+        },
+        {
+          "name": "mask",
+          "type": "MASK",
+          "link": 25
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING_LAYER",
+          "type": "CONDITIONING_LAYER",
+          "links": [
+            26
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersLayer"
+      },
+      "widgets_values": [
+        0.7,
+        "BLENDED",
+        true
+      ],
+      "title": "L4 · Watercolor twilight"
+    },
+    {
+      "id": 34,
+      "type": "ConditioningLayersAddLayer",
+      "pos": [
+        3200,
+        1898
+      ],
+      "size": [
+        220,
+        46
+      ],
+      "flags": {},
+      "order": 36,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "layer",
+          "type": "CONDITIONING_LAYER",
+          "link": 26
+        },
+        {
+          "name": "layers",
+          "type": "CONDITIONING_LAYER_STACK",
+          "link": 27
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING_LAYER_STACK",
+          "type": "CONDITIONING_LAYER_STACK",
+          "links": [
+            34
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersAddLayer"
+      },
+      "widgets_values": [],
+      "title": "Add L4"
+    },
+    {
+      "id": 35,
+      "type": "Note",
+      "pos": [
+        1800,
+        1968
+      ],
+      "size": [
+        340,
+        84
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "Cold watercolor twilight fades down from the sky. The circular Fade dims it over the stalls, leaving a warm pocket of lantern light in the middle of the cold."
+      ],
+      "title": "WHAT THIS SHOWS",
+      "color": "#223",
+      "bgcolor": "#335"
+    },
+    {
+      "id": 36,
+      "type": "ConditioningLayersNoiseField",
+      "pos": [
+        1080,
+        2566
+      ],
+      "size": [
+        300,
+        178
+      ],
+      "flags": {},
+      "order": 37,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": [
+            28
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersNoiseField"
+      },
+      "widgets_values": [
+        57,
+        4.0,
+        4,
+        0.55,
+        0.0,
+        0.0
+      ],
+      "title": "L5 · Smoke noise (field)"
+    },
+    {
+      "id": 37,
+      "type": "ConditioningLayersFieldRemap",
+      "pos": [
+        1460,
+        2566
+      ],
+      "size": [
+        300,
+        130
+      ],
+      "flags": {},
+      "order": 38,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "mask",
+          "type": "MASK",
+          "link": 28
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": [
+            29
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersFieldRemap"
+      },
+      "widgets_values": [
+        95,
+        185,
+        0,
+        255
+      ],
+      "title": "Remap · keep the dense smoke"
+    },
+    {
+      "id": 38,
+      "type": "ConditioningLayersFieldFade",
+      "pos": [
+        1800,
+        2566
+      ],
+      "size": [
+        300,
+        370
+      ],
+      "flags": {},
+      "order": 39,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "mask",
+          "type": "MASK",
+          "link": 29
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": [
+            32
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersFieldFade"
+      },
+      "widgets_values": [
+        "linear",
+        255,
+        0,
+        1.0,
+        270.0,
+        0.0,
+        0.7,
+        0.5,
+        0.5,
+        0.25,
+        0.5,
+        1.0,
+        1.0,
+        0.0
+      ],
+      "title": "Fade · hug the ground"
+    },
+    {
+      "id": 39,
+      "type": "CLIPTextEncode",
+      "pos": [
+        600,
+        2496
+      ],
+      "size": [
+        400,
+        150
+      ],
+      "flags": {},
+      "order": 40,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 30
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            31
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "Drifting smoke and steam from the food stalls, smudged charcoal drawing on rough paper."
+      ],
+      "title": "L5 · Charcoal smoke (prompt)"
+    },
+    {
+      "id": 40,
+      "type": "ConditioningLayersLayer",
+      "pos": [
+        2860,
+        2496
+      ],
+      "size": [
+        300,
+        126
+      ],
+      "flags": {},
+      "order": 41,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "link": 31
+        },
+        {
+          "name": "mask",
+          "type": "MASK",
+          "link": 32
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING_LAYER",
+          "type": "CONDITIONING_LAYER",
+          "links": [
+            33
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersLayer"
+      },
+      "widgets_values": [
+        0.9,
+        "BLENDED",
+        true
+      ],
+      "title": "L5 · Charcoal smoke"
+    },
+    {
+      "id": 41,
+      "type": "ConditioningLayersAddLayer",
+      "pos": [
+        3200,
+        2496
+      ],
+      "size": [
+        220,
+        46
+      ],
+      "flags": {},
+      "order": 42,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "layer",
+          "type": "CONDITIONING_LAYER",
+          "link": 33
+        },
+        {
+          "name": "layers",
+          "type": "CONDITIONING_LAYER_STACK",
+          "link": 34
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING_LAYER_STACK",
+          "type": "CONDITIONING_LAYER_STACK",
+          "links": [
+            42
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersAddLayer"
+      },
+      "widgets_values": [],
+      "title": "Add L5"
+    },
+    {
+      "id": 42,
+      "type": "Note",
+      "pos": [
+        2140,
+        2566
+      ],
+      "size": [
+        340,
+        72
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "Seeded Noise is thresholded by Remap into separate smoke banks, then a Fade keeps them low, so smoke rolls along the street instead of hiding the moon."
+      ],
+      "title": "WHAT THIS SHOWS",
+      "color": "#223",
+      "bgcolor": "#335"
+    },
+    {
+      "id": 43,
+      "type": "ConditioningLayersPatternField",
+      "pos": [
+        1080,
+        3164
+      ],
+      "size": [
+        300,
+        58
+      ],
+      "flags": {},
+      "order": 43,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": [
+            35
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersPatternField"
+      },
+      "widgets_values": [
+        "grid-3x3-cross.png"
+      ],
+      "title": "L6 · Cross pattern (field)"
+    },
+    {
+      "id": 44,
+      "type": "ConditioningLayersFieldRepeat",
+      "pos": [
+        1460,
+        3164
+      ],
+      "size": [
+        300,
+        130
+      ],
+      "flags": {},
+      "order": 44,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "mask",
+          "type": "MASK",
+          "link": 35
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": [
+            36
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersFieldRepeat"
+      },
+      "widgets_values": [
+        4,
+        2,
+        0,
+        0
+      ],
+      "title": "Repeat · 4 × 2 tiles"
+    },
+    {
+      "id": 45,
+      "type": "ConditioningLayersInvertField",
+      "pos": [
+        1800,
+        3164
+      ],
+      "size": [
+        300,
+        26
+      ],
+      "flags": {},
+      "order": 45,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "mask",
+          "type": "MASK",
+          "link": 36
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": [
+            37
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersInvertField"
+      },
+      "widgets_values": [],
+      "title": "Invert · gaps become sign panels"
+    },
+    {
+      "id": 46,
+      "type": "ConditioningLayersFieldTransform",
+      "pos": [
+        2140,
+        3164
+      ],
+      "size": [
+        300,
+        226
+      ],
+      "flags": {},
+      "order": 46,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "mask",
+          "type": "MASK",
+          "link": 37
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": [
+            40
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersFieldTransform"
+      },
+      "widgets_values": [
+        1.0,
+        1.0,
+        0.36,
+        0.0,
+        0.0,
+        -4.0,
+        false,
+        false
+      ],
+      "title": "Transform · onto the stall fronts"
+    },
+    {
+      "id": 47,
+      "type": "CLIPTextEncode",
+      "pos": [
+        600,
+        3094
+      ],
+      "size": [
+        400,
+        150
+      ],
+      "flags": {},
+      "order": 47,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 38
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            39
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "Rows of glowing vector neon shop signs and tattered paper posters with alien lettering, bold flat graphic shapes."
+      ],
+      "title": "L6 · Vector neon signs (prompt)"
+    },
+    {
+      "id": 48,
+      "type": "ConditioningLayersLayer",
+      "pos": [
+        2860,
+        3094
+      ],
+      "size": [
+        300,
+        126
+      ],
+      "flags": {},
+      "order": 48,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "link": 39
+        },
+        {
+          "name": "mask",
+          "type": "MASK",
+          "link": 40
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING_LAYER",
+          "type": "CONDITIONING_LAYER",
+          "links": [
+            41
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersLayer"
+      },
+      "widgets_values": [
+        1.0,
+        "BLENDED",
+        true
+      ],
+      "title": "L6 · Vector neon signs"
+    },
+    {
+      "id": 49,
+      "type": "ConditioningLayersAddLayer",
+      "pos": [
+        3200,
+        3094
+      ],
+      "size": [
+        220,
+        46
+      ],
+      "flags": {},
+      "order": 49,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "layer",
+          "type": "CONDITIONING_LAYER",
+          "link": 41
+        },
+        {
+          "name": "layers",
+          "type": "CONDITIONING_LAYER_STACK",
+          "link": 42
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING_LAYER_STACK",
+          "type": "CONDITIONING_LAYER_STACK",
+          "links": [
+            47
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersAddLayer"
+      },
+      "widgets_values": [],
+      "title": "Add L6"
+    },
+    {
+      "id": 50,
+      "type": "Note",
+      "pos": [
+        2480,
+        3164
+      ],
+      "size": [
+        340,
+        84
+      ],
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "One library pattern becomes rows of signs: Repeat multiplies the cross, Invert turns the gaps between crosses into sign panels, Transform squeezes them onto the stall fronts."
+      ],
+      "title": "WHAT THIS SHOWS",
+      "color": "#223",
+      "bgcolor": "#335"
+    },
+    {
+      "id": 51,
+      "type": "ConditioningLayersPaintedField",
+      "pos": [
+        1080,
+        3618
+      ],
+      "size": [
+        300,
+        110
+      ],
+      "flags": {},
+      "order": 50,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": [
+            45
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersPaintedField",
+        "fieldEditor": {
+          "tool": "paint",
+          "size": 8,
+          "influence": 255,
+          "hardness": 100,
+          "amount": 100,
+          "influenceUnit": "percent",
+          "shape": "custom",
+          "custom_tip": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAQAAAD9CzEMAAABlklEQVR4nO2Y226CUBBFVxPwUqsGbaRenvwA//9rfLI1pbZEoRXExMYtmvahCg3HlKSzw0AInMXsgQPB2mE2rFxHV6kCMbEpQIU7YGcScKsKckQ+gC1AaBpgmwTUzQIsAXKd88cqKL9FFrWS98B4Bf+As1HDwRbApo9PVCzgnh7OqYIxPh6L4gD3DHFxaArQ4oaGbtYMiCyAGj1cHujS1itzxFLrhPCyUVkAjtTFpaMKBsox7zjMswCqVKhgS1aarTQft5q06dDT0D0gIpBtCdtUSZqTNCds2BAfAHfcSvWTalq+qqrs6LKaDJkQfdNay1EfUngAGA1Lbu4/RMKzFrUYMZA58ILHEzNWJ2N+tigFnP8Q6TPmhqX8bwIebywJeGSarcmXwsenoRszYgg8seRVe/1sFl2KCE+PVUzABJgR4POMl2W6yNbkhR6rd4YacsVj0VPFHhHi4AqwZVr8ZLc3ak6iYZPLrf0NAF37oYIc8Q8oGJCwVjYGuIJF65JbdIUelN+ij5IDNgJsTAJCs4Bc/1kO8QkrB7bKShF2QAAAAABJRU5ErkJggg=="
+        }
+      },
+      "widgets_values": [
+        "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAAAAADmVT4XAAAB+0lEQVR4nO2ZPY6DMBCFbclACQ0StBSUbENDhTgALSfgOLlBDpA2R1yZ4PiHbfe9KJqvgoon5sczz0oJX0NRkAU0DVlA35MFjCNZwLKQBawr9/s/+/5D+nTR9OOy7s/nvi5j3+CrkS7gBSsEWrsnUhIa455IZZjn7onUiMrSPRFasTZ5ebuVuTnywB1GPivAAtxx7LMCgg+Bw2cFhOvnrpL+FfvD/SwUBwWCTbm6JgqwdF34Bg6BZRjCN3ASWqYpfAOXof3n2xb+dWAjUqqou2HaHo9tGrqaMQjQBRwkISAQJyEQl25xGQJxBRc3IiCu5fhWDMY1XXsYZRn44+mxU1VkAW0LFqBeIXiPApREzHNvi8wzQYAxxyyeVW033+9z11bgTNT62EZ4AsJ9jBKCcCMldUO/k8PLMHUl4I0oFQBvxS+IztQJ25sjupPnNMTzZ89piOdQn9MQz6M/pyHOLQVpCf8gAYrjAsQQXIAYY8jXZFrz9hEHbSNz4HfSxHzBb+Wx/UTwJd6lx3Jm3s2HIeDafsEh+KP/45Mw6f/4Mkz6P74RBWUYu/QogkYU31MQoJ/G1HmEPpHRBSh2CNQnJCH+Yigky7AXQxfgdkwKxRcOoY/DLFPSQrVlP0LAATMEB/QkpJchvRGRfGFBEARBEARBEARBEARB+FZ+AcKHUtEkdczeAAAAAElFTkSuQmCC"
+      ],
+      "title": "L7 · Sparkle embers (field)"
+    },
+    {
+      "id": 52,
+      "type": "CLIPTextEncode",
+      "pos": [
+        600,
+        3548
+      ],
+      "size": [
+        400,
+        150
+      ],
+      "flags": {},
+      "order": 51,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 43
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            44
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "Swirling golden sparks and glowing embers rising into the night, tiny bright points of light with a dreamlike glow."
+      ],
+      "title": "L7 · Sparkle embers (prompt)"
+    },
+    {
+      "id": 53,
+      "type": "ConditioningLayersLayer",
+      "pos": [
+        2860,
+        3548
+      ],
+      "size": [
+        300,
+        126
+      ],
+      "flags": {},
+      "order": 52,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "link": 44
+        },
+        {
+          "name": "mask",
+          "type": "MASK",
+          "link": 45
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING_LAYER",
+          "type": "CONDITIONING_LAYER",
+          "links": [
+            46
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersLayer"
+      },
+      "widgets_values": [
+        1.0,
+        "BLENDED",
+        true
+      ],
+      "title": "L7 · Sparkle embers"
+    },
+    {
+      "id": 54,
+      "type": "ConditioningLayersAddLayer",
+      "pos": [
+        3200,
+        3548
+      ],
+      "size": [
+        220,
+        46
+      ],
+      "flags": {},
+      "order": 53,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "layer",
+          "type": "CONDITIONING_LAYER",
+          "link": 46
+        },
+        {
+          "name": "layers",
+          "type": "CONDITIONING_LAYER_STACK",
+          "link": 47
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING_LAYER_STACK",
+          "type": "CONDITIONING_LAYER_STACK",
+          "links": [
+            52
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersAddLayer"
+      },
+      "widgets_values": [],
+      "title": "Add L7"
+    },
+    {
+      "id": 55,
+      "type": "Note",
+      "pos": [
+        1460,
+        3618
+      ],
+      "size": [
+        340,
+        72
+      ],
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "Custom Tip embers: the same original sparkle tip as Example 07, stamped as a trail of sparks rising from the traveler's lantern into the sky."
+      ],
+      "title": "WHAT THIS SHOWS",
+      "color": "#223",
+      "bgcolor": "#335"
+    },
+    {
+      "id": 56,
+      "type": "ConditioningLayersPaintedField",
+      "pos": [
+        1080,
+        3956
+      ],
+      "size": [
+        300,
+        110
+      ],
+      "flags": {},
+      "order": 54,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": [
+            50
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersPaintedField",
+        "fieldEditor": {
+          "tool": "paint",
+          "size": 72,
+          "influence": 255,
+          "hardness": 100,
+          "amount": 100,
+          "influenceUnit": "percent",
+          "shape": "procedural",
+          "procedural_version": 1,
+          "procedural_seed": 11,
+          "procedural_particle_shape": "hotdog",
+          "procedural_particle_size": 80,
+          "procedural_particle_rotation": 15,
+          "procedural_rotation_jitter": 30,
+          "hotdog_count": 3,
+          "hotdog_spread": 85
+        }
+      },
+      "widgets_values": [
+        "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAAAAADmVT4XAAADDElEQVR4nO3WW0hTcRwH8O/mmW3qNDELrUhhls4kodTKl8xbatBTKaGhXZCsoF6KSssQzeihK5GKiQT1VG8RmV2obJmXrkOXRWQXrJi5KJ3//0vszDXnpnY5OxL9Pg/n7P87f87vy8bO+QET2uv4EN7dVx++SAEc03/C9UFbifshMh/KL59fBZVqmtM6EdS5s11tmfiGv6tr9GLumUsmyyDvAIYAbNfEh6WmKm/jhK8OXdNyoW1rACqWSRsAPM69xqw+tgAKKAd8gRazFoB/H58uXnwncQDsFu/vokBtz9FYnnuoxcr58IvqQoXj4kupAwDHeahrYeR38dnrYfNavfQBgPjeNxucq5Um+1m90X1nnMEb/UWP+vnOmFl+02PZLUeJj90Txiq91l+kS83KWuxcBve7dL/C0rzb3oMmXrUqPS2joI8/Py978xGqAH/BpbA5YqqiACjase1uYL65fKr6D/urk7YC0PL2qQmQtQdCSUNZJhDSyipj5Q+QbDs05uUqxVWEyfyVMWGcvdpALwRgzHo1DXNwqvfehZP2knLY08b5bwcKMj5K/q/1qwKiuT/2KwVdKS5GCcZns4HWn9fnMcaMzd2MG6NsS8Hy9Lvbe+av9InHss5Q403gRrFuh196Jj9aMTRyOfHgqL2tKZYVWGPw+P38sScj51qWBEQGI1uFAMPZiLyvYjWDq4SSBAAPm2OymaZpbng8VDWSBqD5ieYnEc1Pdv/p/DTee8fBu/NT4QezPqdtsl1u89Nfa69bfbbu5q2a3eLqfi2T9vaTWup88oQGCpe10/pNcrafUb8eHdBXH8jDuiPnelMiFwLf5AzwyQB9hMKkSnyPO9BBkTDw2qCRM0COz4KeYmDXYQBRNawIQIhazgBosT3UM9raHzifs8myBuhxq1yTtT9Ojy3sWyJvAFhdVo8tinF3eks137I+Pnp5/qZ71rqZsne3Uwgq5RS1JuTfJvFg8pt+bX6SHs1PND/R/DQWzU8y96f5iRBCCCGEEEIIIYQQQgghhBBCCCGEEOLRD6H3TW7YyIj1AAAAAElFTkSuQmCC"
+      ],
+      "title": "L8 · Chrome hotdogs (field)"
+    },
+    {
+      "id": 57,
+      "type": "CLIPTextEncode",
+      "pos": [
+        600,
+        3886
+      ],
+      "size": [
+        400,
+        150
+      ],
+      "flags": {},
+      "order": 55,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 48
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            49
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "Floating polished chrome hotdog ornaments with bright glinting edges, drifting above the market like lanterns."
+      ],
+      "title": "L8 · Chrome hotdogs (prompt)"
+    },
+    {
+      "id": 58,
+      "type": "ConditioningLayersLayer",
+      "pos": [
+        2860,
+        3886
+      ],
+      "size": [
+        300,
+        126
+      ],
+      "flags": {},
+      "order": 56,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "link": 49
+        },
+        {
+          "name": "mask",
+          "type": "MASK",
+          "link": 50
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING_LAYER",
+          "type": "CONDITIONING_LAYER",
+          "links": [
+            51
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersLayer"
+      },
+      "widgets_values": [
+        1.0,
+        "BLENDED",
+        true
+      ],
+      "title": "L8 · Chrome hotdogs"
+    },
+    {
+      "id": 59,
+      "type": "ConditioningLayersAddLayer",
+      "pos": [
+        3200,
+        3886
+      ],
+      "size": [
+        220,
+        46
+      ],
+      "flags": {},
+      "order": 57,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "layer",
+          "type": "CONDITIONING_LAYER",
+          "link": 51
+        },
+        {
+          "name": "layers",
+          "type": "CONDITIONING_LAYER_STACK",
+          "link": 52
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING_LAYER_STACK",
+          "type": "CONDITIONING_LAYER_STACK",
+          "links": [
+            57
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersAddLayer"
+      },
+      "widgets_values": [],
+      "title": "Add L8"
+    },
+    {
+      "id": 60,
+      "type": "Note",
+      "pos": [
+        1460,
+        3956
+      ],
+      "size": [
+        340,
+        84
+      ],
+      "flags": {},
+      "order": 13,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "The absurd detail: two clicks of Hotdog Count 3 (Spread 85%, Hotdog Size 80%, Hotdog Rotation 15°, Rotation Jitter 30) hang six chrome hotdog outlines above the stalls."
+      ],
+      "title": "WHAT THIS SHOWS",
+      "color": "#223",
+      "bgcolor": "#335"
+    },
+    {
+      "id": 61,
+      "type": "ConditioningLayersPaintedField",
+      "pos": [
+        1080,
+        4294
+      ],
+      "size": [
+        300,
+        110
+      ],
+      "flags": {},
+      "order": 58,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": [
+            55
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersPaintedField",
+        "fieldEditor": {
+          "tool": "paint",
+          "size": 6,
+          "influence": 255,
+          "hardness": 40,
+          "amount": 85,
+          "influenceUnit": "percent",
+          "pressure_enabled": true
+        }
+      },
+      "widgets_values": [
+        "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAAAAADmVT4XAAAC9ElEQVR4nO2a70tTYRTH75pNtCSWu0I/KHKlNFLICULaCyv1lcaQwOFLyRxoVlZvu3uXJQY1uCYNiVAZzCyskUQLdQRbOrW2q9//JhRK773nhvpMBnI+Lz/3gfPlcO49gz2SxDAMwzAMwzAMwzAMwzAMwzAHBZs9X5Uv+wKKqipPQ0pvR5PXLRdvS2IvLi2wFckV9b5AUFWVekeui3cq4VgGW2jLidhEKNjnb/bWNvv7gqGJT2o0vqj9e56Khaty1ap381lYoqXT/3maXZDFapduL5XSluLR6HfNut7GqcV4dOprOJbSsHWwZO8JntxwSS01LrvHIztOVshFNpuzvVd5NR5LpA1BsjOq0uO7snlmYwIcTkmyyxclSW7uFusCgb1Ydnub/JtJFv4OgzvnZXaYRP86MAzDMAzDMAzDMAzDMAzDMMzBwX4+zwFCyHOAnnwHuJrvABH48htgGP2UDgR2bsW4hyFKR9Yp+34t9wEi0AoJ3Y7jhO3eh4EZA1kqjNuEncZNg6kaFw3wDDhH6C6MEVZB0GDahXsyBAwQuh84ZbatmDaYEtEAtgjwmvC9QKPZKkC53lzCC8EEk8AooRuBPrO9A1zXmyqkBAOMAgqhbwFJl8leA3r0phA4JhYgCFQSug1YqzbZFmD2qM7Ukp3aDSHgBKGr14BHNqP1Axn9EJwGRsQCjNPXDtrWgaipuQ0AGnTmcAbfyoQCDOPHIULXrwLz5UbrzQCDuv/wL2SBNqEAFrvAnQDSNUa70ZcPzu3G9RO4LxRgEA8oXfYZWKo12roVY18KZoCQUIC38JP+LpB0GuVmX7w6pQJR07Duhoeg74T4gd9njbJ0Ckh4dCoIxItEArRafMw9y5gz7+kAsKS/MdQJTApdLRmw2iZzWDG3tk5DTF/OkUVMpL40YhXgOT4SNmn69s+ZNuQuOWLhPUgS9jEmDKYDwr9JaJxYJawXswZTiZf7E0DKfKGseXeS2zQXnCEvyP16YzQr6j4F2Ct/ADLxicNCHAZaAAAAAElFTkSuQmCC"
+      ],
+      "title": "L9 · Painted highlights (field)"
+    },
+    {
+      "id": 62,
+      "type": "CLIPTextEncode",
+      "pos": [
+        600,
+        4224
+      ],
+      "size": [
+        400,
+        150
+      ],
+      "flags": {},
+      "order": 59,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 53
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            54
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "Delicate hand-painted ivory highlights and rim light catching wet edges, fine brush detail."
+      ],
+      "title": "L9 · Painted highlights (prompt)"
+    },
+    {
+      "id": 63,
+      "type": "ConditioningLayersLayer",
+      "pos": [
+        2860,
+        4224
+      ],
+      "size": [
+        300,
+        126
+      ],
+      "flags": {},
+      "order": 60,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "link": 54
+        },
+        {
+          "name": "mask",
+          "type": "MASK",
+          "link": 55
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING_LAYER",
+          "type": "CONDITIONING_LAYER",
+          "links": [
+            56
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersLayer"
+      },
+      "widgets_values": [
+        1.0,
+        "BLENDED",
+        true
+      ],
+      "title": "L9 · Painted highlights"
+    },
+    {
+      "id": 64,
+      "type": "ConditioningLayersAddLayer",
+      "pos": [
+        3200,
+        4224
+      ],
+      "size": [
+        220,
+        46
+      ],
+      "flags": {},
+      "order": 61,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "layer",
+          "type": "CONDITIONING_LAYER",
+          "link": 56
+        },
+        {
+          "name": "layers",
+          "type": "CONDITIONING_LAYER_STACK",
+          "link": 57
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING_LAYER_STACK",
+          "type": "CONDITIONING_LAYER_STACK",
+          "links": [
+            58
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersAddLayer"
+      },
+      "widgets_values": [],
+      "title": "Add L9"
+    },
+    {
+      "id": 65,
+      "type": "Note",
+      "pos": [
+        1460,
+        4294
+      ],
+      "size": [
+        340,
+        84
+      ],
+      "flags": {},
+      "order": 14,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "Fine highlights along the rooftops, the wet street and the traveler's edge, painted as tapered pen strokes. Brush: Size 6, Amount 85, Hardness 40, Pen Pressure ▸ Size on; a mouse paints at full size."
+      ],
+      "title": "WHAT THIS SHOWS",
+      "color": "#223",
+      "bgcolor": "#335"
+    },
+    {
+      "id": 66,
+      "type": "ConditioningLayersCompose",
+      "pos": [
+        3200,
+        4562
+      ],
+      "size": [
+        300,
+        26
+      ],
+      "flags": {},
+      "order": 62,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "layers",
+          "type": "CONDITIONING_LAYER_STACK",
+          "link": 58
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            59
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ConditioningLayersCompose"
+      },
+      "widgets_values": []
+    }
+  ],
+  "links": [
+    [
+      1,
+      3,
+      0,
+      5,
+      0,
+      "CLIP"
+    ],
+    [
+      2,
+      2,
+      0,
+      7,
+      0,
+      "MODEL"
+    ],
+    [
+      3,
+      5,
+      0,
+      7,
+      2,
+      "CONDITIONING"
+    ],
+    [
+      4,
+      6,
+      0,
+      7,
+      3,
+      "LATENT"
+    ],
+    [
+      5,
+      7,
+      0,
+      8,
+      0,
+      "LATENT"
+    ],
+    [
+      6,
+      4,
+      0,
+      8,
+      1,
+      "VAE"
+    ],
+    [
+      7,
+      8,
+      0,
+      9,
+      0,
+      "IMAGE"
+    ],
+    [
+      8,
+      3,
+      0,
+      15,
+      0,
+      "CLIP"
+    ],
+    [
+      9,
+      15,
+      0,
+      16,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      10,
+      14,
+      0,
+      16,
+      1,
+      "MASK"
+    ],
+    [
+      11,
+      16,
+      0,
+      17,
+      0,
+      "CONDITIONING_LAYER"
+    ],
+    [
+      12,
+      3,
+      0,
+      20,
+      0,
+      "CLIP"
+    ],
+    [
+      13,
+      20,
+      0,
+      21,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      14,
+      19,
+      0,
+      21,
+      1,
+      "MASK"
+    ],
+    [
+      15,
+      21,
+      0,
+      22,
+      0,
+      "CONDITIONING_LAYER"
+    ],
+    [
+      16,
+      17,
+      0,
+      22,
+      1,
+      "CONDITIONING_LAYER_STACK"
+    ],
+    [
+      17,
+      3,
+      0,
+      25,
+      0,
+      "CLIP"
+    ],
+    [
+      18,
+      25,
+      0,
+      26,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      19,
+      24,
+      0,
+      26,
+      1,
+      "MASK"
+    ],
+    [
+      20,
+      26,
+      0,
+      27,
+      0,
+      "CONDITIONING_LAYER"
+    ],
+    [
+      21,
+      22,
+      0,
+      27,
+      1,
+      "CONDITIONING_LAYER_STACK"
+    ],
+    [
+      22,
+      30,
+      0,
+      31,
+      0,
+      "MASK"
+    ],
+    [
+      23,
+      3,
+      0,
+      32,
+      0,
+      "CLIP"
+    ],
+    [
+      24,
+      32,
+      0,
+      33,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      25,
+      31,
+      0,
+      33,
+      1,
+      "MASK"
+    ],
+    [
+      26,
+      33,
+      0,
+      34,
+      0,
+      "CONDITIONING_LAYER"
+    ],
+    [
+      27,
+      27,
+      0,
+      34,
+      1,
+      "CONDITIONING_LAYER_STACK"
+    ],
+    [
+      28,
+      36,
+      0,
+      37,
+      0,
+      "MASK"
+    ],
+    [
+      29,
+      37,
+      0,
+      38,
+      0,
+      "MASK"
+    ],
+    [
+      30,
+      3,
+      0,
+      39,
+      0,
+      "CLIP"
+    ],
+    [
+      31,
+      39,
+      0,
+      40,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      32,
+      38,
+      0,
+      40,
+      1,
+      "MASK"
+    ],
+    [
+      33,
+      40,
+      0,
+      41,
+      0,
+      "CONDITIONING_LAYER"
+    ],
+    [
+      34,
+      34,
+      0,
+      41,
+      1,
+      "CONDITIONING_LAYER_STACK"
+    ],
+    [
+      35,
+      43,
+      0,
+      44,
+      0,
+      "MASK"
+    ],
+    [
+      36,
+      44,
+      0,
+      45,
+      0,
+      "MASK"
+    ],
+    [
+      37,
+      45,
+      0,
+      46,
+      0,
+      "MASK"
+    ],
+    [
+      38,
+      3,
+      0,
+      47,
+      0,
+      "CLIP"
+    ],
+    [
+      39,
+      47,
+      0,
+      48,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      40,
+      46,
+      0,
+      48,
+      1,
+      "MASK"
+    ],
+    [
+      41,
+      48,
+      0,
+      49,
+      0,
+      "CONDITIONING_LAYER"
+    ],
+    [
+      42,
+      41,
+      0,
+      49,
+      1,
+      "CONDITIONING_LAYER_STACK"
+    ],
+    [
+      43,
+      3,
+      0,
+      52,
+      0,
+      "CLIP"
+    ],
+    [
+      44,
+      52,
+      0,
+      53,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      45,
+      51,
+      0,
+      53,
+      1,
+      "MASK"
+    ],
+    [
+      46,
+      53,
+      0,
+      54,
+      0,
+      "CONDITIONING_LAYER"
+    ],
+    [
+      47,
+      49,
+      0,
+      54,
+      1,
+      "CONDITIONING_LAYER_STACK"
+    ],
+    [
+      48,
+      3,
+      0,
+      57,
+      0,
+      "CLIP"
+    ],
+    [
+      49,
+      57,
+      0,
+      58,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      50,
+      56,
+      0,
+      58,
+      1,
+      "MASK"
+    ],
+    [
+      51,
+      58,
+      0,
+      59,
+      0,
+      "CONDITIONING_LAYER"
+    ],
+    [
+      52,
+      54,
+      0,
+      59,
+      1,
+      "CONDITIONING_LAYER_STACK"
+    ],
+    [
+      53,
+      3,
+      0,
+      62,
+      0,
+      "CLIP"
+    ],
+    [
+      54,
+      62,
+      0,
+      63,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      55,
+      61,
+      0,
+      63,
+      1,
+      "MASK"
+    ],
+    [
+      56,
+      63,
+      0,
+      64,
+      0,
+      "CONDITIONING_LAYER"
+    ],
+    [
+      57,
+      59,
+      0,
+      64,
+      1,
+      "CONDITIONING_LAYER_STACK"
+    ],
+    [
+      58,
+      64,
+      0,
+      66,
+      0,
+      "CONDITIONING_LAYER_STACK"
+    ],
+    [
+      59,
+      66,
+      0,
+      7,
+      1,
+      "CONDITIONING"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "1 — MODEL / INPUT",
+      "bounding": [
+        -20,
+        -48,
+        340,
+        623
+      ],
+      "color": "#3f789e",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "id": 2,
+      "title": "6 — SAMPLING / OUTPUT",
+      "bounding": [
+        3540,
+        -398,
+        740,
+        1204
+      ],
+      "color": "#b06634",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "id": 3,
+      "title": "L1 · Market street — Rectangle (geometric)",
+      "bounding": [
+        580,
+        552,
+        2860,
+        360
+      ],
+      "color": "#8A8",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "id": 4,
+      "title": "L2 · Neon moon — Radial Gradient",
+      "bounding": [
+        580,
+        958,
+        2860,
+        360
+      ],
+      "color": "#b58b2a",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "id": 5,
+      "title": "L3 · Oil-painted traveler — Painted Field, FIXED",
+      "bounding": [
+        580,
+        1364,
+        2860,
+        400
+      ],
+      "color": "#a1309b",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "id": 6,
+      "title": "L4 · Watercolor twilight — Linear Gradient → Fade",
+      "bounding": [
+        580,
+        1810,
+        2860,
+        552
+      ],
+      "color": "#88A",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "id": 7,
+      "title": "L5 · Charcoal smoke — Noise → Remap → Fade",
+      "bounding": [
+        580,
+        2408,
+        2860,
+        552
+      ],
+      "color": "#b06634",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "id": 8,
+      "title": "L6 · Vector neon signs — Pattern → Repeat → Invert → Transform",
+      "bounding": [
+        580,
+        3006,
+        2860,
+        408
+      ],
+      "color": "#8AA",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "id": 9,
+      "title": "L7 · Sparkle embers — Painted Field, Custom Tip",
+      "bounding": [
+        580,
+        3460,
+        2860,
+        292
+      ],
+      "color": "#A88",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "id": 10,
+      "title": "L8 · Chrome hotdogs — Hotdog scatter",
+      "bounding": [
+        580,
+        3798,
+        2860,
+        292
+      ],
+      "color": "#444",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "id": 11,
+      "title": "L9 · Painted highlights — Painted Field, Pen Pressure",
+      "bounding": [
+        580,
+        4136,
+        2860,
+        292
+      ],
+      "color": "#3f789e",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "id": 12,
+      "title": "5 — COMPOSE",
+      "bounding": [
+        3180,
+        4474,
+        340,
+        138
+      ],
+      "color": "#88A",
+      "font_size": 24,
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.72,
+      "offset": [
+        76,
+        441
+      ]
+    }
+  },
+  "version": 0.4
+}
