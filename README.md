@@ -1,10 +1,10 @@
 # Conditioning Layers
 
-Conditioning Layers gives ComfyUI spatial control over multiple conditioning prompts using editable grayscale **Influence Fields**. Design separate regions, blend concepts through gradients, or paint where each prompt participates. This experimental alpha supports **Krea 2 in ComfyUI** and prompt conditioning only.
+Conditioning Layers brings **regional prompting** to ComfyUI: give multiple prompt-conditioning regions their own editable grayscale **Influence Fields**. Built on ComfyUI masked conditioning, it adds **FIXED** exclusive ownership, **BLENDED** normalized spatial sharing, and deterministic composition of procedural, transformed and painted fields. This experimental alpha supports **Krea 2 in ComfyUI** and prompt conditioning only.
 
 ![BLENDED gradient fields beside a snowy castle transitioning into a coral reef](docs/images/conditioning-layers-blended-transition.png)
 
-*BLENDED influence fields transition from a violet impasto snow castle into a photographic coral reef.* [Example 03](examples/conditioning-layers/03_blended_gradients.json).
+*Overlapping BLENDED fields place the violet impasto snow castle and photographic coral reef, controlling where their prompts share influence through the transition.* [Example 03](examples/conditioning-layers/03_blended_gradients.json).
 
 **Recommended for new projects: the node-based Conditioning Layers workflow.** Start with [Example 01](examples/conditioning-layers/01_one_influence_field.json), then build toward more complex compositions.
 
@@ -24,25 +24,43 @@ These are creative possibilities, not promises of pixel-perfect localization or 
 
 ## Installation
 
-1. Use an existing ComfyUI installation and its own Python environment. **Python 3.10 or newer is required by the source**; Windows tests use Python **3.10.11** for the core/editor and **3.12.11** for host-dependent code. Use a Python version supported by your ComfyUI installation. Linux and macOS testing is not established. See the compatibility tiers below.
-2. Copy the **complete package folder** to `ComfyUI/custom_nodes/conditioning-layers/`. Its `__init__.py`, `src/`, `web/`, `assets/`, `influence-field-library/` and required `studies/` subtree must remain together. Avoid an extra nested folder between `conditioning-layers/` and `__init__.py` when extracting an archive.
-3. There is no separate pip package or frontend build step. The host supplies runtime dependencies such as Torch and aiohttp. **Do not install the contributor test requirements into your working ComfyUI environment as an installation step.** Normal use does not require the [legacy optional node](#legacy--optional-node) or its exact dependency profile.
-4. Restart ComfyUI and reload the browser; use a full refresh if old frontend assets remain. Search for **Conditioning Layer** and **Painted Field**. Confirm the Painted Field **Edit Field…** button appears and opens the editor **before re-saving a painted example**. That button verifies its custom widget loaded; saving without the adapter can lose stored field data. Keep the original workflow until this check passes.
-5. Open [Example 01](examples/conditioning-layers/01_one_influence_field.json) by dragging the downloaded workflow JSON onto ComfyUI's graph canvas or using its workflow **Open** command. Select compatible locally installed assets in all three loader nodes. In **Load CLIP**, keep the example's **type = `krea2`**.
+Use an existing ComfyUI installation and its own Python environment. **Python 3.10 or newer is required by the source**; see [compatibility](#compatibility) and the [tested environments](docs/developer.md#environments). Models are installed separately below.
 
-Models are separate downloads and are not bundled. Select assets from the model publisher's authorized distribution under its terms; no model download URL is supplied in this package. The documented Turbo setup uses:
+**Git installation** — from the directory containing your ComfyUI folder:
+
+```sh
+cd ComfyUI/custom_nodes
+git clone https://github.com/SurrealByDesign/conditioning-layers.git
+```
+
+**ZIP installation** — on the [repository page](https://github.com/SurrealByDesign/conditioning-layers), choose **Code → Download ZIP**. Extract it into `ComfyUI/custom_nodes/` and rename the extracted folder to **`conditioning-layers`**. The loader must be at `ComfyUI/custom_nodes/conditioning-layers/__init__.py`, with no extra nested package folder. Keep the complete package together.
+
+There is no separate pip package or frontend build step. ComfyUI supplies runtime dependencies such as Torch and aiohttp; do not install contributor test requirements into your working host as an installation step.
+
+Restart ComfyUI and reload the browser. Search for **Conditioning Layer** and **Painted Field**. Confirm **Edit Field…** opens the editor before re-saving a painted example; saving without its custom widget can lose stored field data.
+
+Workflows are in **`custom_nodes/conditioning-layers/examples/conditioning-layers/`** inside ComfyUI. Drag [Example 01](examples/conditioning-layers/01_one_influence_field.json) onto the graph canvas or use workflow **Open**. Select your local files in all three model loaders; keep **Load CLIP → type = `krea2`**.
+
+Models are separate downloads and are not bundled. Krea publishes [Krea 2 Turbo](https://huggingface.co/krea/Krea-2-Turbo); the Comfy team provides [ComfyUI-ready files](https://huggingface.co/Comfy-Org/Krea-2). Open each file page below and choose **Download**, then place it in the listed folder. Follow the publishers' model terms; the extension's Apache-2.0 license does not replace them. The documented Turbo setup uses:
 
 | Asset | ComfyUI model directory |
 | --- | --- |
-| `krea2_turbo_bf16.safetensors` | `models/diffusion_models/` |
-| `qwen3vl_4b_fp8_scaled.safetensors` | `models/text_encoders/` |
-| `qwen_image_vae.safetensors` | `models/vae/` |
+| [`krea2_turbo_bf16.safetensors`](https://huggingface.co/Comfy-Org/Krea-2/blob/main/diffusion_models/krea2_turbo_bf16.safetensors) | `models/diffusion_models/` |
+| [`qwen3vl_4b_fp8_scaled.safetensors`](https://huggingface.co/Comfy-Org/Krea-2/blob/main/text_encoders/qwen3vl_4b_fp8_scaled.safetensors) | `models/text_encoders/` |
+| [`qwen_image_vae.safetensors`](https://huggingface.co/Comfy-Org/Krea-2/blob/main/vae/qwen_image_vae.safetensors) | `models/vae/` |
 
 The examples use separate model/text-encoder/VAE loaders, not a combined checkpoint loader. `SELECT_...` values are **placeholders for your local files**, not missing bundled downloads; three loader warnings are expected until you select assets. The Turbo examples use eight steps, CFG 1, Euler/simple and an empty negative prompt.
 
 ### Update and uninstall
 
-To **update**, back up workflows, exported fields and ComfyUI user data, stop ComfyUI, replace this custom-node folder with the complete new release, then restart and refresh the browser. Check **Edit Field…** before re-saving painted workflows. Update the extension separately from ComfyUI; no host update is part of this procedure.
+To **update**, back up workflows, exported fields and ComfyUI user data, then stop ComfyUI. For a Git installation:
+
+```sh
+cd ComfyUI/custom_nodes/conditioning-layers
+git pull
+```
+
+For a ZIP installation, download a fresh ZIP and replace the package folder with its complete contents. Restart ComfyUI, refresh the browser, and check **Edit Field…** before re-saving painted workflows. This updates the extension; it does not update ComfyUI.
 
 To **uninstall**, stop ComfyUI, remove `custom_nodes/conditioning-layers/`, then restart and refresh. Workflows that use its nodes will show missing nodes. Keep workflow backups and any exported PNGs. The Brush Library and sidebar documents live in ComfyUI user data separately from this package; removing the package does not remove them.
 
@@ -94,19 +112,13 @@ Influence Field ----------> Conditioning Layer
 
 Encode a prompt, create a field, and connect both to **Conditioning Layer**. Chain one **Add Conditioning Layer** node per Conditioning Layer, then use **Compose Conditioning Layers** to produce conditioning for the sampler. Model loading, latent creation, negative conditioning, sampling, VAE decoding and image saving remain ordinary ComfyUI operations.
 
-### Legacy / document workflow
-
-The sidebar remains available for **`.conditioning.json` documents**. It provides **Open, Save, Save As, Base Prompt, persistent document/layer identities, document-owned PNG fields and composition policy**. This is a distinct saved-document format, not a replacement for normal ComfyUI workflow JSON; the two formats do not automatically convert into each other.
-
-Sidebar generation has narrower limits: **1–3 Active Conditioning Layers with No Overlap**, or **exactly 3 with the document-level Blend policy**. Blend is separate from the nodes' per-layer BLENDED mode. Sidebar generation targets the specific **ComfyUI 0.34.6 / frontend 1.49.6 Krea 2 Turbo BF16 profile**, with additional model/dependency checks. Node/editor testing on newer hosts does not establish sidebar support there. See [sidebar compatibility details](docs/developer.md#sidebar-compatibility).
-
 ## FIXED and BLENDED Conditioning Layers
 
 **FIXED means spatial ownership.** Every positive cell in an enabled FIXED field belongs to that Conditioning Layer. Two enabled FIXED regions cannot overlap, even if one has Strength zero. Soft gray edges still claim ownership; they do not feather a FIXED boundary.
 
 ![Complementary FIXED fields beside a Renaissance portrait and chrome robot composition](docs/images/conditioning-layers-fixed-regions.png)
 
-*FIXED regions assign exclusive conditioning ownership: a candlelit Renaissance portrait on the left and chrome neon advertising art on the right.* [Example 02](examples/conditioning-layers/02_two_fixed_regions.json).
+*One generated composition, not a collage: complementary FIXED fields assign the candlelit Renaissance portrait to the left and chrome neon advertising art to the right.* [Example 02](examples/conditioning-layers/02_two_fixed_regions.json).
 
 **BLENDED means normalized sharing.** Fields may overlap; their participating influences normalize against one another. Use opposing gradients to transition between two prompts. Strength changes relative weight where contributors overlap. One positive contributor receives the whole local share.
 
@@ -125,6 +137,8 @@ Example prompts may repeat scene/context text so each regional prompt carries th
 ### How it works for technical users
 
 **Compose Conditioning Layers outputs ordinary ComfyUI masked conditioning entries**, one per enabled Conditioning Layer. Each gets its own normalized weight mask, with FIXED ownership resolved first. The original prompt tensors are preserved; Compose sets `mask_strength` to 1 and `set_area_to_bounds` to false. It builds on ComfyUI conditioning and does not replace the sampler.
+
+**Compose requires float32 (binary32) intermediate execution.** Start ComfyUI without `--fp16-intermediates`; this restriction applies to Compose as well as the legacy optional helper.
 
 Each Conditioning Layer accepts one prompt encode (one conditioning entry, batch size 1). Upstream masks, areas, timestep ranges, GLIGEN and hooks are rejected. **ControlNet-modified conditioning is unsupported at the Conditioning Layer input.** No end-to-end ControlNet compatibility is claimed for other graph arrangements.
 
@@ -152,11 +166,13 @@ The names below are the runtime display names. Search for them in ComfyUI; QR an
 | **Pattern Field** | Loads one of the shipped patterns and inverse variants. | Explore checkerboard, rings, stripes or scattered islands. |
 | **Scatter Field** | Generates seeded scattered shapes across the field. | Make repeated islands of a contrasting prompt. |
 | **Noise Field** | Generates deterministic noise-based influence. | Build irregular smoke or weather regions with BLENDED layers. |
-| **Cyclic Partition Field** | Produces members of a repeating spatial partition. | Give alternating regions different prompts using matching settings and different members. |
+| **Cyclic Partition Field** | Produces members of a repeating spatial partition. | Connect different member outputs to different regional prompts. |
 | **Voronoi Partition Field** | Produces seeded nearest-site partition regions. | Make an irregular mosaic of concepts. |
 | **Polar Partition Field** | Produces partition regions arranged around a center. | Build a radial composition from matching partition members. |
 | **Preset Field** | Loads checksum-verified binary QR or UPC fields with dark/light variants. | Use QR structure or barcode stripes to organize a graphic prompt. Generated images are not guaranteed scannable codes. |
 | **Painted Field** | Stores a field painted or imported in the node-launched editor. | Trace selected armor plates over a reference underlay. |
+
+The **Cyclic, Voronoi and Polar Partition Field** nodes each expose four outputs: `field_a`, `field_b`, `field_c`, `field_d`. Only the first `members` outputs participate; outputs beyond that count are empty (all black). Some participating members can also be empty for a particular geometry. Omit or disable empty Conditioning Layer branches.
 
 ### Process fields
 
@@ -179,19 +195,44 @@ Its absence is normal on most installations and it is **not required for normal 
 
 ## Painted Field
 
-Click **Edit Field…** on a Painted Field node or double-click its thumbnail. The editor changes the field's grayscale values. It does not read your prompts, choose layer modes or generate an image.
+Click **Edit Field…** on a Painted Field node, double-click its thumbnail, or right-click the node and choose **Edit Influence Field…**. The editor changes the field's grayscale values. It does not read your prompts, choose layer modes or generate an image.
 
-Start with **Paint**, **Erase**, **Size**, **Influence**, **Hardness** and **Amount**:
+Start with **Paint**, **Erase**, **Size**, **Influence** and **Hardness**. **Amount (%)** is under **Advanced → Brush Behavior**:
 
 - **Paint** moves covered cells toward the chosen Influence value. **Erase** moves them toward black. **Restore**, in Advanced Brush Behavior, paints toward the field as it was when it joined the session.
 - **Size** controls the footprint in field cells. **Influence** is the target value, shown as a percentage or an exact 0–255 value. **Amount** limits how far a stroke moves toward its target. **Hardness** controls the full-coverage portion of the footprint and its soft edge.
-- Use **Undo/Redo** to revise local edits. **Done** commits fields and settings back to the nodes; **Cancel** discards this session's changes. Save the ComfyUI workflow afterward to keep the committed fields.
+- Use **Undo/Redo** to revise local edits. **Done** commits fields and settings back to the nodes; **Cancel** discards this session's changes. After **Done** changes field pixels, ComfyUI graph **Undo** can reverse that committed transaction, including a multi-field save. Save the ComfyUI workflow afterward to keep the committed fields.
 
-Open **Advanced** when you need more control. Rectangle and ellipse selections constrain edits; combine, invert or clear selections to isolate a region. Clear/Fill/Invert act within the selection when one is active. Field Tools also provide exact flips and quarter-turn rotations; clear the selection before those whole-field transforms. Use the Field Transform node for adjustable offsets, scaling and other angles.
+Open **Advanced → Field Tools** for rectangle and ellipse selections that constrain edits; combine, invert or clear selections to isolate a region. Clear/Fill/Invert act within the selection when one is active. Field Tools also provide exact flips and quarter-turn rotations; clear the selection before those whole-field transforms. Use the Field Transform node for adjustable offsets, scaling and other angles.
 
 A **reference image** is a display-only guide. Grid and **Heat View** help inspect cell boundaries and low influence; **Alt-click** samples a field value with the eyedropper. These views do not become conditioning or modify the saved field.
 
 **Import PNG** reads an exact 128 × 128 grayscale field. **Advanced > Field Tools > Import Mask…** accepts supported PNG masks at other sizes, shows an explicit preview, and reduces/enlarges them to the field grid with deterministic area averaging. Choose Graded or Binary output and review before Apply. Import Mask creates one undo step and respects the active selection. **Export PNG** saves the field for reuse.
+
+![Painted Field editor with a meteor-shower field, a companion overlay, field tabs and Hotdog brush controls](docs/images/conditioning-layers-painted-field-editor.png)
+
+*Painted Field editor: edit one field while viewing a companion overlay; brush controls shape the grayscale influence.*
+
+### Where to find controls
+
+| Control | Location |
+| --- | --- |
+| Amount (%) | **Advanced → Brush Behavior** |
+| Rectangle/ellipse selections and Import Mask… | **Advanced → Field Tools** |
+| Custom Tip | **Advanced → Brush Shape & Transform → Shape: Custom → Custom Tip → Import Tip PNG…** |
+| Procedural tips | **Advanced → Brush Shape & Transform → Shape: Procedural → Procedural Tip**; choose **Type: Scatter** or **Noise** |
+| Hotdog template | In **Procedural Tip**, choose **Type: Scatter → Particle Shape: Hotdog** |
+| Reference image | **Advanced → Load Reference Image…** |
+| Pen pressure | **Advanced → Brush Behavior → Pen Pressure → Use Pen Pressure** |
+
+### Paint against a reference
+
+1. Queue once with a fixed sampler seed and save the result.
+2. Open Painted Field and use **Advanced → Load Reference Image…** to load that result.
+3. Paint the intended regions over the reference, then press **Done**.
+4. Queue again using the same model, settings and fixed seed.
+
+This is **regeneration with spatial conditioning, not inpainting**; changes can extend outside the painted regions. The reference is display-only and **session-only**: it is not saved with the workflow and must be loaded again after reopening the editor.
 
 ### Shortcuts
 
@@ -235,9 +276,9 @@ This built-in deterministic motif/scatter example demonstrates template-backed b
 
 #### Brush Library
 
-Save reusable brush configurations and **Apply**, **Update**, **Rename**, **Duplicate** or **Delete** them. Use favorites, categories and search to find a preset. The library is available across workflows/editor sessions in the same ComfyUI user setup; export/import preset JSON to share configurations. Opening an example does not install its presets automatically.
+Save reusable brush configurations and **Apply**, **Update**, **Rename**, **Duplicate** or **Delete** them. Use favorites, categories and search to find a preset. The library is available across workflows/editor sessions in the same ComfyUI user setup; **Export Preset JSON** exports the selected preset only; **Import Preset JSON…** imports one preset. Repeat for other presets to share configurations. Opening an example does not install its presets automatically.
 
-The library is stored in **ComfyUI user data** as `conditioning-layers/brush-library-v1.json`. It is user-level data, separate from workflow state; export it when moving reusable brushes to another installation.
+The library is stored in the active ComfyUI user's data as `conditioning-layers/brush-library-v1.json` (normally `ComfyUI/user/default/conditioning-layers/brush-library-v1.json` for the default user). A custom user directory or multi-user setup changes the prefix. Back up that file for the complete library, or export individual presets through the editor. It is separate from workflow state.
 
 Presets store brush configuration, not field content, selections, history or field relationships. **Transfer/Balance partner identity and Active Share are not stored.** Applying a preset does not select a partner or change the active cross-field tool.
 
@@ -249,7 +290,7 @@ When enabled, pen pressure can affect **Size**, **Amount** and **Flow**; Flow pr
 
 Open one Painted Field, then use **Add Field** to bring in other Painted Field nodes from the same workflow. A session holds **up to four fields**. Exactly one is active and editable; the others appear as overlays. Select a field to make it active.
 
-Each field keeps its own brush settings, selection, Restore baseline and local history as you switch. **Copy From** replaces active-field cells with another participant's current values, respecting the active selection and leaving the source unchanged. **Done** commits the participating changes together; **Cancel** discards them together. Reopening starts a new session: add companion fields again as needed.
+Each field keeps its own brush settings, selection, Restore baseline and local history as you switch. **Copy From** replaces active-field cells with another participant's current values, respecting the active selection and leaving the source unchanged. **Done** commits the participating changes together; **Cancel** discards them together. Use **×** on a field tab to remove it from a multi-field session; this leaves its node in the graph and discards its uncommitted session changes after confirmation. The last remaining field cannot be removed. Reopening starts a new session: add companion fields again as needed.
 
 ### Transfer
 
@@ -302,6 +343,12 @@ The [Conditioning Layers Examples](examples/conditioning-layers/README.md) are t
 
 Import [Hotdog meteor shower](examples/conditioning-layers/presets/hotdog_meteor_shower.brush.json) and [Sparkle glints](examples/conditioning-layers/presets/sparkle_glints.brush.json) through Brush Library for the brushes used in 07. All examples provide full field coverage. The pack contains instructions and embedded fields/tips, not verified generated outputs. Nine layers is a demonstration, not a maximum or a resource guarantee.
 
+## Legacy sidebar
+
+Conditioning Layers also adds a tab in ComfyUI's left sidebar for the older **`.conditioning.json` document-oriented workflow**, with Open, Save, Save As and a Base Prompt. **Use node workflows for new projects; node-only users can generally ignore this tab.** The two saved formats do not automatically convert into one another.
+
+Sidebar generation supports **1–3 Active Conditioning Layers with No Overlap**, or **exactly 3 with document-level Blend**. It targets the specific **ComfyUI 0.34.6 / frontend 1.49.6 Krea 2 Turbo BF16 setup on port 8000**, with additional model checks. Newer node/editor compatibility does not imply sidebar generation support. See [sidebar compatibility](docs/developer.md#sidebar-compatibility).
+
 ## Compatibility
 
 | Tier | ComfyUI | Frontend | Evidence |
@@ -310,6 +357,20 @@ Import [Hotdog meteor shower](examples/conditioning-layers/presets/hotdog_meteor
 | Successfully functional-smoke-tested | 0.39.2 | 1.53.10 | Core painting, brushes, multi-field editing, Transfer, Balance, Undo/Redo, save/reopen and example loading. |
 
 The newer pair has narrower test coverage than the baseline. Other combinations are not established. These node/editor results do not widen sidebar generation support. See the [public validation summary](docs/developer.md#validation) for automated checks and their limits.
+
+## Troubleshooting
+
+| Symptom | Likely cause | Shortest fix |
+| --- | --- | --- |
+| FIXED regions overlap | Two enabled FIXED fields have positive cells in common, including gray edges. | Move/shrink the fields or use BLENDED sharing. Strength zero does not remove FIXED ownership; disable the layer if unwanted. |
+| Field has no positive sample | An enabled field is entirely black, possibly an unused partition output. | Paint/add positive cells, connect a nonempty output, or disable the layer. |
+| Mask shape/codebook rejected | Resizing or generic mask processing lost the exact 128 × 128, 8-bit field values. | Use the supplied field nodes or **Advanced → Field Tools → Import Mask…**. For an exact grayscale PNG, use **Load Image (as Mask) → red**, without resizing. |
+| Compose requires binary32 intermediate execution | ComfyUI is using half-precision intermediates, such as `--fp16-intermediates`. | Remove that startup flag and restart; Compose requires float32 intermediates. |
+| Unsupported conditioning metadata | Upstream conditioning contains ControlNet, area, timestep, mask or hook data. | Connect a plain prompt encode to each Conditioning Layer; these upstream modifiers are unsupported at its input. |
+| Expected exactly one conditioning entry | Multiple prompt encodes were combined upstream. | Give each Conditioning Layer one prompt encode; combine layers through **Add Conditioning Layer → Compose**. |
+| `IMPORT FAILED` or missing nodes | Incomplete/nested installation, missing host dependencies, or an import failure. | Check the ComfyUI console for the first error and **Conditioning Layers** warnings; verify the complete folder layout and restart. An optional Blend-helper warning alone does not disable normal nodes. |
+| Missing **Edit Field…** button | The frontend adapter did not load or the browser has stale assets. | Restart ComfyUI and hard-refresh the browser; verify the complete `web/` folder. Do not re-save painted examples until the button works. |
+| Sidebar **Generate** refuses to run | The older document workflow has stricter host, port, format and layer limits. | Use the recommended node workflow, or check the sidebar's message and [sidebar compatibility](docs/developer.md#sidebar-compatibility). |
 
 ## Current limits
 
@@ -339,10 +400,5 @@ Node/runtime and Python example validation use the separate host-dependency lane
 ## License and contact
 
 Copyright 2026 SurrealByDesign. Licensed under the [Apache License 2.0](LICENSE).
-
-The shipped Hotdog artwork/template is project-created for Conditioning Layers.
-The **QR Code** demo preset points to `https://github.com/SurrealByDesign/conditioning-layers`.
-The **UPC** preset encodes `000000000000`, a synthetic/demo UPC-A with no real-product association.
-These demo assets need no third-party stock license.
 
 **SurrealByDesign** - surrealbydesign@protonmail.com

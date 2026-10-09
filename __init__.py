@@ -1,6 +1,7 @@
 """ComfyUI custom-node loader for the Conditioning Layers sidebar extension."""
 
 from pathlib import Path
+import logging
 import os
 import sys
 
@@ -10,14 +11,19 @@ _SOURCE_ROOT = _PACKAGE_ROOT / "src"
 if str(_SOURCE_ROOT) not in sys.path:
     sys.path.insert(0, str(_SOURCE_ROOT))
 
-from conditioning_layers.integrations.comfyui_panel.routes import register_routes
-
-
 NODE_CLASS_MAPPINGS: dict[str, object] = {}
 NODE_DISPLAY_NAME_MAPPINGS: dict[str, str] = {}
 WEB_DIRECTORY = "./web"
 
-register_routes()
+SIDEBAR_REGISTRATION_ERROR = None
+try:
+    from conditioning_layers.integrations.comfyui_panel.routes import register_routes
+
+    register_routes()
+except Exception as _sidebar_error:
+    SIDEBAR_REGISTRATION_ERROR = f"{type(_sidebar_error).__name__}: {_sidebar_error}"
+    logging.warning("Conditioning Layers: sidebar registration failed: %s; node registration will continue.",
+                    SIDEBAR_REGISTRATION_ERROR)
 
 # The supported sidebar and No Overlap routes are registered before the optional
 # Blend boundary. Any Blend import, dependency, or initialization failure leaves
@@ -31,6 +37,7 @@ try:
     _blend_names = {name: "Normalized Blend Preparation" for name in _blend_mappings}
 except Exception as _blend_error:
     BLEND_REGISTRATION_ERROR = f"{type(_blend_error).__name__}: {_blend_error}"
+    logging.warning("Conditioning Layers: optional Normalized Blend Preparation registration failed: %s", BLEND_REGISTRATION_ERROR)
 else:
     NODE_CLASS_MAPPINGS = _blend_mappings
     NODE_DISPLAY_NAME_MAPPINGS = _blend_names
@@ -45,6 +52,7 @@ try:
     register_readiness_route(BLEND_COMPONENT_IDENTITY)
 except Exception as _readiness_error:
     BLEND_READINESS_REGISTRATION_ERROR = f"{type(_readiness_error).__name__}: {_readiness_error}"
+    logging.warning("Conditioning Layers: Blend readiness route registration failed: %s", BLEND_READINESS_REGISTRATION_ERROR)
 
 # Node System Phase 1 layer-workflow nodes are a separate optional boundary.
 # Node availability is not product admission, and a failure here cannot undo
@@ -58,6 +66,7 @@ try:
         raise RuntimeError("Layer node names collide with registered nodes")
 except Exception as _layer_error:
     LAYER_NODE_REGISTRATION_ERROR = f"{type(_layer_error).__name__}: {_layer_error}"
+    logging.warning("Conditioning Layers: layer nodes registration failed: %s", LAYER_NODE_REGISTRATION_ERROR)
 else:
     NODE_CLASS_MAPPINGS = {**NODE_CLASS_MAPPINGS, **_layer_mappings}
     NODE_DISPLAY_NAME_MAPPINGS = {**NODE_DISPLAY_NAME_MAPPINGS, **_layer_names}
@@ -73,6 +82,7 @@ try:
         raise RuntimeError("Field source node names collide with registered nodes")
 except Exception as _field_error:
     FIELD_SOURCE_REGISTRATION_ERROR = f"{type(_field_error).__name__}: {_field_error}"
+    logging.warning("Conditioning Layers: field source nodes registration failed: %s", FIELD_SOURCE_REGISTRATION_ERROR)
 else:
     NODE_CLASS_MAPPINGS = {**NODE_CLASS_MAPPINGS, **_field_mappings}
     NODE_DISPLAY_NAME_MAPPINGS = {**NODE_DISPLAY_NAME_MAPPINGS, **_field_names}
@@ -88,6 +98,7 @@ try:
         raise RuntimeError("Pattern Field node names collide with registered nodes")
 except Exception as _pattern_error:
     PATTERN_FIELD_REGISTRATION_ERROR = f"{type(_pattern_error).__name__}: {_pattern_error}"
+    logging.warning("Conditioning Layers: Pattern Field registration failed: %s", PATTERN_FIELD_REGISTRATION_ERROR)
 else:
     NODE_CLASS_MAPPINGS = {**NODE_CLASS_MAPPINGS, **_pattern_mappings}
     NODE_DISPLAY_NAME_MAPPINGS = {**NODE_DISPLAY_NAME_MAPPINGS, **_pattern_names}
@@ -102,6 +113,7 @@ try:
         raise RuntimeError("Field Transform node names collide with registered nodes")
 except Exception as _transform_error:
     FIELD_TRANSFORM_REGISTRATION_ERROR = f"{type(_transform_error).__name__}: {_transform_error}"
+    logging.warning("Conditioning Layers: Field Transform registration failed: %s", FIELD_TRANSFORM_REGISTRATION_ERROR)
 else:
     NODE_CLASS_MAPPINGS = {**NODE_CLASS_MAPPINGS, **_transform_mappings}
     NODE_DISPLAY_NAME_MAPPINGS = {**NODE_DISPLAY_NAME_MAPPINGS, **_transform_names}
@@ -116,6 +128,7 @@ try:
         raise RuntimeError("Field Repeat node names collide with registered nodes")
 except Exception as _repeat_error:
     FIELD_REPEAT_REGISTRATION_ERROR = f"{type(_repeat_error).__name__}: {_repeat_error}"
+    logging.warning("Conditioning Layers: Field Repeat registration failed: %s", FIELD_REPEAT_REGISTRATION_ERROR)
 else:
     NODE_CLASS_MAPPINGS = {**NODE_CLASS_MAPPINGS, **_repeat_mappings}
     NODE_DISPLAY_NAME_MAPPINGS = {**NODE_DISPLAY_NAME_MAPPINGS, **_repeat_names}
@@ -130,6 +143,7 @@ try:
         raise RuntimeError("Field Remap node names collide with registered nodes")
 except Exception as _remap_error:
     FIELD_REMAP_REGISTRATION_ERROR = f"{type(_remap_error).__name__}: {_remap_error}"
+    logging.warning("Conditioning Layers: Field Remap registration failed: %s", FIELD_REMAP_REGISTRATION_ERROR)
 else:
     NODE_CLASS_MAPPINGS = {**NODE_CLASS_MAPPINGS, **_remap_mappings}
     NODE_DISPLAY_NAME_MAPPINGS = {**NODE_DISPLAY_NAME_MAPPINGS, **_remap_names}
@@ -144,6 +158,7 @@ try:
         raise RuntimeError("Field Blur node names collide with registered nodes")
 except Exception as _blur_error:
     FIELD_BLUR_REGISTRATION_ERROR = f"{type(_blur_error).__name__}: {_blur_error}"
+    logging.warning("Conditioning Layers: Field Blur registration failed: %s", FIELD_BLUR_REGISTRATION_ERROR)
 else:
     NODE_CLASS_MAPPINGS = {**NODE_CLASS_MAPPINGS, **_blur_mappings}
     NODE_DISPLAY_NAME_MAPPINGS = {**NODE_DISPLAY_NAME_MAPPINGS, **_blur_names}
@@ -158,6 +173,7 @@ try:
         raise RuntimeError("Procedural field node names collide with registered nodes")
 except Exception as _procedural_error:
     PROCEDURAL_FIELD_REGISTRATION_ERROR = f"{type(_procedural_error).__name__}: {_procedural_error}"
+    logging.warning("Conditioning Layers: procedural field nodes registration failed: %s", PROCEDURAL_FIELD_REGISTRATION_ERROR)
 else:
     NODE_CLASS_MAPPINGS = {**NODE_CLASS_MAPPINGS, **_procedural_mappings}
     NODE_DISPLAY_NAME_MAPPINGS = {**NODE_DISPLAY_NAME_MAPPINGS, **_procedural_names}
@@ -172,6 +188,7 @@ try:
         raise RuntimeError("Field Fade node names collide with registered nodes")
 except Exception as _fade_error:
     FIELD_FADE_REGISTRATION_ERROR = f"{type(_fade_error).__name__}: {_fade_error}"
+    logging.warning("Conditioning Layers: Field Fade registration failed: %s", FIELD_FADE_REGISTRATION_ERROR)
 else:
     NODE_CLASS_MAPPINGS = {**NODE_CLASS_MAPPINGS, **_fade_mappings}
     NODE_DISPLAY_NAME_MAPPINGS = {**NODE_DISPLAY_NAME_MAPPINGS, **_fade_names}
@@ -186,6 +203,7 @@ try:
         raise RuntimeError("Preset Field node names collide with registered nodes")
 except Exception as _preset_error:
     PRESET_FIELD_REGISTRATION_ERROR = f"{type(_preset_error).__name__}: {_preset_error}"
+    logging.warning("Conditioning Layers: Preset Field registration failed: %s", PRESET_FIELD_REGISTRATION_ERROR)
 else:
     NODE_CLASS_MAPPINGS = {**NODE_CLASS_MAPPINGS, **_preset_mappings}
     NODE_DISPLAY_NAME_MAPPINGS = {**NODE_DISPLAY_NAME_MAPPINGS, **_preset_names}
@@ -200,6 +218,7 @@ try:
         raise RuntimeError("Painted Field node names collide with registered nodes")
 except Exception as _painted_error:
     PAINTED_FIELD_REGISTRATION_ERROR = f"{type(_painted_error).__name__}: {_painted_error}"
+    logging.warning("Conditioning Layers: Painted Field registration failed: %s", PAINTED_FIELD_REGISTRATION_ERROR)
 else:
     NODE_CLASS_MAPPINGS = {**NODE_CLASS_MAPPINGS, **_painted_mappings}
     NODE_DISPLAY_NAME_MAPPINGS = {**NODE_DISPLAY_NAME_MAPPINGS, **_painted_names}
@@ -219,6 +238,7 @@ if os.environ.get("CONDITIONING_LAYERS_P3D_QUALIFICATION_BRIDGE") == "1":
     except Exception as _bridge_error:
         # Store only the exception type: registration may have issued a secret.
         P3D_QUALIFICATION_BRIDGE_REGISTRATION_ERROR = type(_bridge_error).__name__
+        logging.warning("Conditioning Layers: optional qualification bridge registration failed: %s", P3D_QUALIFICATION_BRIDGE_REGISTRATION_ERROR)
 
 __all__ = [
     "NODE_CLASS_MAPPINGS",

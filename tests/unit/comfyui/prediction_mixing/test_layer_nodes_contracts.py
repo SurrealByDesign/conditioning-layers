@@ -5,10 +5,14 @@ runtime tensor paths belong to test_layer_node_runtime.py on the host lane.
 """
 
 import ast
+import builtins
+import importlib
+import ntpath
 from pathlib import Path
 import subprocess
 import sys
 import unittest
+from types import SimpleNamespace
 from unittest.mock import patch
 
 from conditioning_layers.comfyui.influence_field_sources import FIELD_SOURCE_NODE_CLASS_NAMES
@@ -263,18 +267,21 @@ assert not [name for name in sys.modules if "layer_nodes" in name]
 
 
 class RootRegistrationTests(unittest.TestCase):
-    def load_root(self, blend_available=True, **layer_patch):
+    def load_root(self, blend_available=True, sidebar_patch=None, expect_sidebar_call=True, **layer_patch):
         namespace = {"__file__": str(ROOT / "__init__.py"), "__name__": "_node_system_offline_root"}
         from conditioning_layers.comfyui.prediction_mixing import layer_nodes
         blend = {"return_value": ({"ConditioningLayersNormalizedBlend": object}, None)} if blend_available else \
             {"side_effect": ImportError("offline Blend unavailable")}
-        with patch.dict("os.environ", {}, clear=True), patch.object(routes, "register_routes") as register, \
+        with patch.dict("os.environ", {}, clear=True), patch.object(routes, "register_routes", **(sidebar_patch or {})) as register, \
                 patch.object(blend_readiness, "register_readiness_route"), \
                 patch.object(blend_component, "initialize_blend_node_registration", **blend), \
                 patch.object(layer_nodes, "initialize_layer_node_registration",
                              **(layer_patch or {"wraps": initialize_layer_node_registration})):
             exec(compile((ROOT / "__init__.py").read_text(encoding="utf-8"), "__init__.py", "exec"), namespace)
-        register.assert_called_once_with()
+        if expect_sidebar_call:
+            register.assert_called_once_with()
+        else:
+            register.assert_not_called()
         return namespace
 
     def test_layer_nodes_register_beside_blend_and_alone(self):
@@ -299,6 +306,115 @@ class RootRegistrationTests(unittest.TestCase):
                 self.assertIs(namespace["NODE_CLASS_MAPPINGS"]["ConditioningLayersNormalizedBlend"], object)
                 self.assertTrue(namespace["LAYER_NODE_REGISTRATION_ERROR"].startswith(message))
                 self.assertIsNone(namespace["BLEND_REGISTRATION_ERROR"])
+
+    def test_successful_sidebar_registration_has_no_error_or_warning(self):
+        with self.assertNoLogs(level="WARNING"):
+            namespace = self.load_root()
+        self.assertIsNone(namespace["SIDEBAR_REGISTRATION_ERROR"])
+        self.assertIs(namespace["NODE_CLASS_MAPPINGS"]["ConditioningLayersCompose"], ConditioningLayersCompose)
+
+    def test_cross_drive_sidebar_failure_preserves_all_node_registrations(self):
+        expected = self.load_root()
+        cli = SimpleNamespace(args=SimpleNamespace(port=8000))
+        folders = SimpleNamespace(
+            __file__="C:/fixture/ComfyUI/folder_paths.py", models_dir="D:/fixture/models",
+            get_input_directory=lambda: "C:/fixture/input",
+            get_output_directory=lambda: "D:/fixture/output",
+            get_user_directory=lambda: "C:/fixture/user",
+        )
+
+        windows_commonpath = ntpath.commonpath
+
+        def cross_drive_commonpath(paths):
+            self.assertEqual(len(paths), 4)
+            # Exercise Windows' actual different-drive error even on other platforms.
+            return windows_commonpath(("C:/fixture/input", "D:/fixture/output"))
+
+        real_register = routes.register_routes
+        with patch.dict(sys.modules, {
+            "aiohttp": SimpleNamespace(web=SimpleNamespace()),
+            "server": SimpleNamespace(PromptServer=SimpleNamespace()),
+            "folder_paths": folders, "comfy": SimpleNamespace(cli_args=cli), "comfy.cli_args": cli,
+        }), patch.object(routes, "_REGISTERED", False), \
+                patch.object(routes.os.path, "commonpath", side_effect=cross_drive_commonpath) as commonpath, \
+                self.assertLogs(level="WARNING") as warnings:
+            namespace = self.load_root(sidebar_patch={"wraps": real_register})
+        commonpath.assert_called_once()
+        self.assertIn("ValueError", namespace["SIDEBAR_REGISTRATION_ERROR"])
+        self.assertIn("same drive", namespace["SIDEBAR_REGISTRATION_ERROR"])
+        self.assertEqual(namespace["NODE_CLASS_MAPPINGS"], expected["NODE_CLASS_MAPPINGS"])
+        self.assertEqual(namespace["NODE_DISPLAY_NAME_MAPPINGS"], expected["NODE_DISPLAY_NAME_MAPPINGS"])
+        self.assertEqual(len(warnings.output), 1)
+        self.assertIn("sidebar registration failed", warnings.output[0])
+        self.assertIn("node registration will continue", warnings.output[0])
+
+    def test_sidebar_import_failure_is_isolated_and_logged(self):
+        original_import = builtins.__import__
+
+        def importing(name, *args, **kwargs):
+            if name == "conditioning_layers.integrations.comfyui_panel.routes":
+                raise ImportError("sidebar dependency unavailable")
+            return original_import(name, *args, **kwargs)
+
+        with patch("builtins.__import__", side_effect=importing), self.assertLogs(level="WARNING") as warnings:
+            namespace = self.load_root(expect_sidebar_call=False)
+        self.assertEqual(namespace["SIDEBAR_REGISTRATION_ERROR"], "ImportError: sidebar dependency unavailable")
+        self.assertIs(namespace["NODE_CLASS_MAPPINGS"]["ConditioningLayersCompose"], ConditioningLayersCompose)
+        self.assertIn("sidebar dependency unavailable", warnings.output[0])
+
+    def test_existing_registration_failures_log_the_failed_group(self):
+        cases = (
+            ("conditioning_layers.integrations.blend_readiness", "register_readiness_route", "BLEND_READINESS_REGISTRATION_ERROR", "Blend readiness route"),
+            ("conditioning_layers.comfyui.influence_field_sources", "initialize_field_source_node_registration", "FIELD_SOURCE_REGISTRATION_ERROR", "field source nodes"),
+            ("conditioning_layers.comfyui.pattern_field_source", "initialize_pattern_field_node_registration", "PATTERN_FIELD_REGISTRATION_ERROR", "Pattern Field"),
+            ("conditioning_layers.comfyui.field_transform", "initialize_field_transform_node_registration", "FIELD_TRANSFORM_REGISTRATION_ERROR", "Field Transform"),
+            ("conditioning_layers.comfyui.field_repeat", "initialize_field_repeat_node_registration", "FIELD_REPEAT_REGISTRATION_ERROR", "Field Repeat"),
+            ("conditioning_layers.comfyui.field_remap", "initialize_field_remap_node_registration", "FIELD_REMAP_REGISTRATION_ERROR", "Field Remap"),
+            ("conditioning_layers.comfyui.field_blur", "initialize_field_blur_node_registration", "FIELD_BLUR_REGISTRATION_ERROR", "Field Blur"),
+            ("conditioning_layers.comfyui.procedural_field_sources", "initialize_procedural_field_node_registration", "PROCEDURAL_FIELD_REGISTRATION_ERROR", "procedural field nodes"),
+            ("conditioning_layers.comfyui.field_fade", "initialize_field_fade_node_registration", "FIELD_FADE_REGISTRATION_ERROR", "Field Fade"),
+            ("conditioning_layers.comfyui.preset_field_source", "initialize_preset_field_node_registration", "PRESET_FIELD_REGISTRATION_ERROR", "Preset Field"),
+            ("conditioning_layers.comfyui.painted_field_source", "initialize_painted_field_node_registration", "PAINTED_FIELD_REGISTRATION_ERROR", "Painted Field"),
+        )
+        namespace = {"__file__": str(ROOT / "__init__.py"), "__name__": "_node_system_offline_root"}
+        for module, function, key, label in cases:
+            with self.subTest(group=label), patch.dict("os.environ", {}, clear=True), \
+                    patch.object(routes, "register_routes"), \
+                    patch.object(blend_component, "initialize_blend_node_registration", return_value=({}, None)), \
+                    patch.object(blend_readiness, "register_readiness_route"), \
+                    patch.object(importlib.import_module(module), function, side_effect=RuntimeError("synthetic registration failure")), \
+                    self.assertLogs(level="WARNING") as warnings:
+                exec(compile((ROOT / "__init__.py").read_text(encoding="utf-8"), "__init__.py", "exec"), namespace)
+            self.assertEqual(namespace[key], "RuntimeError: synthetic registration failure")
+            self.assertTrue(any(label + " registration failed" in line for line in warnings.output))
+            self.assertIn("ConditioningLayersCompose", namespace["NODE_CLASS_MAPPINGS"])
+        with self.assertLogs(level="WARNING") as warnings:
+            namespace = self.load_root(False, side_effect=RuntimeError("layer failure"))
+        self.assertIn("ImportError", namespace["BLEND_REGISTRATION_ERROR"])
+        self.assertEqual(namespace["LAYER_NODE_REGISTRATION_ERROR"], "RuntimeError: layer failure")
+        self.assertTrue(any("optional Normalized Blend Preparation" in line for line in warnings.output))
+        self.assertTrue(any("layer nodes registration failed" in line for line in warnings.output))
+        self.assertIn("ConditioningLayersPaintedField", namespace["NODE_CLASS_MAPPINGS"])
+
+    def test_optional_bridge_warning_keeps_exception_details_private(self):
+        def failed_registration():
+            raise RuntimeError("sensitive exception detail")
+
+        namespace = {"__file__": str(ROOT / "__init__.py"), "__name__": "_node_system_offline_root"}
+        before = sys.path[:]
+        try:
+            with patch.dict("os.environ", {"CONDITIONING_LAYERS_P3D_QUALIFICATION_BRIDGE": "1"}, clear=True), \
+                    patch.dict(sys.modules, {"p3d_blend_invocation_bridge": SimpleNamespace(register_invocation_route=failed_registration)}), \
+                    patch.object(routes, "register_routes"), \
+                    patch.object(blend_component, "initialize_blend_node_registration", return_value=({}, None)), \
+                    patch.object(blend_readiness, "register_readiness_route"), self.assertLogs(level="WARNING") as warnings:
+                exec(compile((ROOT / "__init__.py").read_text(encoding="utf-8"), "__init__.py", "exec"), namespace)
+        finally:
+            sys.path[:] = before
+        self.assertEqual(namespace["P3D_QUALIFICATION_BRIDGE_REGISTRATION_ERROR"], "RuntimeError")
+        self.assertIn("optional qualification bridge registration failed: RuntimeError", warnings.output[0])
+        self.assertNotIn("sensitive exception detail", "\n".join(warnings.output))
+        self.assertIn("ConditioningLayersCompose", namespace["NODE_CLASS_MAPPINGS"])
 
     def test_registration_changes_no_product_admission_or_cardinality(self):
         from conditioning_layers.capabilities import blend, multi_layer

@@ -94,8 +94,8 @@ evidence strings in source records are not runtime file dependencies.
 
 ## Validation
 
-On 2026-10-09 the Windows public maintenance suite ran **1,841 tests: 1,836 passed, 5 skipped,
-0 failures/errors**. The skips are four Windows symlink-creation checks and one
+On 2026-10-09 the Windows public maintenance suite ran **1,846 tests: 1,841 passed, 5 skipped,
+0 failures/errors**. This includes five loader-registration regression tests added after the initial release. The skips are four Windows symlink-creation checks and one
 optional historical host-source decoder check. The tested interpreters are
 **CPython 3.10.11** (core/editor) and **3.12.11** (host dependencies), with
 **Node.js 25.6.1** for frontend checks. Linux and macOS testing is not established.
@@ -137,16 +137,20 @@ applicable execution dependencies, not only version labels. Node/editor smoke
 testing on 0.39.2 does not establish sidebar generation support there. Check
 the sidebar's reported compatibility findings before generating.
 
+The sidebar execution client requires the validated **loopback port 8000** setup. A host on another port can still use native node workflows, but sidebar generation refuses it. Sidebar route initialization also requires input, output, user and model directories with a common filesystem root; different Windows drives can prevent its routes from registering. That failure is logged and no longer prevents the node pack from loading.
+
 ## Troubleshooting node availability
 
 The normal package exposes 22 nodes; **Normalized Blend Preparation** is an
 optional 23rd. It requires exact Torch **2.8.0+cu129**, NumPy **2.4.6**, PyAV
 **17.0.1**, no `--fp16-intermediates`, and matching component source hashes.
-Execution also requires float32 intermediates. Its absence alone is expected
+Execution also requires float32 intermediates. **Compose Conditioning Layers** independently requires float32 intermediates too; do not launch with `--fp16-intermediates`. The optional helper's absence alone is expected
 outside that profile and does not disable Layer → Add → Compose.
 
 If a normal node group is missing, confirm the entire package is installed and
 inspect loader import failures. The loader records group-specific
-`*_REGISTRATION_ERROR` values for diagnosis; it currently does not print every
-caught group failure. For Painted Field, verify **Edit Field…** appears and opens
+`*_REGISTRATION_ERROR` values and logs a warning naming each failed registration.
+`SIDEBAR_REGISTRATION_ERROR` reports legacy sidebar failures; the independent
+node groups still load. The inactive qualification hook logs only the exception
+type, preserving its existing secret-redaction boundary. For Painted Field, verify **Edit Field…** appears and opens
 before re-saving a workflow, then refresh the browser if necessary.

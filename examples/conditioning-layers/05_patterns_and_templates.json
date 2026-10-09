@@ -978,7 +978,7 @@
       "outputs": [],
       "properties": {},
       "widgets_values": [
-        "Switch the preset to \"QR Code  Light\" and the mosaic jumps to the other modules. Set the Transform uniform_scale to 0.6 for a bigger mosaic block."
+        "Try one edit at a time: switch to \"QR Code  Light\" to move the mosaic to the other modules, OR keep \"QR Code  Dark\" and set its Transform uniform_scale to 0.6. Restore the original settings before trying the other edit; combining them overlaps the FIXED Hotdog field."
       ],
       "title": "TRY THIS",
       "color": "#232",
