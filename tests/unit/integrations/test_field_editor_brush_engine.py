@@ -570,7 +570,7 @@ for (const text of ['Paint', 'Erase', 'Undo', 'Redo', 'Clear', 'Done', 'Cancel',
   assert.ok(!within(button(text), advanced), text);
 for (const label of ['Size (cells)', 'Influence (%)', 'Hardness (%)']) assert.ok(!within(input(label), advanced), label);
 assert.equal(button('Reset Brush').hidden, true); assert.ok(!within(button('Reset Brush'), advanced));
-assert.equal(all().filter(e => e.type === 'text').length, 41);
+assert.equal(all().filter(e => e.type === 'text').length, 49);
 // The default footprint is E1's disk: the retained 208-cell Size-16 mark.
 click(64, 64); assert.equal(controller.session.codes.filter(v => v).length, 208);
 assert.equal(controller.session.history.undoEntries.length, 1);

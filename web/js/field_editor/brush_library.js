@@ -21,6 +21,8 @@ const DECIMALS = new Set(["scale_x", "scale_y", "rotation_degrees", "gradient_cu
   "procedural_particle_rotation", "procedural_rotation_jitter"]);
 export const PRESSURE_SNAPSHOT_KEYS = Object.freeze(["pressure_enabled", "pressure_size", "pressure_amount", "pressure_flow"]);
 export const HOTDOG_SNAPSHOT_KEYS = Object.freeze(["hotdog_count", "hotdog_spread", "hotdog_invert"]);
+// Optional in every version: written only when not the default, and absent means the default.
+export const DYNAMICS_SNAPSHOT_KEYS = Object.freeze(["smoothing", "pressure_min_size", "angle_jitter", "size_jitter", "amount_jitter", "jitter_seed", "flow_jitter", "scatter", "follow_direction"]);
 const BASE = {size: 16, influence: 255, hardness: 100, amount: 100};
 const VALIDATED = new WeakMap();
 const compare = (a, b) => a < b ? -1 : a > b ? 1 : 0;
@@ -51,6 +53,7 @@ function snapshot(source, version) {
       throw new Error(`Brush ${key} must have at most one decimal place.`);
     brush[key] = value;
   }
+  for (const key of DYNAMICS_SNAPSHOT_KEYS) if (Object.hasOwn(source, key)) brush[key] = source[key];
   for (const [key, low, high] of [["size", 1, 128], ["influence", 0, 255], ["hardness", 0, 100], ["amount", 1, 100]])
     if (!Number.isInteger(brush[key]) || brush[key] < low || brush[key] > high) throw new Error(`Invalid brush ${key}.`);
   resolveBrush(brush); // Retained E3–E5 enum, range, crop and profile-pair validation.
@@ -102,6 +105,7 @@ export async function captureBrushPreset(settings, metadata) {
   if (hotdog) for (const key of HOTDOG_SNAPSHOT_KEYS) brush[key] = complete[key];
   const pressure = complete.pressure_enabled === true;
   if (pressure || hotdog) for (const key of PRESSURE_SNAPSHOT_KEYS) brush[key] = complete[key];
+  for (const key of DYNAMICS_SNAPSHOT_KEYS) if (complete[key] !== BRUSH_DEFAULTS[key]) brush[key] = complete[key];
   if (brush.shape === "custom") brush.custom_tip = settings.custom_tip;
   return validateBrushPreset({favorite: false, category: "", ...metadata, version: hotdog ? 3 : pressure ? 2 : 1, brush});
 }
@@ -114,7 +118,7 @@ export async function prepareBrushPreset(value) {
   return {brush: preset.brush, tip: tip ? {...tip, luminance: tip.luminance.slice(), alpha: tip.alpha.slice()} : null};
 }
 export function applyPreparedBrush(prepared, session) {
-  for (const key of [...PROCEDURAL_SNAPSHOT_KEYS, ...PRESSURE_SNAPSHOT_KEYS, ...HOTDOG_SNAPSHOT_KEYS]) session.settings[key] = BRUSH_DEFAULTS[key];
+  for (const key of [...PROCEDURAL_SNAPSHOT_KEYS, ...PRESSURE_SNAPSHOT_KEYS, ...HOTDOG_SNAPSHOT_KEYS, ...DYNAMICS_SNAPSHOT_KEYS]) session.settings[key] = BRUSH_DEFAULTS[key];
   Object.assign(session.settings, prepared.brush);
   if (!prepared.brush.custom_tip) delete session.settings.custom_tip;
   session.tip = prepared.tip;

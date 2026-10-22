@@ -37,6 +37,49 @@ const empty = () => new Uint8Array(16384);
 
 
 class FieldEditorFrontendTests(unittest.TestCase):
+    def test_advanced_panel_toggle_preserves_field_groups_and_keyboard_activation(self):
+        run_node('''
+const dom=installDOM();let expanded=false;const writes=[];
+const host={getAdvancedExpanded:()=>expanded,setAdvancedExpanded:v=>{expanded=v;writes.push(v);},
+ getGroupExpanded:()=>true,setGroupExpanded:()=>assert.fail('panel must not change groups'),confirmDiscard:()=>true};
+const open=()=>ui.openInfluenceFieldEditor({codes:empty(),settings:{size:7,amount:40},host});
+let c=open();dom.flush();
+const all=()=>descendants(document.body),find=cls=>all().find(e=>e.className===cls);
+const toggle=()=>find('advanced-toggle'),panel=()=>find('advanced-panel');
+const summary=()=>panel().children[0].children[0];
+const before=JSON.stringify([c.session.settings,[...c.session.codes]]);
+assert.equal(panel().hidden,true);assert.equal(toggle().textContent,'Show Advanced');
+assert.equal(toggle().getAttribute('aria-expanded'),'false');
+assert.equal(toggle().getAttribute('aria-controls'),panel().children[0].id);
+assert.deepEqual(writes,[]);
+// The editor isolates host shortcuts; Enter/Space activate exactly once.
+for(const type of ['keydown','keyup']) fire(window,type,{key:'Enter',target:toggle()});
+assert.equal(panel().hidden,false);assert.deepEqual(writes,[true]);
+fire(window,'keydown',{key:' ',target:toggle()});assert.equal(panel().hidden,false);
+fire(window,'keyup',{key:' ',target:toggle()});assert.equal(panel().hidden,true);
+assert.deepEqual(writes,[true,false]);writes.length=0;
+toggle().click();dom.flush();assert.equal(panel().hidden,false);
+assert.equal(toggle().getAttribute('aria-expanded'),'true');
+// A native details toggle event after the click must not duplicate preference writes.
+fire(panel().children[0],'toggle');assert.deepEqual(writes,[true]);
+assert.ok(all().filter(e=>e.className==='group').every(e=>e.open));
+toggle().click();dom.flush();assert.equal(panel().hidden,true);
+assert.equal(document.activeElement,toggle());assert.deepEqual(writes,[true,false]);
+assert.equal(find('advanced-state').textContent,'Advanced · Amount 40%');
+assert.equal(all().find(e=>e.textContent==='Reset Brush').hidden,false);
+assert.equal(JSON.stringify([c.session.settings,[...c.session.codes]]),before);
+assert.equal(c.session.history.undoEntries.length,0);
+// Neither a pointer nor a summary activation may change coordinates during a live stroke.
+fire(find('viewport'),'pointerdown',{clientX:50,clientY:50});toggle().click();
+assert.equal(panel().hidden,true);
+panel().children[0].open=true;fire(panel().children[0],'toggle');
+assert.equal(panel().children[0].open,false);assert.deepEqual(writes,[true,false]);
+fire(find('viewport'),'pointercancel');dom.flush();
+c.cancel();c=open();dom.flush();assert.equal(panel().hidden,true);
+toggle().click();c.cancel();c=open();dom.flush();assert.equal(panel().hidden,false);
+assert.ok(all().filter(e=>e.className==='group').every(e=>e.open));c.cancel();
+''')
+
     def e2_script(self, body):
         return run_node(f'''
 const view = await import({json.dumps((CORE / 'view.js').as_uri())});
@@ -659,7 +702,8 @@ const state=()=>JSON.stringify([widget.value,node.properties,widget2.value,node2
 resetObservers();
 // First use: defaults collapse every level; nothing is written.
 await launch();dom.flush();assert.deepEqual(states(),[false,false,false]);assert.deepEqual(settingWrites,[]);
-toggle('Advanced',true);toggle('Brush Behavior',true);toggle('Brush Shape',true);
+descendants(document.body).find(e=>e.className==='advanced-toggle').click();
+toggle('Brush Behavior',true);toggle('Brush Shape',true);
 assert.deepEqual(settingWrites,[[ids.advanced,true],[ids.behavior,true],[ids.shape,true]]);
 assert.equal(controller.session.history.undoEntries.length,0);
 // Cancel keeps the preference; a different node opens with the same user-level state.
@@ -860,7 +904,7 @@ const viewport=all().find(e=>e.className==='viewport');
 const press=label=>all().find(e=>e.tagName==='BUTTON'&&e.textContent===label).click();
 assert.equal(all().find(e=>e.tagName==='SUMMARY'&&e.textContent==='Advanced').parent.open,false);
 // E1 four, E2 Reference Opacity, E3 Flow, Spacing, Scale X/Y, Rotation and four crops, E4 thirteen.
-assert.equal(all().filter(e=>e.type==='text').length,41);
+assert.equal(all().filter(e=>e.type==='text').length,49);
 // Fit gives four screen pixels per cell plus an eight-pixel margin.
 fire(viewport,'pointerdown',{clientX:50,clientY:50});
 fire(viewport,'pointermove',{clientX:450,clientY:450,getCoalescedEvents:()=>[{clientX:250,clientY:250}]});

@@ -1,6 +1,6 @@
 # Conditioning Layers
 
-Conditioning Layers brings **regional prompting** to ComfyUI: give multiple prompt-conditioning regions their own editable grayscale **Influence Fields**. Built on ComfyUI masked conditioning, it adds **FIXED** exclusive ownership, **BLENDED** normalized spatial sharing, and deterministic composition of procedural, transformed and painted fields. This experimental alpha supports **Krea 2 in ComfyUI** and prompt conditioning only.
+Conditioning Layers brings **regional prompting** to ComfyUI: give multiple prompt-conditioning regions their own editable grayscale **Influence Fields**. Built on ComfyUI masked conditioning, it adds **FIXED** exclusive ownership, **BLENDED** normalized spatial sharing, and deterministic composition of procedural, transformed and painted fields. This **experimental public alpha** supports **Krea 2 in ComfyUI** and prompt conditioning only. It is not production-certified.
 
 ![BLENDED gradient fields beside a snowy castle transitioning into a coral reef](docs/images/conditioning-layers-blended-transition.png)
 
@@ -197,7 +197,7 @@ Its absence is normal on most installations and it is **not required for normal 
 
 Click **Edit Field…** on a Painted Field node, double-click its thumbnail, or right-click the node and choose **Edit Influence Field…**. The editor changes the field's grayscale values. It does not read your prompts, choose layer modes or generate an image.
 
-Start with **Paint**, **Erase**, **Size**, **Influence** and **Hardness**. **Amount (%)** is under **Advanced → Brush Behavior**:
+The compact horizontal painting toolbar keeps **Paint**, **Erase**, **Size**, **Influence**, **Hardness** and **Clear** above the canvas. **Undo/Redo** sit in the editor header. Open the **Influence ⋯ menu** for percentage/code units and preset values. Use **Show Advanced / Hide Advanced** to expand or collapse the side panel; its visibility is a user preference, not field data. **Amount (%)** is under **Advanced → Brush Behavior**:
 
 - **Paint** moves covered cells toward the chosen Influence value. **Erase** moves them toward black. **Restore**, in Advanced Brush Behavior, paints toward the field as it was when it joined the session.
 - **Size** controls the footprint in field cells. **Influence** is the target value, shown as a percentage or an exact 0–255 value. **Amount** limits how far a stroke moves toward its target. **Hardness** controls the full-coverage portion of the footprint and its soft edge.
@@ -207,17 +207,19 @@ Open **Advanced → Field Tools** for rectangle and ellipse selections that cons
 
 A **reference image** is a display-only guide. Grid and **Heat View** help inspect cell boundaries and low influence; **Alt-click** samples a field value with the eyedropper. These views do not become conditioning or modify the saved field.
 
-**Import PNG** reads an exact 128 × 128 grayscale field. **Advanced > Field Tools > Import Mask…** accepts supported PNG masks at other sizes, shows an explicit preview, and reduces/enlarges them to the field grid with deterministic area averaging. Choose Graded or Binary output and review before Apply. Import Mask creates one undo step and respects the active selection. **Export PNG** saves the field for reuse.
+The toolbar's **Field** menu contains Fill, Invert, Import PNG and Export PNG. **Import PNG** reads an exact 128 × 128 grayscale field. **Advanced > Field Tools > Import Mask…** accepts supported PNG masks at other sizes, shows an explicit preview, and reduces/enlarges them to the field grid with deterministic area averaging. Choose Graded or Binary output and review before Apply. Import Mask creates one undo step and respects the active selection. **Export PNG** saves the field for reuse.
 
 ![Painted Field editor with a meteor-shower field, a companion overlay, field tabs and Hotdog brush controls](docs/images/conditioning-layers-painted-field-editor.png)
 
-*Painted Field editor: edit one field while viewing a companion overlay; brush controls shape the grayscale influence.*
+*Earlier editor view: companion overlays and brush controls work as shown; the current release uses the compact toolbar and collapsible Advanced panel described above.*
 
 ### Where to find controls
 
 | Control | Location |
 | --- | --- |
-| Amount (%) | **Advanced → Brush Behavior** |
+| Amount, Amount Jitter, Smoothing, Build-up and Flow/Flow Jitter | **Advanced → Brush Behavior**; Flow controls appear with Build-up |
+| Angle/Size Jitter, Scatter, Jitter Seed and Follow Stroke Direction | **Advanced → Brush Shape & Transform** |
+| Influence units and preset values | **Influence ⋯ menu** in the toolbar |
 | Rectangle/ellipse selections and Import Mask… | **Advanced → Field Tools** |
 | Custom Tip | **Advanced → Brush Shape & Transform → Shape: Custom → Custom Tip → Import Tip PNG…** |
 | Procedural tips | **Advanced → Brush Shape & Transform → Shape: Procedural → Procedural Tip**; choose **Type: Scatter** or **Noise** |
@@ -260,6 +262,8 @@ Disk, Square and Diamond define the footprint. **Advanced > Brush Shape & Transf
 
 #### Brush behavior
 
+**Smoothing (0–100%)** steadies the sampled stroke path; zero preserves the unsmoothed path. **Angle, Size, Amount and Flow Jitter** vary individual stamps reproducibly. **Scatter** offsets stamps around the path; **Jitter Seed** and **New Jitter Seed** choose the repeatable variation. **Follow Stroke Direction** turns directional tips with the stroke. Zero jitter/scatter and disabled direction following preserve ordinary behavior. These settings travel with workflow brush settings and Brush Library presets.
+
 Spacing controls stamps along the stroke. **Build-up** enables distance-based accumulation, with **Flow** controlling its rate, capped by Amount. **Raise Only** and **Lower Only** constrain ordinary edits to one direction. Uniform, Linear Gradient, Radial Gradient and Square Gradient value profiles control the values painted within the footprint.
 
 #### Custom Tip
@@ -284,7 +288,7 @@ Presets store brush configuration, not field content, selections, history or fie
 
 #### Pressure
 
-When enabled, pen pressure can affect **Size**, **Amount** and **Flow**; Flow pressure applies with Build-up. Choose the mappings you want. A physical pen is optional: mouse, touch and Shift-click lines use the set values. Some pressure tests used synthetic pen events, so physical-device behavior should be checked on your own tablet/browser combination.
+When enabled, pen pressure can affect **Size**, **Amount** and **Flow**; Flow pressure applies with Build-up. **Minimum Size (% of Size)** sets the floor when pressure controls Size. Choose the mappings you want. A physical pen is optional: mouse, touch and Shift-click lines use the set values. Some pressure tests used synthetic pen events, so physical-device behavior should be checked on your own tablet/browser combination.
 
 ### Multi-field editing
 
@@ -354,9 +358,14 @@ Sidebar generation supports **1–3 Active Conditioning Layers with No Overlap**
 | Tier | ComfyUI | Frontend | Evidence |
 | --- | --- | --- | --- |
 | Qualified baseline | 0.34.6 | 1.49.6 | Established baseline testing. |
-| Successfully functional-smoke-tested | 0.39.2 | 1.53.10 | Core painting, brushes, multi-field editing, Transfer, Balance, Undo/Redo, save/reopen and example loading. |
+| Bounded live qualification | 0.37.2 | 1.52.7 | Exact-three-layer normalized Blend: technical and owner visual PASS; qualification-only host, not general editor qualification. |
+| Bounded live evidence | 0.37.4 | 1.52.7 | Technical compatibility and selected live workflows, including a native N=9 technical/owner visual PASS. Visual coverage varies by attempt; no blanket qualification. |
+| Successfully functional-smoke-tested | 0.39.2 | 1.53.10 | Core painting, brushes, multi-field editing, Transfer, Balance, Undo/Redo, save/reopen and example loading at the earlier tested checkpoint. |
+| UI launch / visual inspection only | 0.42.0 | 1.55.18 | Development UI launched and was visually inspected; no full compatibility, generation or persistence qualification claimed. |
 
-The newer pair has narrower test coverage than the baseline. Other combinations are not established. These node/editor results do not widen sidebar generation support. See the [public validation summary](docs/developer.md#validation) for automated checks and their limits.
+Newer-version evidence is narrower than baseline qualification and does not establish every later editor change. Other combinations are not established. Native node availability does not imply compatibility qualification or widen the legacy sidebar's stricter host, model and port requirements. See the [public validation summary](docs/developer.md#validation) for automated checks and their limits.
+
+Retained native workflow-persistence qualification passed **Save → browser restart → Open**, restoring all **16,384 field codes** exactly and producing byte-identical CPU operation-chain output. This completed journey is carried forward, not rerun for this candidate, and is not a 0.42.0 qualification claim.
 
 ## Troubleshooting
 

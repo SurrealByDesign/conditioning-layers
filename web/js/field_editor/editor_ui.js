@@ -1,8 +1,10 @@
-import {Stroke, fieldOperation, percentToCode, sameCodes, stampPreview, transformField, withinSelection, FIELD_TRANSFORMS, PressureStroke, pressureCode, pressureMappings, scaledControl, pressurePercent} from "./engine.js";
+import {Stroke, fieldOperation, percentToCode, sameCodes, stampPreview, transformField, withinSelection, FIELD_TRANSFORMS, PressureStroke, pressureCode, pressureMappings, pressurePercent} from "./engine.js";
 import {FieldHistory, observeHistory} from "./history.js";
 import {TransferLinks, transferReach, transferEngineBrush, transferSource, nothingMovable,
   BALANCE_DEFAULT_SHARE, balanceTarget, balancePartner, balanceSettled} from "./transfer.js";
 import {createNumberControl} from "./number_control.js";
+import {StrokeSmoother} from "./stroke_smoothing.js";
+import {JitterStroke, JitterPressureStroke, stampJitterActive} from "./angle_jitter.js";
 import {decodeFieldPng, encodeFieldPng} from "./png_codec.js";
 import {BRUSH_DEFAULTS, PROCEDURAL_KEYS, PROCEDURAL_EMPTY, cropError, profileError, proceduralError, proceduralMask, tipMask, validBrushSetting} from "./brush.js";
 import {decodeTipDataUrl, importTipFile, storedTipValid} from "./custom_tip.js";
@@ -103,16 +105,20 @@ function tipModifiers(s) {
 // no effect and are not flagged. tip is the custom tip's condition; anything but "ready" is shown.
 function pressureLabels(settings) {
   const mappings = pressureMappings(settings);
-  return ["Size", "Amount", "Flow"].filter(label => mappings?.[label.toLowerCase()]);
+  return ["Size", "Amount", "Flow"].filter(label => mappings?.[label.toLowerCase()])
+    .map(label => label === "Size" && settings.pressure_min_size ? `Size ≥ ${settings.pressure_min_size}%` : label);
 }
 export function brushBadges(s, tip = "ready", procedural = "ready", share = BALANCE_DEFAULT_SHARE) {
   const behavior = [], shape = [], profile = [];
   if (s.amount !== 100) behavior.push(`Amount ${s.amount}%`);
+  if (s.amount_jitter) behavior.push(`Amount Jitter ±${s.amount_jitter}%`);
   if (s.tool === "restore") behavior.push("Restore");
   if (s.tool === "transfer") behavior.push("Transfer");
   if (s.tool === "balance") behavior.push(`Balance ${share}:${100 - share}`);
   if (s.build_up) behavior.push(`Build-up ${s.flow}%`);
+  if (s.build_up && s.flow_jitter) behavior.push(`Flow Jitter ±${s.flow_jitter}%`);
   if (s.spacing === "custom") behavior.push(`Spacing ${s.spacing_percent}%`);
+  if (s.smoothing) behavior.push(`Smoothing ${s.smoothing}%`);
   if (s.falloff_curve !== "smooth") behavior.push(s.falloff_curve === "linear" ? "Linear falloff" : "Sharper falloff");
   if (s.apply_mode !== "normal") behavior.push((s.apply_mode === "raise_only" ? "Raise Only" : "Lower Only")
     + (s.tool === "transfer" ? " (inactive for Transfer)" : s.tool === "balance" ? " (inactive for Balance)" : ""));
@@ -122,6 +128,11 @@ export function brushBadges(s, tip = "ready", procedural = "ready", share = BALA
   else if (s.shape !== "disk") shape.push(s.shape === "square" ? "Square" : "Diamond");
   if (s.scale_x !== 1 || s.scale_y !== 1) shape.push(`Scale ${s.scale_x}×${s.scale_y}`);
   if (s.rotation_degrees !== 0) shape.push(`Rotation ${s.rotation_degrees}°`);
+  if (s.follow_direction) shape.push("Follow Direction");
+  if (s.angle_jitter) shape.push(`Angle Jitter ±${s.angle_jitter}°`);
+  if (s.size_jitter) shape.push(`Size Jitter ±${s.size_jitter}%`);
+  if (s.scatter) shape.push(`Scatter ${s.scatter}%`);
+  if (s.jitter_seed) shape.push(`Jitter Seed ${s.jitter_seed}`);
   if (s.mirror_horizontal) shape.push("Mirror H");
   if (s.mirror_vertical) shape.push("Mirror V");
   if (s.crop_left || s.crop_right || s.crop_top || s.crop_bottom)
@@ -183,7 +194,7 @@ export function openInfluenceFieldEditor({codes, settings, host, onDone, onCance
   let active = records[0], session = active.session;
   const changed = r => r.session.changed() || JSON.stringify(editorSettings(r.session.settings)) !== r.initialSettings;
   const isAvailable = r => host.fields ? host.fields.available(r.key) : true;
-  let stroke = null, gesture = null, space = false, closed = false, busy = false, frame = null;
+  let stroke = null, smoother = null, gesture = null, space = false, closed = false, busy = false, frame = null;
   let transfer = null, transferMessage = null;
   // A Balance stroke's binding at its start, and the message-line text Balance set.
   let balance = null, balanceMessage = null;
@@ -211,11 +222,13 @@ export function openInfluenceFieldEditor({codes, settings, host, onDone, onCance
   dialog.setAttribute("aria-label", "Influence Field Editor");
   const style = el("style", null, dialog);
   style.textContent = `
-    .cl-field-editor {width:min(1000px,94vw);height:min(760px,92vh);box-sizing:border-box;
+    .cl-field-editor {width:96vw;height:96vh;box-sizing:border-box;
       background:#24262b;color:#eee;border:1px solid #777;border-radius:8px;padding:16px;}
     .cl-field-editor::backdrop {background:#0009;}
-    .cl-field-editor .layout {display:flex;flex-direction:column;gap:12px;height:100%;}
+    .cl-field-editor .layout {display:flex;flex-direction:column;gap:6px;height:100%;}
     .cl-field-editor .bar {display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+    .cl-field-editor .top-bar {flex-wrap:nowrap;flex:none;min-width:0;}
+    .cl-field-editor .top-bar > :not(.status) {flex:none;white-space:nowrap;}
     .cl-field-editor .body {display:flex;gap:16px;flex:1;min-height:0;}
     .cl-field-editor .viewport {position:relative;flex:1;min-width:100px;overflow:hidden;background:#141519;touch-action:none;}
     .cl-field-editor canvas {position:absolute;left:0;top:0;image-rendering:pixelated;transform-origin:0 0;}
@@ -232,7 +245,39 @@ export function openInfluenceFieldEditor({codes, settings, host, onDone, onCance
     .cl-field-editor .selection-veil {pointer-events:none;}
     .cl-field-editor .selection-outline,.cl-field-editor .selection-candidate {position:absolute;left:0;top:0;
       width:128px;height:128px;transform-origin:0 0;overflow:visible;pointer-events:none;}
-    .cl-field-editor .tools {width:240px;overflow:auto;display:flex;flex-direction:column;gap:12px;}
+    .cl-field-editor .tools {display:grid;grid-template-columns:minmax(0,1fr) auto auto;
+      grid-template-rows:32px;gap:8px;flex:none;min-width:0;position:relative;}
+    .cl-field-editor .painting-controls {display:flex;align-items:center;gap:8px;min-width:0;
+      overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;grid-column:1;grid-row:1;}
+    .cl-field-editor .painting-controls > * {flex:none;}
+    .cl-field-editor .painting-controls .bar {flex-wrap:nowrap;}
+    .cl-field-editor .painting-controls label {white-space:nowrap;}
+    .cl-field-editor .painting-controls input {width:56px;}
+    .cl-field-editor .influence-control {width:208px;}
+    .cl-field-editor .influence-group {display:flex;align-items:center;gap:2px;}
+    .cl-field-editor .influence-menu > summary {list-style:none;min-width:20px;text-align:center;
+      border:1px solid #777;border-radius:3px;line-height:18px;}
+    .cl-field-editor .influence-menu > summary::-webkit-details-marker {display:none;}
+    .cl-field-editor .influence-menu[open] > summary {background:#3a3d44;}
+    /* The containing block is the toolbar, outside its scrolling strip. */
+    .cl-field-editor .painting-options {position:absolute;top:100%;left:clamp(0px,25%,calc(100% - 318px));
+      z-index:3;width:300px;display:flex;flex-direction:column;align-items:flex-start;gap:8px;
+      padding:8px;background:#24262b;border:1px solid #777;font-size:12px;}
+    .cl-field-editor .painting-options small {font-size:inherit;}
+    .cl-field-editor .painting-options button {padding:6px;}
+    .cl-field-editor .influence-readout {white-space:nowrap;font-variant-numeric:tabular-nums;}
+    .cl-field-editor .field-strip .profile-note {width:300px;font-size:12px;line-height:14px;white-space:normal;}
+    .cl-field-editor .field-menu {grid-column:2;grid-row:1;position:relative;}
+    .cl-field-editor .field-menu-content {position:absolute;right:0;top:100%;z-index:3;width:240px;
+      display:flex;flex-direction:column;gap:6px;padding:8px;background:#24262b;border:1px solid #777;
+      max-height:50vh;overflow:auto;}
+    .cl-field-editor .advanced-panel {width:240px;flex:none;min-height:0;overflow:auto;}
+    .cl-field-editor .advanced-toggle {grid-column:3;grid-row:1;width:126px;white-space:nowrap;}
+    .cl-field-editor .painting-controls .advanced-state {flex:none;width:100px;white-space:nowrap;
+      overflow:hidden;text-overflow:ellipsis;}
+    @media (max-width:1279px) {
+      .cl-field-editor .tools {grid-template-rows:44px;}
+    }
     .cl-field-editor details.group {margin:6px 0;padding-left:8px;border-left:2px solid #555;}
     .cl-field-editor details.group > * {margin:6px 0;}
     .cl-field-editor details.group > summary {font-weight:600;}
@@ -248,7 +293,8 @@ export function openInfluenceFieldEditor({codes, settings, host, onDone, onCance
     .cl-field-editor .procedural-crop {position:absolute;box-sizing:border-box;border:1px solid #00ffff;pointer-events:none;}
     .cl-field-editor .procedural-prepared {display:flex;flex-direction:column;align-items:flex-start;gap:4px;}
     .cl-field-editor .procedural-status,.cl-field-editor .procedural-help {display:block;}
-    .cl-field-editor .field-strip {display:flex;align-items:center;gap:8px;overflow-x:auto;white-space:nowrap;min-height:34px;}
+    .cl-field-editor .field-strip {display:flex;align-items:center;gap:8px;overflow-x:auto;white-space:nowrap;height:48px;flex:none;scrollbar-width:thin;}
+    .cl-field-editor .field-strip > * {flex:none;}
     .cl-field-editor .field-tab {display:flex;align-items:center;gap:2px;border:1px solid #555;border-radius:4px;padding:2px;}
     .cl-field-editor .field-tab.active {border-color:#79aeff;background:#2f3440;}
     .cl-field-editor .field-swatch {display:inline-block;width:10px;height:10px;margin-right:6px;border:1px solid #111;}
@@ -266,11 +312,14 @@ export function openInfluenceFieldEditor({codes, settings, host, onDone, onCance
     .cl-field-editor input:not([readonly]) {cursor:text;}
     .cl-field-editor button,.cl-field-editor summary {padding:6px;cursor:pointer;}
     .cl-field-editor button[aria-pressed=true] {outline:2px solid #79aeff;}
-    .cl-field-editor .status {font-size:12px;min-height:30px;}
-    .cl-field-editor .error {color:#ffb5ab;}
+    .cl-field-editor .status {font-size:12px;flex:1 1 0;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .cl-field-editor .profile-note {flex:none;}
+    .cl-field-editor .error {color:#ffb5ab;box-sizing:border-box;height:24px;flex:none;
+      line-height:24px;white-space:nowrap;text-overflow:ellipsis;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;}
+    .cl-field-editor .error::-webkit-scrollbar {display:none;}
   `;
   const layout = el("div", null, dialog); layout.className = "layout";
-  const top = el("div", null, layout); top.className = "bar";
+  const top = el("div", null, layout); top.className = "bar top-bar";
   el("strong", "Influence Field Editor", top);
   const button = (parent, label, action) => {
     const b = el("button", label, parent); b.type = "button";
@@ -279,6 +328,8 @@ export function openInfluenceFieldEditor({codes, settings, host, onDone, onCance
   function edit(action) { if (stroke) return; anchor = null; action(); schedule(); }
   const undo = button(top, "Undo", () => edit(() => historyStep("undo")));
   const redo = button(top, "Redo", () => edit(() => historyStep("redo")));
+  button(top, "Fit", fit);
+  const status = el("span", null, top); status.className = "status";
   button(top, "Cancel", cancel);
   const done = button(top, "Done", async () => {
     if (stroke) endStroke();
@@ -290,7 +341,7 @@ export function openInfluenceFieldEditor({codes, settings, host, onDone, onCance
       else await onDone(session.codes.slice(), editorSettings(session.settings));
       close();
     }
-    catch (error) { message.textContent = error.message; }
+    catch (error) { message.textContent = message.title = error.message; }
     finally { busy = false; done.disabled = false; }
   });
   const strip = el("div", null, layout); strip.className = "field-strip";
@@ -304,6 +355,9 @@ export function openInfluenceFieldEditor({codes, settings, host, onDone, onCance
   // help and status at the first partner choice. Both are kept for the dialog's life.
   let balanceRow = null, balanceStrip = null, balanceButtons = [];
   let shareRow = null, shareControl = null, balanceHelp = null, balanceStatus = null;
+  const tools = el("div", null, layout); tools.className = "tools";
+  tools.setAttribute("role", "group"); tools.setAttribute("aria-label", "Painting controls");
+  const paintingControls = el("div", null, tools); paintingControls.className = "painting-controls";
   const body = el("div", null, layout); body.className = "body";
   const viewport = el("div", null, body); viewport.className = "viewport";
   const reference = el("img", null, viewport); reference.className = "reference";
@@ -336,8 +390,7 @@ export function openInfluenceFieldEditor({codes, settings, host, onDone, onCance
     const path = document.createElementNS(SVG, "path");
     path.setAttribute("fill", "none"); path.setAttribute("stroke", color); outline.append(path); return path;
   });
-  const tools = el("div", null, body); tools.className = "tools";
-  const toolBar = el("div", null, tools); toolBar.className = "bar";
+  const toolBar = el("div", null, paintingControls); toolBar.className = "bar";
   function setTool(tool) {
     cancelSelectionGesture();
     if (session.settings.tool !== tool || session.selectTool !== null) anchor = null;
@@ -354,8 +407,8 @@ export function openInfluenceFieldEditor({codes, settings, host, onDone, onCance
         if (busy) return;
         const value = convert(n), problem = check?.(value);
         // A rejected value is reported and reverted, never silently adjusted.
-        if (problem) { control.setValue(session.settings[key]); message.textContent = rejection = problem; return; }
-        if (rejection && message.textContent === rejection) message.textContent = rejection = "";
+        if (problem) { control.setValue(session.settings[key]); message.textContent = message.title = rejection = problem; return; }
+        if (rejection && message.textContent === rejection) message.textContent = message.title = rejection = "";
         session.settings[key] = value; schedule();
       }});
     row.append(control.element); controls.push(control); synced.push([control, key]); control.row = row;
@@ -378,8 +431,9 @@ export function openInfluenceFieldEditor({codes, settings, host, onDone, onCance
     details.addEventListener("toggle", () => { if (!closed) host.setGroupExpanded(key, details.open); });
     return {details, heading: el("summary", title, details), title};
   }
-  number(tools, "Size (cells)", "size", 1, 128);
-  const influenceRow = el("div", null, tools);
+  number(paintingControls, "Size (cells)", "size", 1, 128);
+  const influenceGroup = el("div", null, paintingControls); influenceGroup.className = "influence-group";
+  const influenceRow = el("div", null, influenceGroup); influenceRow.className = "influence-control";
   let influence;
   function influenceControl() {
     if (influence) {
@@ -391,31 +445,46 @@ export function openInfluenceFieldEditor({codes, settings, host, onDone, onCance
       0, percent ? 100 : 255, percent ? 0.1 : 1, !percent, percent ? percentToCode : n => n);
   }
   influenceControl();
-  const exact = el("small", null, tools);
+  const influenceMenu = el("details", null, influenceGroup); influenceMenu.className = "influence-menu";
+  const influenceSummary = el("summary", "⋯", influenceMenu);
+  influenceSummary.title = "Influence units and presets";
+  influenceSummary.setAttribute("aria-label", "Influence options");
+  const paintingOptions = el("div", null, influenceMenu); paintingOptions.className = "painting-options";
+  paintingOptions.setAttribute("role", "group"); paintingOptions.setAttribute("aria-label", "Influence options");
+  function closeInfluenceMenu() { influenceMenu.open = false; }
+  dialog.addEventListener("pointerdown", event => {
+    if (!influenceGroup.contains(event.target)) closeInfluenceMenu();
+  });
+  influenceGroup.addEventListener("focusout", event => {
+    if (!influenceGroup.contains(event.relatedTarget)) closeInfluenceMenu();
+  });
+  const exact = el("small"); exact.className = "influence-readout";
   // Influence stays visible and still sets Fill; a gradient replaces it only as Paint's target.
-  const profileNote = el("small", null, tools);
-  button(tools, "% ⇄ 0–255", () => {
+  const profileNote = el("small"); profileNote.className = "profile-note";
+  button(paintingOptions, "% ⇄ 0–255", () => {
     influence.commit(); session.settings.influenceUnit = session.settings.influenceUnit === "percent" ? "code" : "percent";
     influenceControl(); schedule();
   });
-  const chips = el("div", null, tools); chips.className = "bar";
+  const chips = el("div", null, paintingOptions); chips.className = "bar";
   for (const p of [0, 25, 50, 75, 100]) button(chips, `${p}%`, () => {
     session.settings.influence = percentToCode(p); schedule();
   });
-  number(tools, "Hardness (%)", "hardness", 0, 100);
-  button(tools, "Clear", () => edit(() => session.operation("clear"))).title =
+  paintingOptions.append(exact);
+  number(paintingControls, "Hardness (%)", "hardness", 0, 100);
+  button(paintingControls, "Clear", () => edit(() => session.operation("clear"))).title =
     "Set cells to 0: every cell, or only the selected cells while a selection is active.";
-  const field = el("details", null, tools); el("summary", "Field", field);
-  button(field, "Fill with Influence", () => edit(() => session.operation("fill"))).title =
+  const field = el("details", null, tools); field.className = "field-menu"; el("summary", "Field", field);
+  const fieldContent = el("div", null, field); fieldContent.className = "field-menu-content";
+  button(fieldContent, "Fill with Influence", () => edit(() => session.operation("fill"))).title =
     "Set cells to Influence: every cell, or only the selected cells while a selection is active.";
-  button(field, "Invert", () => edit(() => session.operation("invert"))).title =
+  button(fieldContent, "Invert", () => edit(() => session.operation("invert"))).title =
     "Replace each code with 255 − code: every cell, or only the selected cells while a selection is active.";
-  const picker = el("input", null, field); picker.type = "file"; picker.accept = ".png"; picker.hidden = true;
-  button(field, "Import PNG…", () => picker.click()).title =
+  const picker = el("input", null, fieldContent); picker.type = "file"; picker.accept = ".png"; picker.hidden = true;
+  button(fieldContent, "Import PNG…", () => picker.click()).title =
     "Exact 128×128 grayscale field PNG, as Export PNG writes; never resized. With an active selection, only selected cells change. Other sizes: Advanced ▸ Field Tools ▸ Import Mask…";
   picker.addEventListener("change", () => { importFile(picker.files?.[0]); picker.value = ""; });
-  const copyButtons = el("span", null, field); copyButtons.className = "field-copies";
-  button(field, "Export PNG", async () => {
+  const copyButtons = el("span", null, fieldContent); copyButtons.className = "field-copies";
+  button(fieldContent, "Export PNG", async () => {
     busy = true;
     try {
       const bytes = await encodeFieldPng(session.codes);
@@ -423,13 +492,37 @@ export function openInfluenceFieldEditor({codes, settings, host, onDone, onCance
       const url = URL.createObjectURL(new Blob([bytes], {type: "image/png"}));
       const a = el("a", null, dialog); a.href = url; a.download = "influence-field.png"; a.click(); a.remove();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
-    } catch (error) { message.textContent = error.message; }
+    } catch (error) { message.textContent = message.title = error.message; }
     finally { busy = false; }
   });
-  const advanced = el("details", null, tools);
+  const advancedToggle = button(tools, "", () => {
+    if (stroke || gesture) return;
+    advanced.open = !advanced.open;
+    updateAdvancedPanel();
+  });
+  advancedToggle.className = "advanced-toggle";
+  const advancedPanel = el("div", null, body); advancedPanel.className = "advanced-panel";
+  const advanced = el("details", null, advancedPanel);
+  advanced.id = "cl-field-editor-advanced";
   advanced.open = host.getAdvancedExpanded();
   const summary = el("summary", null, advanced);
-  advanced.addEventListener("toggle", () => { if (!closed) host.setAdvancedExpanded(advanced.open); });
+  advancedToggle.setAttribute("aria-controls", advanced.id);
+  const advancedState = el("small", null, paintingControls); advancedState.className = "advanced-state";
+  function updateAdvancedPanel() {
+    if (stroke || gesture) { advanced.open = !advancedPanel.hidden; return; }
+    const resized = advancedPanel.hidden !== !advanced.open;
+    advancedPanel.hidden = !advanced.open;
+    advancedToggle.textContent = advanced.open ? "Hide Advanced" : "Show Advanced";
+    advancedToggle.setAttribute("aria-expanded", advanced.open);
+    if (resized) {
+      if (!advanced.open) advancedToggle.focus();
+      host.setAdvancedExpanded(advanced.open);
+      fit(); // Deliberate panel-width change: reuse the existing Fit behavior.
+    }
+  }
+  advancedPanel.hidden = !advanced.open;
+  updateAdvancedPanel();
+  advanced.addEventListener("toggle", () => { if (!closed) updateAdvancedPanel(); });
   button(advanced, "Brush Library…", async () => {
     if (libraryDialog || stroke || gesture || closed) return;
     for (const control of controls) control.commit();
@@ -448,16 +541,22 @@ export function openInfluenceFieldEditor({codes, settings, host, onDone, onCance
           clearTipMessage(); anchor = null; schedule();
         }, confirmDelete: name => window.confirm(`Delete brush preset “${name}”?`),
         onClose: () => { libraryDialog = null; dialog.focus(); }});
-    } catch (error) { message.textContent = `Cannot open Brush Library: ${error.message}`; }
+    } catch (error) { message.textContent = message.title = `Cannot open Brush Library: ${error.message}`; }
     finally { busy = false; }
   });
   const behavior = group(advanced, "Brush Behavior", "behavior");
   number(behavior.details, "Amount (%)", "amount", 1, 100);
+  number(behavior.details, "Amount Jitter (%)", "amount_jitter", 0, 100).row.title =
+    "Changes each stamp's Amount by a repeatable whole-percent amount, up to this much lower or higher (pen pressure's Amount applied first), kept within 1–100%. 0: every stamp at its Amount.";
   const buildUpRow = el("div", null, behavior.details); buildUpRow.className = "bar";
   toggle(buildUpRow, "Build-up", "build_up");
   const flow = number(behavior.details, "Flow (%)", "flow", 1, 100);
+  const flowJitter = number(behavior.details, "Flow Jitter (%)", "flow_jitter", 0, 100);
+  flowJitter.row.title = "Changes each Build-up stamp's Flow by a repeatable whole-percent amount, up to this much lower or higher (pen pressure's Flow applied first), kept within 1–100%. 0: every stamp at its Flow.";
   choice(behavior.details, "Spacing", "spacing", [["auto", "Auto"], ["custom", "Custom"]]);
   const spacing = number(behavior.details, "Spacing (% of Size)", "spacing_percent", 1, 1000);
+  number(behavior.details, "Smoothing (%)", "smoothing", 0, 100).row.title =
+    "Steadies the painted path against hand jitter; higher values follow the pointer more loosely. The stroke still ends where you release. 0: the path as drawn.";
   choice(behavior.details, "Falloff", "falloff_curve", [["smooth", "Smooth"], ["linear", "Linear"], ["sharper", "Sharper"]]);
   choice(behavior.details, "Apply", "apply_mode",
     [["normal", "Normal"], ["raise_only", "Raise Only"], ["lower_only", "Lower Only"]]);
@@ -470,10 +569,12 @@ export function openInfluenceFieldEditor({codes, settings, host, onDone, onCance
     "Read a pen's pressure while painting with Paint, Erase, Restore, Transfer or Balance. Mouse, touch and Shift-click lines always paint with the set values.";
   const pressureRow = el("div", null, pressureGroup.details); pressureRow.className = "bar";
   el("span", "Pressure changes", pressureRow);
-  toggle(pressureRow, "Size", "pressure_size").title = "Lighter pressure paints a smaller stamp, down to 1 cell.";
+  toggle(pressureRow, "Size", "pressure_size").title = "Lighter pressure paints a smaller stamp, down to Minimum Size and never below 1 cell.";
   toggle(pressureRow, "Amount", "pressure_amount").title = "Lighter pressure lowers how far a stamp can move cells toward the target. Amount stays the most.";
   const pressureFlow = toggle(pressureRow, "Flow", "pressure_flow");
   pressureFlow.title = "Lighter pressure builds up more slowly. Acts only with Build-up.";
+  const pressureMin = number(pressureGroup.details, "Minimum Size (% of Size)", "pressure_min_size", 0, 100);
+  pressureMin.row.title = "The smallest stamp light pressure paints, as a percentage of Size. 0: down to 1 cell.";
   const pressureNote = el("small", "Pen pressure changes nothing yet: choose Size or Amount, or turn on Build-up for Flow.", pressureGroup.details);
   el("small", "Pen only. Each stamp uses the pen's pressure where it lands: full pressure paints with the set value, lighter pressure with less (never below 1), and no pressure paints nothing. Mouse, touch and Shift-click lines paint with the set values.", pressureGroup.details);
   const shape = group(advanced, "Brush Shape & Transform", "shape");
@@ -583,6 +684,24 @@ export function openInfluenceFieldEditor({codes, settings, host, onDone, onCance
   number(shape.details, "Scale X", "scale_x", 0.1, 10, 0.1, false);
   number(shape.details, "Scale Y", "scale_y", 0.1, 10, 0.1, false);
   number(shape.details, "Rotation (°)", "rotation_degrees", -360, 360, 1, false);
+  const follow = el("div", null, shape.details); follow.className = "bar";
+  toggle(follow, "Follow Stroke Direction", "follow_direction").title =
+    "Turns each stamp toward the direction the stroke travels, measured along the unscattered path; Rotation and Angle Jitter then turn it further. Moving right is 0°. The first stamp, before the stroke has a direction, uses Rotation alone. A plain round Disk looks the same at any angle, so it is not turned.";
+  number(shape.details, "Angle Jitter (±°)", "angle_jitter", 0, 180).row.title =
+    "Turns each stamp by a repeatable whole-degree amount, up to this many degrees either side of Rotation. 0: every stamp at Rotation. A plain round Disk looks the same at any angle, so it is not turned.";
+  number(shape.details, "Size Jitter (%)", "size_jitter", 0, 100).row.title =
+    "Resizes each stamp by a repeatable whole-percent amount, up to this much smaller or larger than its size (pen pressure and Minimum Size applied first), never below 1 cell. Spacing follows the unjittered size. 0: every stamp at its size.";
+  number(shape.details, "Scatter (%)", "scatter", 0, 200).row.title =
+    "Moves each stamp's centre by a repeatable amount in any direction, up to this percentage of its size (pen pressure, Minimum Size and Size Jitter applied first). Spacing and pressure follow the unscattered path. 0: every stamp on the path.";
+  const jitterSeed = number(shape.details, "Jitter Seed", "jitter_seed", 0, 4294967295);
+  jitterSeed.row.title = "Picks which repeatable pattern Angle, Size, Amount and Flow Jitter and Scatter draw. The stroke's path and spacing stay the same. 0: the original pattern.";
+  const newJitterSeed = button(shape.details, "New Jitter Seed", () => {
+    jitterSeed.commit();
+    const drawn = globalThis.crypto.getRandomValues(new Uint32Array(1))[0];
+    session.settings.jitter_seed = drawn === session.settings.jitter_seed ? (drawn + 1) % 4294967296 : drawn;
+    schedule();
+  });
+  newJitterSeed.title = "Pick a new random Jitter Seed. Strokes use the stored Seed, so typing it again reproduces the same jitter exactly.";
   const mirrors = el("div", null, shape.details); mirrors.className = "bar";
   toggle(mirrors, "Mirror H", "mirror_horizontal"); toggle(mirrors, "Mirror V", "mirror_vertical");
   for (const [label, key] of [["Crop Left (%)", "crop_left"], ["Crop Right (%)", "crop_right"],
@@ -616,7 +735,7 @@ export function openInfluenceFieldEditor({codes, settings, host, onDone, onCance
     number(valueProfile.details, "Aspect Y", "gradient_aspect_y", 0.1, 10, 0.1, false),
     number(valueProfile.details, "Gradient Rotation (°)", "gradient_rotation", -360, 360, 1, false)];
   const gradientHelp = el("small", null, valueProfile.details);
-  const reset = button(tools, "Reset Brush", () => {
+  const reset = button(paintingControls, "Reset Brush", () => {
     if (["restore", "transfer", "balance"].includes(session.settings.tool)) { session.settings.tool = "paint"; anchor = null; }
     active.transferSource = null; clearTransferMessage();
     active.balancePartner = null; clearBalanceMessage(); active.balanceShare = BALANCE_DEFAULT_SHARE;
@@ -682,10 +801,8 @@ export function openInfluenceFieldEditor({codes, settings, host, onDone, onCance
   for (const name of ["pointercancel", "lostpointercapture", "blur"]) compare.addEventListener(name, releaseCompare);
   button(advanced, "Reset View", () => { clearReference(); Object.assign(view, createViewSession()); schedule(); });
   el("small", "Alt-click: sample field Influence. Shift-click: line from last stroke endpoint. Drop field PNGs on canvas.", advanced);
-  const bottom = el("div", null, layout); bottom.className = "bar";
-  button(bottom, "Fit", fit);
-  const status = el("span", null, bottom); status.className = "status";
   const message = el("div", null, layout); message.className = "error"; message.setAttribute("role", "alert");
+  message.tabIndex = 0; // Keyboard users can scroll the complete, single-line error.
 
   // One eligibility check for every membership operation; asynchronous work stays field-bound.
   function canSwitch() { return !closed && !busy && !stroke && !gesture && !maskDialog && !libraryDialog && !chooserDialog; }
@@ -709,11 +826,11 @@ export function openInfluenceFieldEditor({codes, settings, host, onDone, onCance
     r.visible = true; clearTransferMessage(); clearBalanceMessage(); schedule();
   }
   function showTransferMessage(text, refusal = false) {
-    message.textContent = text; transferMessage = {text, refusal};
+    message.textContent = message.title = text; transferMessage = {text, refusal};
   }
   function showTransferNote(text) { showTransferMessage(text); transferMessage.note = true; }
   function clearTransferMessage() {
-    if (transferMessage && message.textContent === transferMessage.text) message.textContent = "";
+    if (transferMessage && message.textContent === transferMessage.text) message.textContent = message.title = "";
     transferMessage = null;
   }
   // Balance's partner: like a Transfer source, an invalid one is cleared, never replaced.
@@ -746,11 +863,11 @@ export function openInfluenceFieldEditor({codes, settings, host, onDone, onCance
     balanceStatus = el("small", null, behavior.details); balanceStatus.className = "balance-status";
   }
   function showBalanceMessage(text, refusal = false) {
-    message.textContent = text; balanceMessage = {text, refusal};
+    message.textContent = message.title = text; balanceMessage = {text, refusal};
   }
   function showBalanceNote(text) { showBalanceMessage(text); balanceMessage.note = true; }
   function clearBalanceMessage() {
-    if (balanceMessage && message.textContent === balanceMessage.text) message.textContent = "";
+    if (balanceMessage && message.textContent === balanceMessage.text) message.textContent = message.title = "";
     balanceMessage = null;
   }
   function historyStep(kind) {
@@ -768,7 +885,7 @@ export function openInfluenceFieldEditor({codes, settings, host, onDone, onCance
   function switchTo(r) {
     const unit = session.settings.influenceUnit;
     active = r; session = r.session;
-    anchor = endpoint = null; message.textContent = "";
+    anchor = endpoint = null; message.textContent = message.title = "";
     rejection = ""; tipMessage = fieldToolsMessage = transferMessage = balanceMessage = null;
     settleSource(r); settlePartner(r);
     if (session.settings.influenceUnit !== unit) influenceControl();
@@ -781,14 +898,14 @@ export function openInfluenceFieldEditor({codes, settings, host, onDone, onCance
   }
   async function chooseField() {
     if (!canSwitch() || records.length >= MAX_SESSION_FIELDS) return;
-    busy = true; message.textContent = "Reading fields…";
+    busy = true; message.textContent = message.title = "Reading fields…";
     try {
       const items = await host.fields.candidates();
       if (closed) return;
-      message.textContent = "";
+      message.textContent = message.title = "";
       chooserDialog = openFieldChooser({items, choose: addField,
         onClose: () => { chooserDialog = null; if (!closed) dialog.focus(); }});
-    } catch (error) { message.textContent = error.message; }
+    } catch (error) { message.textContent = message.title = error.message; }
     finally { busy = false; }
   }
   async function addField(item) {
@@ -799,7 +916,7 @@ export function openInfluenceFieldEditor({codes, settings, host, onDone, onCance
       if (closed) { host.fields.leave(joined.key); return; }
       const r = record(joined, nextColorSlot(records.map(r => r.slot)));
       records.push(r); rebuildMembershipDom(); loadStoredTip(r); schedule();
-    } catch (error) { message.textContent = `Cannot add ${item.label}: ${error.message}`; }
+    } catch (error) { message.textContent = message.title = `Cannot add ${item.label}: ${error.message}`; }
     finally { busy = false; }
   }
   function removeField(r) {
@@ -818,7 +935,7 @@ export function openInfluenceFieldEditor({codes, settings, host, onDone, onCance
   }
   function copyFrom(r) {
     if (!canSwitch() || r === active || !records.includes(r) || !isAvailable(r)) return;
-    edit(() => { session.replace("Copy Field", withinSelection(session.codes, r.session.codes, session.selection)); message.textContent = ""; });
+    edit(() => { session.replace("Copy Field", withinSelection(session.codes, r.session.codes, session.selection)); message.textContent = message.title = ""; });
   }
   function rebuildMembershipDom() {
     if (records.length >= 2 && !transferRow) {
@@ -836,7 +953,7 @@ export function openInfluenceFieldEditor({codes, settings, host, onDone, onCance
       balanceStrip = el("span"); balanceStrip.className = "field-balance";
     }
     tabs = []; copies = []; transferButtons = []; balanceButtons = [];
-    strip.replaceChildren(editing, ...(transferStrip ? [transferStrip] : []), ...(balanceStrip ? [balanceStrip] : []));
+    strip.replaceChildren(editing, profileNote, ...(transferStrip ? [transferStrip] : []), ...(balanceStrip ? [balanceStrip] : []));
     copyButtons.replaceChildren();
     transferRow?.replaceChildren(); balanceRow?.replaceChildren();
     if (records.length >= 2) for (const r of records) {
@@ -967,7 +1084,7 @@ export function openInfluenceFieldEditor({codes, settings, host, onDone, onCance
     erase.setAttribute("aria-pressed", session.selectTool === null && brush.tool === "erase");
     restore.setAttribute("aria-pressed", session.selectTool === null && brush.tool === "restore");
     for (const refresh of refreshers) refresh();
-    flow.row.hidden = !brush.build_up; spacing.row.hidden = brush.spacing !== "custom";
+    flow.row.hidden = flowJitter.row.hidden = !brush.build_up; spacing.row.hidden = brush.spacing !== "custom";
     // Only the chosen profile's rows show; Radial and Square share theirs.
     const kind = brush.value_profile, gradient = kind !== "uniform", painting = brush.tool === "paint";
     for (const control of [gradientStart, gradientEnd, gradientCurve]) control.row.hidden = !gradient;
@@ -983,6 +1100,7 @@ export function openInfluenceFieldEditor({codes, settings, host, onDone, onCance
     profileNote.hidden = !gradient || !painting;
     if (gradient) profileNote.textContent =
       `Paint targets ${GRADIENTS[kind]} ${brush.gradient_start}→${brush.gradient_end} (Value Profile), not Influence.`;
+    profileNote.title = profileNote.textContent;
     const procedural = brush.shape === "procedural" ? proceduralMask(brush) : null;
     const condition = tipCondition(), badges = brushBadges(brush, condition, procedural?.empty ? "empty" : "ready", active.balanceShare);
     // A refusal no longer describing the brush (now ready, another condition, or not Custom) is cleared.
@@ -998,6 +1116,7 @@ export function openInfluenceFieldEditor({codes, settings, host, onDone, onCance
     pressureGroup.heading.textContent = ["Pen Pressure", ...(brush.pressure_enabled ? (pressureNames.length ? pressureNames : ["no effect"]) : [])].join(" · ");
     pressureRow.hidden = !brush.pressure_enabled; pressureFlow.hidden = !brush.build_up;
     pressureNote.hidden = !brush.pressure_enabled || pressureNames.length > 0;
+    pressureMin.row.hidden = !brush.pressure_enabled || !brush.pressure_size;
     shape.heading.textContent = [shape.title, ...badges.shape].join(" · ");
     valueProfile.heading.textContent = [valueProfile.title, ...badges.profile].join(" · ");
     const selected = selectionStats(session.selection), selectionBadges = [];
@@ -1015,6 +1134,8 @@ export function openInfluenceFieldEditor({codes, settings, host, onDone, onCance
     viewport.style.cursor = session.selectTool !== null ? "crosshair" : "";
     drawSelection();
     if (view.grid || view.heat || view.referenceOpacity !== 50 || referenceUrl) summary.textContent += " · View modified";
+    advancedState.textContent = advancedState.title = summary.textContent;
+    advancedState.hidden = summary.textContent === "Advanced";
     reset.hidden = !badges.behavior.length && !badges.shape.length && !badges.profile.length;
     undo.disabled = !session.history.undoEntries.length; redo.disabled = !session.history.redoEntries.length;
     const stats = fieldStatistics(session.codes), target = cellReadout(session.codes, cursor);
@@ -1027,7 +1148,7 @@ export function openInfluenceFieldEditor({codes, settings, host, onDone, onCance
       cell.style.width = cell.style.height = `${zoom}px`;
     }
     drawBrush(stroke instanceof PressureStroke && stroke.mappings.size
-      ? {...brush, size: scaledControl(stroke.brush.size, stroke.pressure)} : brush);
+      ? {...brush, size: stroke.sizeAt(stroke.pressure)} : brush);
     cell.hidden = !target || zoom < 8 || space || view.comparing;
     if (candidate !== null) {
       const r = selectionRectangle(gesture.start, gesture.end);
@@ -1035,7 +1156,8 @@ export function openInfluenceFieldEditor({codes, settings, host, onDone, onCance
     }
     const selectedText = session.selection === null ? "" : `selection ${selected.count} cells (${(selected.count * 100 / 16384).toFixed(1)}%) · x ${selected.left}–${selected.right} · y ${selected.top}–${selected.bottom} · `;
     status.textContent = `${session.selectTool !== null ? toolName + " · " : ""}${readout}${Math.round(zoom * 100)}% zoom · ${selectedText}${stats.total} cells · ${stats.nonzero} nonzero · ${stats.zero} zero · binary ${stats.binary ? "yes" : "no"} · min ${stats.min} · max ${stats.max} · mean ${stats.mean.toFixed(2)} · ${stats.distinct} distinct${stats.nonzero ? "" : " · no positive values"}`;
-    if (stroke instanceof PressureStroke) status.textContent = `pressure ${pressurePercent(stroke.pressure)}% · ` + status.textContent;
+    if (stroke instanceof PressureStroke && !stroke.mouse) status.textContent = `pressure ${pressurePercent(stroke.pressure)}% · ` + status.textContent;
+    status.title = status.textContent;
   }
   function drawSelection() {
     if (shownSelection !== session.selection) {
@@ -1087,9 +1209,9 @@ export function openInfluenceFieldEditor({codes, settings, host, onDone, onCance
     context.putImageData(pixels, 0, 0); // Display only; never read back into field data.
   }
   function schedule() { if (frame === null && !closed) frame = requestAnimationFrame(render); }
-  function showFieldToolsMessage(text) { message.textContent = fieldToolsMessage = text; }
+  function showFieldToolsMessage(text) { message.textContent = message.title = fieldToolsMessage = text; }
   function clearFieldToolsMessage() {
-    if (fieldToolsMessage !== null && message.textContent === fieldToolsMessage) message.textContent = "";
+    if (fieldToolsMessage !== null && message.textContent === fieldToolsMessage) message.textContent = message.title = "";
     fieldToolsMessage = null;
   }
   function changeSelection(next) {
@@ -1143,10 +1265,10 @@ export function openInfluenceFieldEditor({codes, settings, host, onDone, onCance
     }
     context.putImageData(pixels, 0, 0);
   }
-  function showTipMessage(text, refusal = false) { message.textContent = text; tipMessage = {text, refusal}; }
+  function showTipMessage(text, refusal = false) { message.textContent = message.title = text; tipMessage = {text, refusal}; }
   // Another message written since is left as it is.
   function clearTipMessage() {
-    if (tipMessage && message.textContent === tipMessage.text) message.textContent = "";
+    if (tipMessage && message.textContent === tipMessage.text) message.textContent = message.title = "";
     tipMessage = null;
   }
   function renderTip(s, condition) {
@@ -1217,10 +1339,16 @@ export function openInfluenceFieldEditor({codes, settings, host, onDone, onCance
     const coalesced = event.getCoalescedEvents?.();
     for (const sample of coalesced?.length ? [...coalesced, event] : [event]) {
       const p = position(sample);
-      if (stroke instanceof PressureStroke) stroke.add(p.x, p.y, release ? stroke.pressure : pressureCode(sample.pressure));
-      else stroke.add(p.x, p.y);
+      smoother.add(p.x, p.y, stroke instanceof PressureStroke ? (release ? stroke.pressure : pressureCode(sample.pressure)) : null);
       endpoint = p;
     }
+    if (release) smoother.finish();
+  }
+  // Smoothed points reach the stroke here; Smoothing 0 passes the sampled path through unchanged.
+  function smoothStroke(x, y, pressure) {
+    const made = stroke;
+    return made && new StrokeSmoother(session.settings.smoothing, x, y, pressure,
+      (sx, sy, code) => { if (made instanceof PressureStroke) made.add(sx, sy, code); else made.add(sx, sy); });
   }
   function newStroke(x, y, pressure = null) {
     // A Custom brush without a usable tip says why and paints nothing.
@@ -1241,10 +1369,13 @@ export function openInfluenceFieldEditor({codes, settings, host, onDone, onCance
     const target = moving ? transferReach(active.transferSource.session.codes, session.codes)
       : balancing ? balanceTarget(session.codes, active.balancePartner.session.codes, active.balanceShare) : session.initial;
     let made;
-    try { made = pressure === null
-      ? new Stroke(session.codes, 128, 128, brush, x, y, target, session.selection)
-      : new PressureStroke(session.codes, 128, 128, brush, x, y, target, session.selection, pressure); }
-    catch (error) { message.textContent = error.message; return null; }
+    try {
+      const jitter = stampJitterActive(brush);
+      made = pressure === null && !(jitter && brush.amount_jitter > 0)
+        ? new (jitter ? JitterStroke : Stroke)(session.codes, 128, 128, brush, x, y, target, session.selection)
+        : new (jitter ? JitterPressureStroke : PressureStroke)(session.codes, 128, 128, brush, x, y, target, session.selection, pressure);
+    }
+    catch (error) { message.textContent = message.title = error.message; return null; }
     transfer = moving ? {source: active.transferSource, sourceBefore: active.transferSource.session.codes.slice()} : null;
     balance = balancing ? {partner: active.balancePartner, partnerBefore: active.balancePartner.session.codes.slice(),
       target, share: active.balanceShare} : null;
@@ -1316,7 +1447,7 @@ export function openInfluenceFieldEditor({codes, settings, host, onDone, onCance
     gesture = {id: event.pointerId, x: event.clientX, y: event.clientY, panX, panY, pan: space || event.button === 1};
     if (!gesture.pan) {
       const pressure = event.pointerType === "pen" && pressureMappings(session.settings) ? pressureCode(event.pressure) : null;
-      endpoint = cursor; stroke = newStroke(cursor.x, cursor.y, pressure);
+      endpoint = cursor; stroke = newStroke(cursor.x, cursor.y, pressure); smoother = smoothStroke(cursor.x, cursor.y, pressure);
     }
     schedule();
   });
@@ -1364,10 +1495,10 @@ export function openInfluenceFieldEditor({codes, settings, host, onDone, onCance
       if (closed || revision !== referenceRevision) { URL.revokeObjectURL(url); return; }
       if (referenceUrl) URL.revokeObjectURL(referenceUrl);
       referenceUrl = url; reference.src = url; reference.hidden = false;
-      message.textContent = ""; schedule();
+      message.textContent = message.title = ""; schedule();
     } catch (error) {
       URL.revokeObjectURL(url);
-      if (!closed && revision === referenceRevision) message.textContent = `Cannot load reference image: ${error.message}`;
+      if (!closed && revision === referenceRevision) message.textContent = message.title = `Cannot load reference image: ${error.message}`;
     } finally { pendingReferences.delete(url); }
   }
   async function importFile(file) {
@@ -1377,8 +1508,8 @@ export function openInfluenceFieldEditor({codes, settings, host, onDone, onCance
     try {
       if (file.size > 65536) throw new Error("PNG exceeds 65,536 bytes.");
       const imported = await decodeFieldPng(new Uint8Array(await file.arrayBuffer()));
-      if (!closed) { target.session.replace("Import", withinSelection(target.session.codes, imported, target.session.selection)); anchor = null; message.textContent = ""; schedule(); }
-    } catch (error) { message.textContent = `${error.message} For another size or format, use Advanced ▸ Field Tools ▸ Import Mask…`; }
+      if (!closed) { target.session.replace("Import", withinSelection(target.session.codes, imported, target.session.selection)); anchor = null; message.textContent = message.title = ""; schedule(); }
+    } catch (error) { message.textContent = message.title = `${error.message} For another size or format, use Advanced ▸ Field Tools ▸ Import Mask…`; }
     finally { busy = false; }
   }
   async function importMask(file) {
@@ -1412,6 +1543,15 @@ export function openInfluenceFieldEditor({codes, settings, host, onDone, onCance
     if (chooserDialog) { chooserDialog.keyboard(event); return; }
     if (libraryDialog) { libraryDialog.keyboard(event); return; }
     if (maskDialog) { maskDialog.keyboard(event); return; }
+    // The window capture handler isolates the editor from host shortcuts. Activate
+    // these disclosure controls explicitly; Space must not start canvas panning.
+    if (([advancedToggle, summary, field.children[0], influenceSummary].includes(event.target) ||
+        (event.target.tagName === "BUTTON" && paintingOptions.contains(event.target))) && [" ", "Enter"].includes(event.key)) {
+      event.preventDefault();
+      if (!event.repeat && ((event.key === "Enter" && event.type === "keydown") ||
+          (event.key === " " && event.type === "keyup"))) event.target.click();
+      return;
+    }
     if (event.type === "keyup" && event.key === compareKey) { event.preventDefault(); releaseCompare(); return; }
     if (event.target === compare && [" ", "Enter"].includes(event.key)) {
       event.preventDefault(); compareKey = event.key;
@@ -1419,6 +1559,11 @@ export function openInfluenceFieldEditor({codes, settings, host, onDone, onCance
     }
     const control = controls.find(c => c.element === event.target);
     if (control) { if (event.type === "keydown") control.keydown(event); return; }
+    if (event.key === "Escape" && influenceMenu.open) {
+      event.preventDefault();
+      if (event.type === "keydown") { closeInfluenceMenu(); influenceSummary.focus(); }
+      return;
+    }
     if (event.key === " ") { event.preventDefault(); space = event.type === "keydown"; schedule(); }
     if (event.type !== "keydown" || busy) return;
     const key = event.key.toLowerCase();

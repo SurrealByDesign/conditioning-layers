@@ -235,6 +235,8 @@ export function pressureCode(pressure) {
 }
 export function scaledControl(base, code) { return Math.max(1, Math.floor((2 * base * code + 65535) / 131070)); }
 export function pressurePercent(code) { return Math.floor((200 * code + 65535) / 131070); }
+// Pressure's smallest stamp: Minimum Size percent of Size, rounded half up, never below 1 cell.
+export function pressureMinSize(size, percent) { return Math.max(1, Math.floor((size * percent + 50) / 100)); }
 export function pressureMappings(settings) {
   if (settings.pressure_enabled !== true) return null;
   const size = settings.pressure_size === true, amount = settings.pressure_amount === true;
@@ -264,6 +266,7 @@ export class PressureStroke {
     this.target = brush.tool === "erase" ? 0 : brush.influence;
     this.source = brush.tool === "restore" ? restore.slice() : null;
     this.prepared = new Map();
+    this.minSize = pressureMinSize(brush.size, this.settings.pressure_min_size);
     const entry = this.prepare(brush.size);
     this.targets = entry.profile ? new Uint8Array(codes.length) : null;
     if (this.targets) {
@@ -320,12 +323,23 @@ export class PressureStroke {
     this.last = end; this.pressure = pressure;
   }
 
+  // The stamp size at a pressure code: Size scaled by pressure, held at Minimum Size.
+  sizeAt(code) {
+    return this.mappings.size ? Math.max(this.minSize, scaledControl(this.brush.size, code)) : this.brush.size;
+  }
+
+  // The Amount of a stamp at a pressure code.
+  amountAt(code) { return this.mappings.amount ? scaledControl(this.brush.amount, code) : this.brush.amount; }
+
+  // The Flow of a stamp at a pressure code, with Build-up.
+  flowAt(code) { return this.mappings.flow ? scaledControl(this.settings.flow, code) : this.settings.flow; }
+
   slot(x, y, code) {
-    const size = this.mappings.size ? scaledControl(this.brush.size, code) : this.brush.size;
+    const size = this.sizeAt(code);
     const {footprint, spacing, profile} = this.prepare(size);
     if (code === 0) return spacing;
-    const a = this.mappings.amount ? scaledControl(this.brush.amount, code) : this.brush.amount;
-    const f = this.buildUp ? flowFactor(this.mappings.flow ? scaledControl(this.settings.flow, code) : this.settings.flow, spacing, size) : 0;
+    const a = this.amountAt(code);
+    const f = this.buildUp ? flowFactor(this.flowAt(code), spacing, size) : 0;
     if (footprint.hard) {
       [x, y] = snapAnchor(footprint, x, y);
       if (!this.buildUp) {

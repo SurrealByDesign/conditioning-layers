@@ -1012,7 +1012,7 @@ const advanced = summary().parent;
 assert.deepEqual(advanced.children.filter(e => e.tagName === 'DETAILS').map(g => g.children[0].textContent),
   ['Brush Behavior', 'Brush Shape & Transform', 'Value Profile', 'Field Tools']);
 assert.equal(tipGroup().parent, shapeGroup()); assert.equal(tipGroup().hidden, true); assert.equal(tipGroup().open, false);
-assert.equal(all().filter(e => e.type === 'text').length, 41);  // E5 adds no numeric control
+assert.equal(all().filter(e => e.type === 'text').length, 49);  // E5 adds no numeric control
 custom();
 assert.equal(tipGroup().hidden, false); assert.equal(heading('Custom Tip').textContent, 'Custom Tip · none loaded');
 assert.equal(heading('Brush Shape').textContent, 'Brush Shape & Transform · Custom (no tip)');

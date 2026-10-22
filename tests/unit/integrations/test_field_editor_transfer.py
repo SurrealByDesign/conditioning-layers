@@ -307,7 +307,7 @@ class TransferTests(unittest.TestCase):
     def test_01_one_field_exact_dom_actions_done(self):
         editor(r"""
 assert.ok(!all().some(e=>/(transfer-sources|transfer-help|transfer-status|field-transfer|field-role)/.test(e.className||'')));
-assert.equal(all().filter(e=>e.tagName==='INPUT'&&e.type==='text').length,41);
+assert.equal(all().filter(e=>e.tagName==='INPUT'&&e.type==='text').length,49);
 assert.equal(all().filter(e=>e.tagName==='INPUT'&&e.type==='range').length,0);
 assert.deepEqual(inventory(),retainedInventory);
 assert.deepEqual(heading('Advanced').parent.children.filter(e=>e.className==='group').map(e=>e.children[0].textContent.split(' · ')[0]),
@@ -323,7 +323,7 @@ for(let n=2;n<=4;n++) {await add(String(n));
  for(let k=1;k<=n;k++){activate(String(k));
   assert.deepEqual(transfers().filter(e=>!e.hidden).map(e=>e.textContent),
    Array.from({length:n},(_,i)=>i+1).filter(i=>i!==k).map(i=>`Transfer from Painted Field #${i}`));
-  assert.equal(all().filter(e=>e.tagName==='INPUT'&&e.type==='text').length,41);
+  assert.equal(all().filter(e=>e.tagName==='INPUT'&&e.type==='text').length,49);
   assert.equal(all().filter(e=>e.tagName==='INPUT'&&e.type==='range').length,0);
  }}
 unavailable.add('2');redraw();assert.ok(transfers().find(e=>e.textContent.endsWith('#2')).hidden);
@@ -573,8 +573,8 @@ console.log(JSON.stringify({snapshotBytes:bytes,maxRows:200}));
 
     def test_61_import_and_retained_module_boundaries(self):
         for path, digest in {
-            CORE / 'engine.js': '6366d2b89f8fe8ad791b5a4b96f1c2311559008549cf1eddcf3f3eeb32c28042',
-            CORE / 'brush.js': 'd4969ae4528b7cb146c9ed86680d2bf6c45cb852831c79755e793daf3fe346a9',
+            CORE / 'engine.js': '70d767a642ea7cda612c241aa9d9aeb364295a8d121cc33a2adb92a311c9a1de',
+            CORE / 'brush.js': 'fc6cff66902efa3ad4d0fec7085f93f88996504f97e56ea29a947b6898b95afe',
             ROOT / 'web/js/painted_field_node.js': 'f13daf18ad81c2ad96be350772e0afbdbc8ec60bf7a8b197f41dbf3e906ab690',
         }.items():
             self.assertEqual(hashlib.sha256(path.read_bytes()).hexdigest(), digest, path.name)

@@ -455,7 +455,7 @@ class BalanceTests(unittest.TestCase):
     def test_01_one_field_has_no_balance_and_stays_e10(self):
         editor(r"""
 assert.ok(!all().some(e=>/(balance-|field-balance)/.test(e.className||'')));
-assert.equal(balances().length,0);assert.equal(textInputs(),41);assert.equal(rangeInputs(),0);
+assert.equal(balances().length,0);assert.equal(textInputs(),49);assert.equal(rangeInputs(),0);
 assert.deepEqual(inventory(),retainedInventory);
 assert.equal(heading('Brush Behavior').parent.children.at(-1),heading('Pen Pressure').parent);
 assert.deepEqual(heading('Advanced').parent.children.filter(e=>e.className==='group').map(e=>e.children[0].textContent.split(' · ')[0]),
@@ -473,7 +473,7 @@ for(let n=2;n<=4;n++) {await add(String(n));
  for(let k=1;k<=n;k++){activate(String(k));
   assert.deepEqual(balances().filter(e=>!e.hidden).map(e=>e.textContent),
    Array.from({length:n},(_,i)=>i+1).filter(i=>i!==k).map(i=>`Balance with Painted Field #${i}`));
-  assert.equal(textInputs(),41);assert.equal(rangeInputs(),0);
+  assert.equal(textInputs(),49);assert.equal(rangeInputs(),0);
  }
  assert.deepEqual(balances().map(e=>e.textContent),Array.from({length:n},(_,i)=>`Balance with Painted Field #${i+1}`));
  const behavior=heading('Brush Behavior').parent,row=balances()[0].parent,children=behavior.children;
@@ -485,7 +485,8 @@ for(let n=2;n<=4;n++) {await add(String(n));
  assert.ok(!find('balance-share')&&!find('balance-help')&&!find('balance-status'));
 }
 const strip=find('field-editing').parent;
-assert.deepEqual(strip.children.slice(0,3).map(e=>e.className),['field-editing','field-transfer','field-balance']);
+// The accepted compact layout keeps the gradient notice beside the active field label.
+assert.deepEqual(strip.children.slice(0,4).map(e=>e.className),['field-editing','profile-note','field-transfer','field-balance']);
 assert.equal(find('field-balance').hidden,true);assert.equal(find('field-balance').textContent,'');
 assert.equal(heading('Advanced').parent.children.filter(e=>e.className==='group').length,4);
 assert.deepEqual(buttons('Paint')[0].parent.children.map(e=>e.textContent),['Paint','Erase']);
@@ -553,9 +554,9 @@ assert.equal(a.history.undoEntries.length,0);
     def test_06_active_share_control_created_once_at_first_balance_choice(self):
         editor(r"""
 await setup([10,200,50,80]);
-for(const k of ['2','3','4']){transferFrom(k);assert.equal(textInputs(),41);}
+for(const k of ['2','3','4']){transferFrom(k);assert.equal(textInputs(),49);}
 assert.ok(!find('balance-share')&&!input('Active Share (%)'));
-partnerWith('2');assert.equal(textInputs(),42);assert.equal(rangeInputs(),0);
+partnerWith('2');assert.equal(textInputs(),50);assert.equal(rangeInputs(),0);
 const behavior=heading('Brush Behavior').parent,children=behavior.children,row=find('bar balance-partners');
 assert.deepEqual(children.slice(children.indexOf(row)).map(e=>e.className),['bar balance-partners','balance-share','balance-help','balance-status']);
 const label=find('balance-share');assert.equal(label.tagName,'LABEL');assert.equal(label.children[0],input('Active Share (%)'));
@@ -565,7 +566,7 @@ press('Paint');assert.equal(label.hidden,true);assert.equal(find('balance-help')
 partnerWith('3');assert.equal(label.hidden,false);assert.equal(find('balance-help').hidden,false);
 assert.ok(!all().some(e=>e.tagName==='BUTTON'&&/^\d+:\d+$/.test(e.textContent||'')));
 remove('4');await add('4');activate('4');partnerWith('1');
-assert.equal(textInputs(),42);assert.equal(all().filter(e=>e.className==='balance-share').length,1);
+assert.equal(textInputs(),50);assert.equal(all().filter(e=>e.className==='balance-share').length,1);
 """)
 
     def test_07_default_share_fifty_per_field_join_and_reopen(self):
@@ -1390,7 +1391,7 @@ partnerWith('2');share(75);click(64,64);assert.equal(a.codes[center],150);assert
         run_editor(r"""
 assert.ok(!all().some(e=>/(balance-|field-balance|transfer-|field-transfer|field-role)/.test(e.className||'')));
 assert.ok(!all().some(e=>e.tagName==='BUTTON'&&/^(Balance with|Transfer from) /.test(e.textContent||'')));
-assert.equal(all().filter(e=>e.tagName==='INPUT'&&e.type==='text').length,41);
+assert.equal(all().filter(e=>e.tagName==='INPUT'&&e.type==='text').length,49);
 assert.deepEqual(controller.fields().map(f=>[f.balanceWith,f.balanceShare,f.transferFrom]),[[null,50,null]]);
 for(const tool of ['Paint','Erase','Restore']) {
  press(tool);Object.assign(settings(),{amount:63,hardness:44,influence:117});
@@ -1992,8 +1993,8 @@ activate('2');press('Undo');assert.equal(saved(),before);
 
     def test_89_module_boundaries_prefix_hashes_and_tokens(self):
         for path, digest in {
-            CORE / 'engine.js': '6366d2b89f8fe8ad791b5a4b96f1c2311559008549cf1eddcf3f3eeb32c28042',
-            CORE / 'brush.js': 'd4969ae4528b7cb146c9ed86680d2bf6c45cb852831c79755e793daf3fe346a9',
+            CORE / 'engine.js': '70d767a642ea7cda612c241aa9d9aeb364295a8d121cc33a2adb92a311c9a1de',
+            CORE / 'brush.js': 'fc6cff66902efa3ad4d0fec7085f93f88996504f97e56ea29a947b6898b95afe',
             CORE / 'history.js': '1b65ef775b17fa8cee83d56b7b315f3149ebeffcef04f552cf0139fa5b5157bf',
             ROOT / 'web/js/painted_field_node.js': 'f13daf18ad81c2ad96be350772e0afbdbc8ec60bf7a8b197f41dbf3e906ab690',
         }.items():

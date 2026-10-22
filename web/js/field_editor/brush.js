@@ -25,7 +25,7 @@ export const FALLOFF_CURVES = {
   sharper: s => s * s * s * (s * (s * 6 - 15) + 10), // quintic smootherstep
 };
 
-// E3–E9 brush settings and their defaults. Missing keys mean the default, so E1 brushes
+// E3–E9 brush settings, stroke dynamics and their defaults. Missing keys mean the default, so E1 brushes
 // are unchanged. The gradient_* settings act only while value_profile is not "uniform", and the
 // tip_* settings (how a custom tip is read) only while shape is "custom". The tip itself is no
 // setting here: the editor keeps it as custom_tip and gives the engine the decoded tip as tip.
@@ -45,9 +45,19 @@ export const BRUSH_DEFAULTS = Object.freeze({
   procedural_particle_rotation: 0, procedural_rotation_jitter: 0, procedural_frequency: 4, procedural_octaves: 3,
   procedural_persistence: 50, procedural_noise_low: 30, procedural_noise_high: 70,
   hotdog_count: 1, hotdog_spread: 100, hotdog_invert: false,
+  // Stroke dynamics: smoothing reshapes the pointer path (stroke_smoothing.js); pressure_min_size
+  // is pen pressure's smallest stamp, as a percentage of Size; angle_jitter turns each stamp by up
+  // to ± that many degrees, size_jitter resizes it and amount_jitter changes its Amount by up to ±
+  // that percentage (angle_jitter.js). 0 keeps each one's earlier behavior. A nonzero jitter_seed
+  // rerolls every jitter sequence; 0 keeps the earlier ones. flow_jitter changes a Build-up stamp's
+  // Flow by up to ± that percentage. scatter moves each stamp up to that percentage of its size.
+  // follow_direction adds the stroke's direction of travel to each stamp's Rotation.
+  smoothing: 0, pressure_min_size: 0, angle_jitter: 0, size_jitter: 0, amount_jitter: 0, jitter_seed: 0, flow_jitter: 0, scatter: 0,
+  follow_direction: false,
   pressure_enabled: false, pressure_size: true, pressure_amount: false, pressure_flow: false,
 });
-export const PRESSURE_KEYS = Object.freeze(Object.keys(BRUSH_DEFAULTS).filter(key => key.startsWith("pressure_")));
+// The pressure mappings that version 2 brush presets require. Minimum Size is an optional preset key.
+export const PRESSURE_KEYS = Object.freeze(["pressure_enabled", "pressure_size", "pressure_amount", "pressure_flow"]);
 export const PROCEDURAL_KEYS = Object.freeze(Object.keys(BRUSH_DEFAULTS).filter(key => key.startsWith("procedural_")));
 export const PROCEDURAL_EMPTY = "This procedural tip is empty: every value is 0. Raise Density or Particle Size, widen Noise Low to Noise High, or turn off Invert Procedural Tip.";
 export function proceduralError(settings) {
@@ -81,6 +91,8 @@ const RULES = {
   procedural_frequency: integer(1, 16), procedural_octaves: integer(1, 4), procedural_persistence: integer(0, 100),
   procedural_noise_low: integer(0, 100), procedural_noise_high: integer(0, 100),
   hotdog_count: integer(1, 1024), hotdog_spread: integer(0, 100), hotdog_invert: flag,
+  smoothing: integer(0, 100), pressure_min_size: integer(0, 100), angle_jitter: integer(0, 180), size_jitter: integer(0, 100), amount_jitter: integer(0, 100),
+  jitter_seed: integer(0, 4294967295), flow_jitter: integer(0, 100), scatter: integer(0, 200), follow_direction: flag,
   pressure_enabled: flag, pressure_size: flag, pressure_amount: flag, pressure_flow: flag,
 };
 

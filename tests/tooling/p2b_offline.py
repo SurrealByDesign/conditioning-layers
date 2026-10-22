@@ -28,7 +28,7 @@ GROUPS = {
                                       "test_field_editor_brush_library.py", "test_field_editor_procedural_tip.py",
                                       "test_field_editor_field_tools.py", "test_field_editor_pressure.py",
                                       "test_field_editor_multi_field.py", "test_field_editor_transfer.py",
-                                      "test_field_editor_balance.py")),
+                                      "test_field_editor_balance.py", "test_field_editor_brush_dynamics.py")),
     "domain": ("domain", ("test_*.py",)),
     "capabilities": ("capabilities", ("test_*.py",)),
     "translation": ("adapters/prediction_mixing", ("test_*.py",)),

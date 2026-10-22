@@ -71,7 +71,7 @@ python -X utf8 -B -W error tests/tooling/public_offline.py execution
 python -X utf8 -B -W error tests/tooling/validate_examples.py
 ```
 
-`field-editor` includes pressure, custom tips, procedural brushes, library,
+`field-editor` includes brush dynamics (smoothing, pressure Minimum Size, jitter, Scatter and Follow Stroke Direction), compact-toolbar/Advanced-panel behavior, pressure, custom tips, procedural brushes, library,
 multi-field sessions, Transfer and Balance. Its exhaustive arithmetic and
 randomized linked-history checks are intentionally slower. Hotdog separately
 checks canonical PNG identity and every decoded pixel against the embedded
@@ -106,11 +106,22 @@ settings, exact Hotdog restamping and composition; they do not
 judge generated image quality. No GPU generation tests are part of this public
 offline suite. No host or browser is launched by these commands.
 
-Compatibility tiers are **ComfyUI 0.34.6 / frontend 1.49.6: qualified baseline**,
-and **ComfyUI 0.39.2 / frontend 1.53.10: functional smoke tested** for the node
-workflow/editor. The newer pair has narrower coverage. A previous isolated
-server-load check registered 23 nodes, including the optional helper, but that
-is not a browser or GPU-generation test. See [compatibility](../README.md#compatibility).
+The qualified baseline is **ComfyUI 0.34.6 / frontend 1.49.6**. Retained newer evidence is bounded: **0.37.2 / 1.52.7** exact-three-layer Blend live qualification; **0.37.4 / 1.52.7** selected technical/live successes, including native N=9 owner visual acceptance; **0.39.2 / 1.53.10** earlier native-node/editor functional smoke testing. **0.42.0 / 1.55.18** has development UI launch and visual inspection only. None promotes the stricter sidebar generation profile or qualifies every subsequent editor change. See [compatibility](../README.md#compatibility).
+
+## Experimental-alpha candidate
+
+The candidate transfers six editor modules from accepted commit `072761b1ce783adf428e697ff26438bb59c5d1fb`: `angle_jitter.js`, `stroke_smoothing.js`, `brush.js`, `brush_library.js`, `editor_ui.js` and `engine.js`. The public loader and its sidebar-failure isolation, loader regression tests, Hotdog asset-test adaptation, dependencies, schemas and shipped assets remain intact. Runtime transfer verification compares exact Git-blob bytes. This is an experimental public alpha, not production certification.
+
+Retained qualification includes native **Save → browser restart → Open**, exact restoration of all **16,384 field codes**, and byte-identical final CPU operation-chain output. The owner supplied this completed result for release preparation; it is carried forward without repeating the journey or assigning it to an unqualified host.
+
+Candidate validation on **2026-10-22**:
+
+- Public `field-editor` group: **526/526 PASS**, zero failures/errors/skips, using CPython **3.10.11** and Node.js **25.6.1**, with the existing execution fences. The first run exposed one stale Balance field-strip ordering expectation; it now checks the accepted four-item order, including `profile-note`. The complete group then passed. No production file or behavioral assertion was weakened.
+- Preserved public `hotdog-template` group: **15/15 PASS**. Existing loader-registration tests: **8/8 PASS**, including sidebar import and cross-drive failure isolation, under the offline fences.
+- All six production files match the accepted Git blobs exactly. The installed host served **25 JavaScript modules** matching the copied files; all **49 relative import references** resolved. Dependencies, schemas, assets, examples, loader protections and public Hotdog adaptations remain unchanged.
+- Clean installation: an ordinary physical copy of the complete public package, isolated user/data directories, and the qualified **ComfyUI 0.34.6** revision `8fed37813848259fbdd2548ae3cd9f14df7fd68b` / **frontend 1.49.6**, using CPython **3.12.11**. Launched through ComfyUI's normal `main.py` entry point on loopback port **8188** with `--cpu`, without the private product launcher or junctions.
+- All **22 normal nodes** registered; the optional helper also registered. Real-browser native mouse painting, editor Undo/Redo, Done/reopen, Brush Library save/apply, Pattern choices and Example 01 node resolution passed. All **16 Pattern and four Preset assets** additionally loaded as float32 CPU masks from the installed copy. No browser page exceptions occurred.
+- **Zero execution requests**, empty host history/queue and no GPU generation. The owned browser/host stopped and port 8188 was released. This installation smoke did not repeat native Save/restart/Open qualification or expand newer-host support.
 
 ## Sidebar compatibility
 

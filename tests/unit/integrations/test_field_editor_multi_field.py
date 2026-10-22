@@ -119,7 +119,7 @@ class AEditorTests(unittest.TestCase):
         editor(r"""
 assert.equal(find('field-editing').textContent,'Editing: Painted Field #1');
 assert.equal(tabs().length,0);assert.equal(overlays().length,0);assert.deepEqual(inventory(),retainedInventory);
-assert.equal(all().filter(e=>e.tagName==='INPUT'&&e.type==='text').length,41);
+assert.equal(all().filter(e=>e.tagName==='INPUT'&&e.type==='text').length,49);
 assert.equal(all().filter(e=>e.type==='range').length,0);
 assert.equal(all().filter(e=>e.textContent?.startsWith('Copy from')).length,0);
 const reference=ui.createEditorSession(sources.get('1').codes,sources.get('1').settings);

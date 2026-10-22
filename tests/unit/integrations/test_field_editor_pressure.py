@@ -569,7 +569,7 @@ const replay=new engine.Stroke(empty(),128,128,engineBrush(),20,25,null,selectio
         run_editor(r"""
 const group=heading('Pen Pressure').parent,behavior=heading('Brush Behavior').parent;
 assert.equal(behavior.children.at(-1),group);assert.equal(group.open,false);
-assert.equal(all().filter(e=>e.tagName==='INPUT'&&e.type==='text').length,41);
+assert.equal(all().filter(e=>e.tagName==='INPUT'&&e.type==='text').length,49);
 assert.equal(all().filter(e=>e.tagName==='INPUT'&&e.type==='range').length,0);
 const row=button('Size').parent,note=group.children.find(e=>e.textContent?.startsWith('Pen pressure changes nothing'));
 assert.equal(row.hidden,true);assert.equal(note.hidden,true);assert.equal(button('Flow').hidden,true);

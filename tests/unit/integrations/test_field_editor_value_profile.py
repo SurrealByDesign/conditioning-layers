@@ -702,7 +702,7 @@ for (const label of [...COMMON, ...LINEAR, ...CENTRED]) assert.ok(within(input(l
 for (const text of ['Uniform', 'Linear Gradient', 'Radial Gradient', 'Square Gradient', 'Swap Start/End']) assert.ok(within(button(text), group), text);
 assert.equal(button('Uniform').attributes['aria-pressed'], 'true');
 for (const label of ['Size (cells)', 'Influence (%)', 'Hardness (%)']) assert.ok(!within(input(label), advanced), label);
-assert.equal(all().filter(e => e.type === 'text').length, 41);
+assert.equal(all().filter(e => e.type === 'text').length, 49);
 assert.equal(small('Paint targets'), undefined); assert.equal(button('Reset Brush').hidden, true);
 click(64, 64); assert.equal(controller.session.codes.filter(v => v === 255).length, 208);
 assert.equal(controller.session.history.undoEntries.length, 1);

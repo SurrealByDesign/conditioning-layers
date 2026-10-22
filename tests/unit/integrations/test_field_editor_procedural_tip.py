@@ -502,7 +502,7 @@ press('New Seed');controller.cancel();controller=open(initial,result.settings);d
 
     def test_numeric_all_fourteen_drag_type_escape_arrows_modifiers_limits_and_pairs(self):
         run_editor(r"""
-pressIn(shapeGroup(),'Procedural');assert.equal(all().filter(e=>e.type==='text').length,41);
+pressIn(shapeGroup(),'Procedural');assert.equal(all().filter(e=>e.type==='text').length,49);
 const controls=[['Seed','procedural_seed',0,4294967295,1,true],['Particle Grid (slots per side)','procedural_grid',1,32,1,true],
  ['Density (%)','procedural_density',0,100,1,true],['Particle Size (% of slot)','procedural_particle_size',1,200,1,true],
  ['Particle Aspect (W:H)','procedural_particle_aspect',.1,10,.1,false],['Size Jitter (±%)','procedural_size_jitter',0,90,1,true],

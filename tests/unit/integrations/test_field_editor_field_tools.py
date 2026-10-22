@@ -887,7 +887,7 @@ eq(session().codes,Uint8Array.from({length:16384},(_,i)=>i%256));assert.equal(ma
         run_editor(r"""
 const group=heading('Field Tools').parent;assert.equal(group.open,false);group.open=true;fire(group,'toggle');
 assert.deepEqual(writes,[['fieldTools',true]]);controller.cancel();controller=open();dom.flush();assert.equal(heading('Field Tools').parent.open,true);
-assert.equal(all().filter(e=>e.tagName==='INPUT'&&e.type==='text').length,41);assert.equal(all().filter(e=>e.type==='range').length,0);
+assert.equal(all().filter(e=>e.tagName==='INPUT'&&e.type==='text').length,49);assert.equal(all().filter(e=>e.type==='range').length,0);
 assert.ok(!Object.hasOwn(settings(),'fieldTools'));assert.ok(!Object.hasOwn(ui.editorSettings(settings()),'fieldTools'));
 """)
 

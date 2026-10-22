@@ -6,6 +6,7 @@ export function installDOM() {
       this.classList = {add: name => { this.className = name; }}; }
     append(...items) { for (const item of items) { this.children.push(item); item.parent = this; } }
     replaceChildren(...items) { this.children = []; this.append(...items); }
+    contains(target) { return this === target || this.children.some(child => child.contains(target)); }
     remove() { if (this.parent) this.parent.children = this.parent.children.filter(c => c !== this); }
     addEventListener(name, fn) { (this.listeners[name] ??= []).push(fn); }
     removeEventListener(name, fn) { this.listeners[name] = (this.listeners[name] ?? []).filter(f => f !== fn); }
