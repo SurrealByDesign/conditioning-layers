@@ -8,7 +8,7 @@ Conditioning Layers brings **regional prompting** to ComfyUI: give multiple prom
 
 **Recommended for new projects: the node-based Conditioning Layers workflow.** Start with [Example 01](examples/conditioning-layers/01_one_influence_field.json), then build toward more complex compositions.
 
-[Install](#installation) · [Build a workflow](#build-your-first-workflow) · [Node guide](#node-guide) · [Painted Field](#painted-field) · [Examples 01–09](#examples) · [Contributing](docs/developer.md)
+[Install](#installation) · [Build a workflow](#build-your-first-workflow) · [Node guide](#node-guide) · [Painted Field](#painted-field) · [Examples](#examples) · [Contributing](docs/developer.md)
 
 ## What can you do with it?
 
@@ -126,6 +126,18 @@ You may mix the two modes: FIXED ownership is resolved first, and BLENDED Condit
 
 Participating BLENDED Conditioning Layers use `u = field × Strength`, then `weight = u / sum(u)` wherever the sum is positive. Where nothing participates, there is **no hidden base prompt fill**; this does not promise blank pixels or preservation of an input image.
 
+### Selective Blend Groups
+
+Use **Compose Blend Groups** when several BLENDED layers should share one group's contribution. Set each Conditioning Layer's **blend_group** to one case-sensitive name, such as `materials` or `environment`. Empty or omitted means the single default group. Leading/trailing whitespace is invalid; `A,B` is one name, not two memberships.
+
+At each field cell, members share their group's contribution in proportion to `field × Strength`. The group competes with other groups using its **strongest member's value**. Adding a weaker member redistributes that group's share without diluting the other groups. Changing its strongest member can change every group's share, and an unchanged sibling's share can rise and then fall. This is expected coupling, not independent group opacity. There are no group Strength controls or nested groups.
+
+**FIXED ownership remains global across all groups.** Positive FIXED cells suppress every BLENDED layer; two FIXED owners still conflict. A FIXED layer's group has no effect under Compose Blend Groups. At most one BLENDED group produces the retained flat-composition bits unchanged.
+
+Grouping is explicit: **Compose Conditioning Layers** retains flat normalization and rejects any nonempty group assignment, even on disabled or FIXED layers. Old workflows that omit the new widget retain their meaning. To compare flat and grouped behavior, change Compose type **and clear assignments for the legacy Compose**. Keep backups when moving workflows between alpha versions.
+
+Start with the [self-contained Blend Groups and Contribution tutorial](examples/blend-groups/README.md). It uses four direct Painted Fields, two BLENDED groups and one global FIXED region.
+
 ### Background prompt
 
 For subject regions on FIXED Conditioning Layers, add a full-frame **Solid Field** (value 255) as a **BLENDED background Conditioning Layer** with positive Strength. It fills cells no FIXED Conditioning Layer owns.
@@ -150,9 +162,10 @@ The names below are the runtime display names. Search for them in ComfyUI; QR an
 
 | Node | Purpose and common use | Try it |
 | --- | --- | --- |
-| **Conditioning Layer** | Pairs conditioning with a field, Strength, FIXED/BLENDED mode and enabled state. | Give two Conditioning Layers distinct regional prompts. |
+| **Conditioning Layer** | Pairs conditioning with a field, Strength, FIXED/BLENDED mode, enabled state and optional Blend Group. | Give two Conditioning Layers distinct regional prompts. |
 | **Add Conditioning Layer** | Starts an ordered stack or appends one Conditioning Layer to it. | Add a sky or foreground Conditioning Layer. |
 | **Compose Conditioning Layers** | Validates enabled Conditioning Layers and resolves their spatial weights into sampler conditioning. | Use BLENDED gradients with overlapping companions to explore sharing. |
+| **Compose Blend Groups** | Resolves the same stack with explicit strongest-member group shares. | Try the [Blend Groups tutorial](examples/blend-groups/README.md). |
 
 ### Create fields
 
@@ -191,7 +204,7 @@ These nodes process the field before it reaches a Conditioning Layer. They do no
 
 **Normalized Blend Preparation** is a lower-level helper for exactly three conditioning entries. It registers only when **Torch 2.8.0+cu129, NumPy 2.4.6 and PyAV 17.0.1** match exactly, `--fp16-intermediates` is absent, and its source-integrity check passes. Execution also requires float32 intermediates.
 
-Its absence is normal on most installations and it is **not required for normal Conditioning Layers usage**. **22 nodes versus 23 is not, by itself, a broken installation**: the extra node is this optional helper. Use **Conditioning Layer → Add Conditioning Layer → Compose Conditioning Layers** for normal workflows.
+Its absence is normal on most installations and it is **not required for normal Conditioning Layers usage**. **23 nodes versus 24 is not, by itself, a broken installation**: the extra node is this optional helper. Use **Conditioning Layer → Add Conditioning Layer → Compose Conditioning Layers** for normal workflows.
 
 ## Painted Field
 
@@ -296,6 +309,16 @@ Open one Painted Field, then use **Add Field** to bring in other Painted Field n
 
 Each field keeps its own brush settings, selection, Restore baseline and local history as you switch. **Copy From** replaces active-field cells with another participant's current values, respecting the active selection and leaving the source unchanged. **Done** commits the participating changes together; **Cancel** discards them together. Use **×** on a field tab to remove it from a multi-field session; this leaves its node in the graph and discards its uncommitted session changes after confirmation. The last remaining field cannot be removed. Reopening starts a new session: add companion fields again as needed.
 
+### Effective-Contribution Visualization
+
+In the Painted Field editor, switch **Fields → Contribution** to inspect a layer's prepared conditioning weight. Choose the Compose/layer context when the field belongs to more than one stack or layer. The preview includes all enabled layers in that stack, including fields outside the four-field editing session. It supports both Compose nodes and shows group membership for Compose Blend Groups.
+
+This view shows **conditioning weights, not predicted pixels or image quality**. Python uses the same preparation mathematics as execution. FIXED conflicts appear as hatching and diagnostics rather than partially valid weights. Current uncommitted field edits are previewed without changing the saved workflow; switching views adds no history or saved settings.
+
+Every enabled layer must have a **direct Painted Field connection** with literal Strength, mode, enabled and group values. Procedural sources, field-processing chains, connected dynamic values, muted/bypassed nodes, invalid stacks and unresolved topology report **Preview unavailable**. The preview does not execute upstream nodes or approximate unresolved fields. Disabled fields need not resolve.
+
+Pending and stale states are explicit. During a stroke, the previous result is stale; it refreshes after the stroke. Obsolete responses cannot replace current results. An 8 MiB request budget bounds transport, not the semantic layer count. Preview failure leaves ordinary editing and generation available.
+
 ### Transfer
 
 Transfer moves influence **from another participating field into the active field**. The active field is the destination. In **Advanced > Brush Behavior**, choose **Transfer from** the source field, then paint.
@@ -327,7 +350,7 @@ That is the target split: brush coverage and Amount determine how far a stroke m
 
 Balance is useful when you want a consistent relative split, such as more atmosphere and less subject influence, without changing the pair's local total. **The partner and Active Share are session-only**. Reopening starts with no partner and Active Share **50%**; select the tool and partner again.
 
-For **two enabled BLENDED Conditioning Layers with equal Strength**, conserving their local field total keeps their combined unnormalized weight unchanged. At cells not owned by FIXED, a third unchanged overlapping BLENDED Conditioning Layer therefore keeps its normalized share, provided all other inputs stay unchanged. This follows from `field × Strength` normalization on the field grid; it is not a promise that generated pixels stay unchanged. Different Strengths, later field processing or FIXED ownership can invalidate that reasoning. The editor itself does not inspect modes or Strength.
+For **two enabled BLENDED Conditioning Layers with equal Strength**, conserving their local field total keeps their combined unnormalized weight unchanged. At cells not owned by FIXED, a third unchanged overlapping BLENDED Conditioning Layer therefore keeps its normalized share, provided all other inputs stay unchanged. This follows from `field × Strength` normalization on the field grid; it is not a promise that generated pixels stay unchanged. Different Strengths, later field processing or FIXED ownership can invalidate that reasoning. Ordinary Balance editing does not inspect modes or Strength. The optional Contribution view reads those values separately and does not change Balance arithmetic.
 
 ## Examples
 
@@ -344,6 +367,8 @@ The [Conditioning Layers Examples](examples/conditioning-layers/README.md) are t
 | [07 - Advanced Brushes](examples/conditioning-layers/07_advanced_brushes.json) | Hotdog nebula: Custom Tip, procedural Noise and single/scattered/inverted Hotdogs. |
 | [08 - Multi-Field Painting](examples/conditioning-layers/08_multi_field_painting.json) | Tin-toy robot: four coordinated fields, tabs, overlays and Copy from. |
 | [09 - Nine-Layer Showcase](examples/conditioning-layers/09_nine_layer_showcase.json) | Alien night market: distinct regional styles using the major tools together. |
+
+Also try [Blend Groups and Contribution](examples/blend-groups/README.md), a complete four-field workflow. The separate [experimental MOSS FIXED example](examples/moss-experimental/README.md) has its own model and resolution restrictions.
 
 Import [Hotdog meteor shower](examples/conditioning-layers/presets/hotdog_meteor_shower.brush.json) and [Sparkle glints](examples/conditioning-layers/presets/sparkle_glints.brush.json) through Brush Library for the brushes used in 07. All examples provide full field coverage. The pack contains instructions and embedded fields/tips, not verified generated outputs. Nine layers is a demonstration, not a maximum or a resource guarantee.
 
@@ -363,9 +388,15 @@ Sidebar generation supports **1–3 Active Conditioning Layers with No Overlap**
 | Successfully functional-smoke-tested | 0.39.2 | 1.53.10 | Core painting, brushes, multi-field editing, Transfer, Balance, Undo/Redo, save/reopen and example loading at the earlier tested checkpoint. |
 | UI launch / visual inspection only | 0.42.0 | 1.55.18 | Development UI launched and was visually inspected; no full compatibility, generation or persistence qualification claimed. |
 
-Newer-version evidence is narrower than baseline qualification and does not establish every later editor change. Other combinations are not established. Native node availability does not imply compatibility qualification or widen the legacy sidebar's stricter host, model and port requirements. See the [public validation summary](docs/developer.md#validation) for automated checks and their limits.
+Newer-version evidence is narrower than baseline qualification and does not establish every later editor change. Other combinations are not established. Alpha.4 Contribution preview and Selective Blend Groups have bounded evidence on 0.34.6 / frontend 1.49.6; the earlier newer-host checks do not automatically qualify these additions. Native node availability does not imply compatibility qualification or widen the legacy sidebar's stricter host, model and port requirements. See the [public validation summary](docs/developer.md#validation) for automated checks and their limits.
 
 Retained native workflow-persistence qualification passed **Save → browser restart → Open**, restoring all **16,384 field codes** exactly and producing byte-identical CPU operation-chain output. This completed journey is carried forward, not rerun for this candidate, and is not a 0.42.0 qualification claim.
+
+### Experimental MOSS example
+
+Krea 2 remains the only supported early backend. A separate [MOSS-Image FIXED example](examples/moss-experimental/README.md) records one successful configuration on ComfyUI 0.42.0 / frontend 1.55.18 with the three documented model files, 1024×1024, aligned FIXED fields and full positive coverage. It is an example-only compatibility observation, not a supported profile or a Krea 2 host promotion.
+
+At that resolution MOSS stores a 64×64 latent: each 128×128 field must be constant within aligned **2×2 cell blocks** to preserve exact weights. Painted gradients, unaligned boundaries, other resolutions, BLENDED, Blend Groups and other models are unqualified. Restrictions are documented, not enforced. No MOSS/Krea 2 prediction mixing is provided.
 
 ## Troubleshooting
 
@@ -383,7 +414,7 @@ Retained native workflow-persistence qualification passed **Save → browser res
 
 ## Current limits
 
-- Krea 2 and prompt-based Conditioning Layers only; there is no claim of other-backend compatibility, separate Style/Control/LoRA layers or per-region MODEL-LoRA isolation.
+- Krea 2 product scope and prompt-based Conditioning Layers only. The separate MOSS example is a bounded experimental exception, not another supported backend. No separate Style/Control/LoRA layers or per-region MODEL-LoRA isolation.
 - Native fields remain 128 × 128. Spatial influence is experimental; perceptual linearity and perfect isolation are not guaranteed.
 - Multi-field sessions hold four Painted Fields maximum. Transfer and Balance are pairwise; N-field normalization/redistribution is not implemented in the editor.
 - Connect one plain prompt encode per Conditioning Layer. ControlNet-modified conditioning and other upstream spatial/scheduling metadata are unsupported at that input; see [How it works](#how-it-works-for-technical-users).

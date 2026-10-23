@@ -104,3 +104,17 @@ for (const filename of ['hotdog_meteor_shower.brush.json', 'sparkle_glints.brush
   assert.equal(matched.length, 1, 'Reusable preset must match a wired Painted Field in 07');
   console.log(`PASS reusable preset ${filename} v${preset.version}`);
 }
+
+// Separate feature tutorial: retain the established numbered pack and its checks.
+const grouped = JSON.parse(await readFile(join(root, 'examples/blend-groups/grouped_contribution.json'), 'utf8'));
+const groupedFields = grouped.nodes.filter(n => n.type === 'ConditioningLayersPaintedField');
+assert.equal(groupedFields.length, 4);
+for (const field of groupedFields) {
+  const data = await decodeFieldDataUrl(field.widgets_values[0]);
+  assert.equal(data.length, 16384);
+  assert(data.some(v => v > 0));
+  assert.deepEqual(editorSettings(field.properties.fieldEditor), field.properties.fieldEditor);
+  resolveBrush(field.properties.fieldEditor);
+}
+assert.equal(grouped.nodes.filter(n => n.type === 'ConditioningLayersComposeGroups').length, 1);
+console.log('PASS grouped tutorial: four exact embedded Painted Fields and portable brush settings');

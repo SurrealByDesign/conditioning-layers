@@ -13,7 +13,7 @@ a behavior change pass.
   intent, strict field codecs, saved documents and declared behavior.
 - `src/conditioning_layers/adapters`: translation and deterministic contracts.
 - `src/conditioning_layers/comfyui`: field nodes, layer composition and host boundaries.
-- `src/conditioning_layers/integrations`: sidebar routes and readiness.
+- `src/conditioning_layers/integrations`: sidebar routes, readiness and the optional CPU composition preview.
 - `web/js/field_editor`: host-independent editor, arithmetic, codecs and history.
 - `web/js/painted_field_node.js`: public ComfyUI frontend adapter.
 - `tests/unit`: public maintenance tests; `tests/tooling`: offline runners
@@ -108,13 +108,13 @@ offline suite. No host or browser is launched by these commands.
 
 The qualified baseline is **ComfyUI 0.34.6 / frontend 1.49.6**. Retained newer evidence is bounded: **0.37.2 / 1.52.7** exact-three-layer Blend live qualification; **0.37.4 / 1.52.7** selected technical/live successes, including native N=9 owner visual acceptance; **0.39.2 / 1.53.10** earlier native-node/editor functional smoke testing. **0.42.0 / 1.55.18** has development UI launch and visual inspection only. None promotes the stricter sidebar generation profile or qualifies every subsequent editor change. See [compatibility](../README.md#compatibility).
 
-## Experimental-alpha candidate
+## Retained alpha.3 evidence
 
-The candidate transfers six editor modules from accepted commit `072761b1ce783adf428e697ff26438bb59c5d1fb`: `angle_jitter.js`, `stroke_smoothing.js`, `brush.js`, `brush_library.js`, `editor_ui.js` and `engine.js`. The public loader and its sidebar-failure isolation, loader regression tests, Hotdog asset-test adaptation, dependencies, schemas and shipped assets remain intact. Runtime transfer verification compares exact Git-blob bytes. This is an experimental public alpha, not production certification.
+The published alpha.3 candidate transferred six editor modules from accepted commit `072761b1ce783adf428e697ff26438bb59c5d1fb`: `angle_jitter.js`, `stroke_smoothing.js`, `brush.js`, `brush_library.js`, `editor_ui.js` and `engine.js`. The public loader and its sidebar-failure isolation, loader regression tests, Hotdog asset-test adaptation, dependencies, schemas and shipped assets remain intact. Runtime transfer verification compares exact Git-blob bytes. This is an experimental public alpha, not production certification.
 
 Retained qualification includes native **Save → browser restart → Open**, exact restoration of all **16,384 field codes**, and byte-identical final CPU operation-chain output. The owner supplied this completed result for release preparation; it is carried forward without repeating the journey or assigning it to an unqualified host.
 
-Candidate validation on **2026-10-22**:
+Historical alpha.3 validation on **2026-10-22**:
 
 - Public `field-editor` group: **526/526 PASS**, zero failures/errors/skips, using CPython **3.10.11** and Node.js **25.6.1**, with the existing execution fences. The first run exposed one stale Balance field-strip ordering expectation; it now checks the accepted four-item order, including `profile-note`. The complete group then passed. No production file or behavioral assertion was weakened.
 - Preserved public `hotdog-template` group: **15/15 PASS**. Existing loader-registration tests: **8/8 PASS**, including sidebar import and cross-drive failure isolation, under the offline fences.
@@ -122,6 +122,55 @@ Candidate validation on **2026-10-22**:
 - Clean installation: an ordinary physical copy of the complete public package, isolated user/data directories, and the qualified **ComfyUI 0.34.6** revision `8fed37813848259fbdd2548ae3cd9f14df7fd68b` / **frontend 1.49.6**, using CPython **3.12.11**. Launched through ComfyUI's normal `main.py` entry point on loopback port **8188** with `--cpu`, without the private product launcher or junctions.
 - All **22 normal nodes** registered; the optional helper also registered. Real-browser native mouse painting, editor Undo/Redo, Done/reopen, Brush Library save/apply, Pattern choices and Example 01 node resolution passed. All **16 Pattern and four Preset assets** additionally loaded as float32 CPU masks from the installed copy. No browser page exceptions occurred.
 - **Zero execution requests**, empty host history/queue and no GPU generation. The owned browser/host stopped and port 8188 was released. This installation smoke did not repeat native Save/restart/Open qualification or expand newer-host support.
+
+## Alpha.4 validation
+
+Alpha.4 promotes Contribution preview and Selective Blend Groups into the independent public distribution. The root loader retains public sidebar-failure isolation and logging. No runtime dependencies, numerical authority, sidebar admission or historical identity fixtures change. The existing compact toolbar and numbered examples remain intact.
+
+`.gitattributes` keeps Python and JavaScript source at LF on checkout. Source-identity and prefix tests intentionally compare canonical bytes; do not regenerate their hashes after a line-ending conversion. A fresh Windows checkout exposed this packaging issue during preparation. The source bytes were restored to their existing Git identities, with no behavior change.
+
+Run focused checks from the package root with the existing offline fences:
+
+```text
+# Developer lane: CPython 3.10.11, Node.js for frontend checks
+python -X utf8 -B -W error tests/tooling/public_offline.py selective-groups
+python -X utf8 -B -W error tests/tooling/public_offline.py composition-preview
+python -X utf8 -B -W error tests/tooling/public_offline.py field-editor
+python -X utf8 -B -W error tests/tooling/public_offline.py hotdog-template
+node tests/tooling/validate_examples.mjs
+
+# Host-dependency lane: CPython 3.12.11; CPU tensors, no running host or models
+python -X utf8 -B -W error tests/tooling/public_offline.py selective-groups-runtime
+python -X utf8 -B -W error tests/tooling/public_offline.py release-registration
+python -X utf8 -B -W error tests/tooling/validate_examples.py
+python -X utf8 -B -W error tests/tooling/validate_feature_examples.py
+```
+
+The portable group oracle uses independent Fraction arithmetic and adjacent-IEEE-value rounding; it imports no research prototype or measurements. The public runner does not include private host-cache checks or historical graph-fixture suites requiring unpublished files. The accepted private cache/persistence evidence is retained as qualification, not a public test dependency. The existing Balance `profile-note` expectation from alpha.3 is preserved, and Transfer/Balance adapter pins track the accepted preview adapter.
+
+The feature-example validator checks the new grouped workflow's graph, four embedded fields, exact 25%/25%/50% shares outside the FIXED region, global ownership, serialization and all-layer preview equivalence. It separately checks the accepted MOSS UI/API pair, including native union sockets and empty custom-widget exports. These are structural/numerical checks, not new MOSS runtime qualification.
+
+Accepted feature evidence is carried forward: Contribution's 22 focused tests and 30 CPU/UI checks; groups Stage 1's 88 tests and seven persistence checks; Stage 2's 41 CPU/UI checks with production-bit equivalence; Stage 3's 14 completed Krea 2 Turbo BF16 generations on 0.34.6 / 1.49.6 with owner visual acceptance. The MOSS example carries one successful 0.42.0 / 1.55.18 FIXED generation with its documented models, resolution and alignment. These counts are historical evidence, not a claim that the same suites were rerun publicly. No GPU generations are needed for this packaging candidate.
+
+Candidate verification on **2026-10-23**:
+
+| Check | Result |
+| --- | --- |
+| `selective-groups` | 56 passed |
+| `composition-preview` | 32 passed |
+| `selective-groups-runtime` | 23 passed; real Torch on CPU |
+| `release-registration` | 29 passed, including retained public sidebar failure isolation |
+| `field-editor` | 526 passed after canonical LF checkout correction |
+| `hotdog-template` | 15 passed |
+| `runtime` | 87 run: 86 passed, one Windows symlink-creation skip |
+| Existing example validators | All ten workflows and both brush presets passed |
+| Feature examples | Grouped exact weights/preview and MOSS UI/API checks passed |
+
+The full editor rerun had no failures/errors/skips. Its initial three failures were byte-hash differences caused by checkout CRLF conversion; existing identity values were preserved. The candidate also preserves alpha.3's already-correct Balance field-strip assertion. No production behavior was changed to satisfy tests.
+
+An isolated physical installation of the candidate on the supported **ComfyUI 0.34.6 / frontend 1.49.6**, with **Python 3.12.11**, ran on CPU with execution endpoints blocked. All **23 normal nodes plus the optional helper** registered. Thirteen browser checks passed: toolbar/Contribution availability, exact 25% outside and zero inside global FIXED ownership, membership refresh to 50%, grouped native serialize/reload, empty legacy group defaults and byte-exact legacy field restoration. The screenshot was visually inspected. Queue/history stayed unchanged, execution requests were zero, and the owned host/browser stopped. This check does not replace the carried-forward full Save/browser-restart/Open qualification.
+
+Two initial UI harness attempts used the wrong status selector or percentage text format; their captured UI already displayed the expected result. The final check compared numeric weights and passed without changing application code. Three model-selection warnings were expected in this model-free installation; frontend deprecation notices do not constitute new compatibility qualification. No blanket claim is made for later hosts, other models or platforms.
 
 ## Sidebar compatibility
 
@@ -152,10 +201,10 @@ The sidebar execution client requires the validated **loopback port 8000** setup
 
 ## Troubleshooting node availability
 
-The normal package exposes 22 nodes; **Normalized Blend Preparation** is an
-optional 23rd. It requires exact Torch **2.8.0+cu129**, NumPy **2.4.6**, PyAV
+The normal package exposes 23 nodes; **Normalized Blend Preparation** is an
+optional 24th. It requires exact Torch **2.8.0+cu129**, NumPy **2.4.6**, PyAV
 **17.0.1**, no `--fp16-intermediates`, and matching component source hashes.
-Execution also requires float32 intermediates. **Compose Conditioning Layers** independently requires float32 intermediates too; do not launch with `--fp16-intermediates`. The optional helper's absence alone is expected
+Execution also requires float32 intermediates. **Compose Conditioning Layers** and **Compose Blend Groups** independently require float32 intermediates too; do not launch with `--fp16-intermediates`. The optional helper's absence alone is expected
 outside that profile and does not disable Layer → Add → Compose.
 
 If a normal node group is missing, confirm the entire package is installed and

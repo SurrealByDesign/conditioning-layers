@@ -57,3 +57,7 @@ The Hotdog line-art template is project-created. The QR Code preset points to
 code `000000000000`. These shapes define influence, not a guaranteed rendered
 symbol or scannable code. Nine layers is a demonstration, not a maximum or a
 GPU-memory guarantee.
+
+## Additional feature examples
+
+The separate [Blend Groups and Contribution tutorial](../blend-groups/README.md) combines two groups, four direct Painted Fields and global FIXED ownership. The [experimental MOSS FIXED example](../moss-experimental/README.md) uses different models and has narrowly documented restrictions. Examples 01–09 above remain unchanged.

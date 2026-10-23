@@ -1,0 +1,4 @@
+# Source identities and browser prefix checks use canonical LF bytes.
+*.py text eol=lf
+*.js text eol=lf
+*.mjs text eol=lf

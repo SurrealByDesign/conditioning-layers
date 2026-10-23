@@ -211,6 +211,29 @@ function paintedWidget(node, inputName, inputData) {
       ui.openInfluenceFieldEditor({codes: originalCodes, settings: currentNode.properties?.fieldEditor,
         host: {
           fields,
+          async createCompositionPreview() {
+            // Opt-in only. Ordinary E10 discovery never reads composition metadata or links.
+            const {createCompositionPreview, createPreviewQueue} = await import("./composition_preview.js");
+            const {api} = await import("../../../scripts/api.js");
+            return {...createCompositionPreview({graph, currentGraph: () => app.canvas?.graph,
+              decode: codec.decodeFieldDataUrl,
+              validateEdits: edits => {
+                for (const key of edits.keys()) {
+                  const member = members.get(key);
+                  if (!available(key) || member.widget.value !== member.original)
+                    throw new Error("A session field changed outside this editor; reopen to preview.");
+                }
+              },
+              request: async payload => {
+                const response = await api.fetchApi("/conditioning-layers/composition-preview", {
+                  method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(payload)});
+                if (!response.ok) {
+                  const detail = await response.json().catch(() => ({}));
+                  throw new Error(detail.message ?? `Preview service unavailable (${response.status})`);
+                }
+                return response.json();
+              }}), createQueue: createPreviewQueue};
+          },
           getBrushLibrary,
           getAdvancedExpanded: () => app.ui.settings.getSettingValue(ADVANCED, false),
           setAdvancedExpanded: expanded => app.ui.settings.setSettingValue(ADVANCED, expanded),

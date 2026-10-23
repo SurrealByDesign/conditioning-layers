@@ -1,0 +1,341 @@
+{
+  "1": {
+    "inputs": {
+      "unet_name": "moss_image_sft_int8_convrot.safetensors",
+      "weight_dtype": "default"
+    },
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "MOSS diffusion model"
+    }
+  },
+  "2": {
+    "inputs": {
+      "clip_name": "mossImage_sft_txt_int8.safetensors",
+      "type": "moss_image",
+      "device": "default"
+    },
+    "class_type": "CLIPLoader",
+    "_meta": {
+      "title": "MOSS text encoder"
+    }
+  },
+  "3": {
+    "inputs": {
+      "vae_name": "flux2-vae.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "FLUX.2 VAE"
+    }
+  },
+  "4": {
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    },
+    "class_type": "EmptyFlux2LatentImage",
+    "_meta": {
+      "title": "Empty latent 1024x1024"
+    }
+  },
+  "5": {
+    "inputs": {
+      "text": "nsfw, worst quality, bad anatomy, watermark, jpeg artifact",
+      "clip": [
+        "2",
+        0
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    }
+  },
+  "20": {
+    "inputs": {
+      "text": [
+        "61",
+        0
+      ],
+      "clip": [
+        "2",
+        0
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Encode left layout"
+    }
+  },
+  "21": {
+    "inputs": {
+      "text": [
+        "64",
+        0
+      ],
+      "clip": [
+        "2",
+        0
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Encode right layout"
+    }
+  },
+  "22": {
+    "inputs": {
+      "center_x": 32,
+      "center_y": 64,
+      "width": 64,
+      "height": 128,
+      "inside_value": 255,
+      "outside_value": 0
+    },
+    "class_type": "ConditioningLayersRectangleField",
+    "_meta": {
+      "title": "Left half field (columns 0-63)"
+    }
+  },
+  "23": {
+    "inputs": {
+      "mask": [
+        "22",
+        0
+      ]
+    },
+    "class_type": "ConditioningLayersInvertField",
+    "_meta": {
+      "title": "Right half field (inverted)"
+    }
+  },
+  "24": {
+    "inputs": {
+      "strength": 1,
+      "mode": "FIXED",
+      "enabled": true,
+      "conditioning": [
+        "20",
+        0
+      ],
+      "mask": [
+        "22",
+        0
+      ]
+    },
+    "class_type": "ConditioningLayersLayer",
+    "_meta": {
+      "title": "Left layer (FIXED)"
+    }
+  },
+  "25": {
+    "inputs": {
+      "strength": 1,
+      "mode": "FIXED",
+      "enabled": true,
+      "conditioning": [
+        "21",
+        0
+      ],
+      "mask": [
+        "23",
+        0
+      ]
+    },
+    "class_type": "ConditioningLayersLayer",
+    "_meta": {
+      "title": "Right layer (FIXED)"
+    }
+  },
+  "26": {
+    "inputs": {
+      "layer": [
+        "24",
+        0
+      ]
+    },
+    "class_type": "ConditioningLayersAddLayer",
+    "_meta": {
+      "title": "Start stack"
+    }
+  },
+  "27": {
+    "inputs": {
+      "layer": [
+        "25",
+        0
+      ],
+      "layers": [
+        "26",
+        0
+      ]
+    },
+    "class_type": "ConditioningLayersAddLayer",
+    "_meta": {
+      "title": "Add right layer"
+    }
+  },
+  "28": {
+    "inputs": {
+      "layers": [
+        "27",
+        0
+      ]
+    },
+    "class_type": "ConditioningLayersCompose",
+    "_meta": {
+      "title": "Compose layers"
+    }
+  },
+  "29": {
+    "inputs": {
+      "seed": 20261022,
+      "steps": 25,
+      "cfg": 2.5,
+      "sampler_name": "er_sde",
+      "scheduler": "simple",
+      "denoise": 1,
+      "model": [
+        "1",
+        0
+      ],
+      "positive": [
+        "28",
+        0
+      ],
+      "negative": [
+        "5",
+        0
+      ],
+      "latent_image": [
+        "4",
+        0
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "KSampler"
+    }
+  },
+  "30": {
+    "inputs": {
+      "samples": [
+        "29",
+        0
+      ],
+      "vae": [
+        "3",
+        0
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode"
+    }
+  },
+  "31": {
+    "inputs": {
+      "filename_prefix": "conditioning_layers_moss_experimental",
+      "images": [
+        "30",
+        0
+      ]
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "Save Image"
+    }
+  },
+  "60": {
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "editor_state": {
+        "__value__": {}
+      },
+      "last_incoming": {
+        "__value__": {}
+      },
+      "bboxes": [
+        "62",
+        0
+      ]
+    },
+    "class_type": "CreateBoundingBoxes",
+    "_meta": {
+      "title": "Left layout boxes"
+    }
+  },
+  "61": {
+    "inputs": {
+      "prompt": "A realistic photograph of a sunny coastal harbor in late-afternoon sunlight, taken from standing eye level looking straight out across the harbor. A paved waterfront promenade with a low stone quay edge fills the left half of the foreground, and calm blue harbor water fills the right half. The horizon is a level line slightly above the middle of the frame, with distant coastal hills along it under a clear blue sky with a few small white clouds. Warm low sunlight comes from the left and casts soft shadows toward the right, with a light haze over the hills. A bright red vintage automobile is parked on the waterfront promenade on the left.",
+      "width": 1024,
+      "height": 1024,
+      "character_boxes": "",
+      "element": [
+        "60",
+        2
+      ]
+    },
+    "class_type": "MOSSImageLayoutPrompt",
+    "_meta": {
+      "title": "Left layout prompt"
+    }
+  },
+  "62": {
+    "inputs": {
+      "value": "[{\"type\": \"obj\", \"bbox\": [400, 40, 880, 460], \"desc\": \"A bright red vintage automobile, large and close in the foreground.\"}]"
+    },
+    "class_type": "PrimitiveStringMultiline",
+    "_meta": {
+      "title": "Left boxes (0-1000, ymin xmin ymax xmax)"
+    }
+  },
+  "63": {
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "editor_state": {
+        "__value__": {}
+      },
+      "last_incoming": {
+        "__value__": {}
+      },
+      "bboxes": [
+        "65",
+        0
+      ]
+    },
+    "class_type": "CreateBoundingBoxes",
+    "_meta": {
+      "title": "Right layout boxes"
+    }
+  },
+  "64": {
+    "inputs": {
+      "prompt": "A realistic photograph of a sunny coastal harbor in late-afternoon sunlight, taken from standing eye level looking straight out across the harbor. A paved waterfront promenade with a low stone quay edge fills the left half of the foreground, and calm blue harbor water fills the right half. The horizon is a level line slightly above the middle of the frame, with distant coastal hills along it under a clear blue sky with a few small white clouds. Warm low sunlight comes from the left and casts soft shadows toward the right, with a light haze over the hills. A blue sailboat with tall white sails is floating in the harbor on the right.",
+      "width": 1024,
+      "height": 1024,
+      "character_boxes": "",
+      "element": [
+        "63",
+        2
+      ]
+    },
+    "class_type": "MOSSImageLayoutPrompt",
+    "_meta": {
+      "title": "Right layout prompt"
+    }
+  },
+  "65": {
+    "inputs": {
+      "value": "[{\"type\": \"obj\", \"bbox\": [180, 540, 860, 960], \"desc\": \"A blue sailboat with tall white sails, large and close in the foreground on calm water.\"}]"
+    },
+    "class_type": "PrimitiveStringMultiline",
+    "_meta": {
+      "title": "Right boxes (0-1000, ymin xmin ymax xmax)"
+    }
+  }
+}

@@ -16,7 +16,7 @@ import {selectionCell, onField, selectionRectangle, rectangleSelection, ellipseS
 import {MASK_DEFAULTS, readMaskFile} from "./field_import.js";
 import {openMaskImport} from "./field_import_ui.js";
 import {openFieldChooser} from "./field_chooser_ui.js";
-import {OVERLAY_COLORS, overlayPixels} from "./view.js";
+import {OVERLAY_COLORS, overlayPixels, drawContribution} from "./view.js";
 import {heatColor, fieldPosition, cellReadout, gridVisible, gridPath, fieldStatistics,
   displayState, createViewSession, footprintOutline, outlinePath, SELECTION_VEIL, selectionOutlinePath} from "./view.js";
 
@@ -204,6 +204,9 @@ export function openInfluenceFieldEditor({codes, settings, host, onDone, onCance
   // The message-line text Custom Tip set, a refusal or a failed import: only it is ever cleared by Custom Tip.
   let tipMessage = null;
   const view = createViewSession();
+  let previewService = null, previewQueue = null, previewPoll = null, previewEpoch = 0;
+  let previewContext = null, previewField = null, previewSnapshot = null, previewOptions = "";
+  let previewError = null, preparedState = null, preparedWeights = null;
   let referenceUrl = null, referenceRevision = 0, anchor = null, endpoint = null, comparePointer = null, compareKey = null;
   const pendingReferences = new Set();
   const controls = [], synced = [], refreshers = [];
@@ -329,7 +332,57 @@ export function openInfluenceFieldEditor({codes, settings, host, onDone, onCance
   const undo = button(top, "Undo", () => edit(() => historyStep("undo")));
   const redo = button(top, "Redo", () => edit(() => historyStep("redo")));
   button(top, "Fit", fit);
+  const fieldsView = host.createCompositionPreview ? button(top, "Fields", () => setContribution(false)) : null;
+  const contributionView = host.createCompositionPreview ? button(top, "Contribution", () => setContribution(true)) : null;
+  const contextChoice = host.createCompositionPreview ? el("select", null, top) : null;
+  if (contextChoice) {
+    contextChoice.setAttribute("aria-label", "Contribution Compose and layer");
+    contextChoice.style.cssText = "max-width:220px;min-width:0"; contextChoice.hidden = true;
+    contextChoice.addEventListener("change", () => { previewContext = contextChoice.value || null; schedule(); });
+  }
   const status = el("span", null, top); status.className = "status";
+  async function setContribution(enabled) {
+    if (stroke || gesture || closed) return;
+    view.contribution = enabled; const epoch = ++previewEpoch;
+    previewQueue?.dispose(); previewQueue = null;
+    if (previewPoll !== null) clearInterval(previewPoll);
+    previewPoll = null; previewError = null; preparedState = preparedWeights = null;
+    schedule();
+    if (!enabled) return;
+    try {
+      const service = previewService ?? await host.createCompositionPreview();
+      if (closed || epoch !== previewEpoch) return;
+      previewService = service; previewQueue = service.createQueue(service.calculate, schedule);
+      // Detect programmatic changes while the modal is idle. Reads only; unchanged snapshots do no work.
+      previewPoll = setInterval(schedule, 500);
+    } catch (error) { if (epoch === previewEpoch) previewError = error.message; }
+    schedule();
+  }
+  function refreshContribution() {
+    fieldsView?.setAttribute("aria-pressed", !view.contribution);
+    contributionView?.setAttribute("aria-pressed", view.contribution);
+    if (contextChoice) contextChoice.hidden = !view.contribution;
+    if (!view.contribution || !previewQueue) return;
+    if (previewField !== active.key) { previewField = active.key; previewContext = null; }
+    try {
+      previewSnapshot = previewService.inspect(active.key, new Map(records.map(r => [r.key, r.session.codes])), previewContext);
+      if (previewContext === null && previewSnapshot.key !== null) previewContext = previewSnapshot.key;
+      const options = JSON.stringify(previewSnapshot.choices.map(c => [c.key, c.label]));
+      if (options !== previewOptions) {
+        previewOptions = options; contextChoice.replaceChildren();
+        const placeholder = el("option", "Select Compose / layer", contextChoice); placeholder.value = "";
+        for (const choice of previewSnapshot.choices) { const option = el("option", choice.label, contextChoice); option.value = choice.key; }
+      }
+      contextChoice.value = previewSnapshot.key ?? "";
+      contextChoice.title = previewSnapshot.choice?.label ?? "Choose the complete composition to inspect";
+      previewQueue.update(previewSnapshot, !!stroke);
+    } catch (error) {
+      previewQueue.update({fingerprint: `error:${error.message}`, error: error.message});
+    }
+  }
+  function contributionState() {
+    return previewError ? {status: "unavailable", message: previewError} : previewQueue?.state ?? {status: "pending"};
+  }
   button(top, "Cancel", cancel);
   const done = button(top, "Done", async () => {
     if (stroke) endStroke();
@@ -799,7 +852,7 @@ export function openInfluenceFieldEditor({codes, settings, host, onDone, onCance
     releaseCompare(); compare.releasePointerCapture(event.pointerId);
   });
   for (const name of ["pointercancel", "lostpointercapture", "blur"]) compare.addEventListener(name, releaseCompare);
-  button(advanced, "Reset View", () => { clearReference(); Object.assign(view, createViewSession()); schedule(); });
+  button(advanced, "Reset View", () => { clearReference(); Object.assign(view, createViewSession()); setContribution(false); schedule(); });
   el("small", "Alt-click: sample field Influence. Shift-click: line from last stroke endpoint. Drop field PNGs on canvas.", advanced);
   const message = el("div", null, layout); message.className = "error"; message.setAttribute("role", "alert");
   message.tabIndex = 0; // Keyboard users can scroll the complete, single-line error.
@@ -1039,7 +1092,7 @@ export function openInfluenceFieldEditor({codes, settings, host, onDone, onCance
     }
     for (const r of records) if (r.overlay) {
       r.overlay.style.transform = canvas.style.transform;
-      r.overlay.hidden = r === active || !r.visible || view.comparing;
+      r.overlay.hidden = r === active || !r.visible || view.comparing || view.contribution;
       if (!r.overlay.hidden && r.shownCodes !== r.session.codes) {
         const context = r.overlay.getContext("2d"), pixels = context.createImageData(128, 128);
         pixels.data.set(overlayPixels(r.session.codes, OVERLAY_COLORS[r.slot]));
@@ -1063,12 +1116,17 @@ export function openInfluenceFieldEditor({codes, settings, host, onDone, onCance
         else throw error;
       }
     }
-    drawCodes(canvas, session.codes, view.heat);
+    refreshContribution();
+    if (view.contribution) {
+      const state = contributionState();
+      if (state !== preparedState) { preparedWeights = drawContribution(canvas, state); preparedState = state; }
+    } else { drawCodes(canvas, session.codes, view.heat); preparedState = preparedWeights = null; }
     for (const layer of [canvas, veil, preview, reference, grid, selectionOutline.layer, selectionCandidate.layer, outline])
       layer.style.transform = `translate(${panX}px,${panY}px) scale(${zoom})`;
     renderFields();
     const display = displayState(view, !!referenceUrl);
-    canvas.style.opacity = String(display.fieldOpacity); reference.style.opacity = String(display.referenceOpacity);
+    canvas.style.opacity = String(view.contribution && !view.comparing ? 1 : display.fieldOpacity);
+    reference.style.opacity = String(display.referenceOpacity);
     grid.style.display = gridVisible(view.grid, zoom) && !view.comparing ? "" : "none";
     gridLines.setAttribute("stroke-width", String(1 / zoom)); // One screen pixel under the shared CSS scale.
     gridToggle.setAttribute("aria-pressed", view.grid); heatToggle.setAttribute("aria-pressed", view.heat);
@@ -1156,8 +1214,38 @@ export function openInfluenceFieldEditor({codes, settings, host, onDone, onCance
     }
     const selectedText = session.selection === null ? "" : `selection ${selected.count} cells (${(selected.count * 100 / 16384).toFixed(1)}%) · x ${selected.left}–${selected.right} · y ${selected.top}–${selected.bottom} · `;
     status.textContent = `${session.selectTool !== null ? toolName + " · " : ""}${readout}${Math.round(zoom * 100)}% zoom · ${selectedText}${stats.total} cells · ${stats.nonzero} nonzero · ${stats.zero} zero · binary ${stats.binary ? "yes" : "no"} · min ${stats.min} · max ${stats.max} · mean ${stats.mean.toFixed(2)} · ${stats.distinct} distinct${stats.nonzero ? "" : " · no positive values"}`;
-    if (stroke instanceof PressureStroke && !stroke.mouse) status.textContent = `pressure ${pressurePercent(stroke.pressure)}% · ` + status.textContent;
-    status.title = status.textContent;
+    let statusDetail = status.textContent;
+    if (view.contribution) {
+      preview.hidden = true; // Raw brush target colours are not contribution predictions.
+      const state = contributionState();
+      const prefix = "Contribution · prepared weight 0–100% · edits change raw field · ";
+      // Grouped stacks only; ready/conflict states always belong to the current snapshot.
+      const groups = previewSnapshot?.choice?.groups, group = groups?.compact ? `${groups.compact} · ` : "";
+      if (state.status === "ready") {
+        const weight = target && preparedWeights ? preparedWeights[target.y * 128 + target.x] : null;
+        statusDetail = prefix + (state.disabled ? "layer disabled · " : "")
+          + (weight === null ? "" : `x ${target.x} y ${target.y} · ${(weight * 100).toPrecision(7)}% · `)
+          + `${Math.round(zoom * 100)}% zoom` + (groups ? ` · ${groups.detail}` : "");
+        status.textContent = (state.disabled ? "Layer disabled · " : "")
+          + (weight === null ? `Contribution · ${group}hover for weight` : `${(weight * 100).toPrecision(7)}% contribution · ${group}x ${target.x} y ${target.y}`);
+      } else if (state.status === "conflict") {
+        statusDetail = "Contribution unavailable · FIXED conflicts: "
+          + state.pairs.map(p => `layers ${p.layers.join(" / ")} share ${p.count} cells`).join("; ")
+          + (groups ? ` · ${groups.detail}` : "");
+        status.textContent = `FIXED conflict · ${state.cells.length} cells · preview unavailable`;
+      } else {
+        statusDetail = state.status === "stale" ? "Preview stale · editing; recalculates after stroke"
+          : state.status === "pending" ? "Preview pending · calculating prepared weights"
+          : `Preview unavailable · ${state.message}`;
+        status.textContent = state.status === "stale" ? "Preview stale · editing"
+          : state.status === "pending" ? "Preview pending" : `Unavailable · ${state.message}`;
+      }
+    }
+    if (stroke instanceof PressureStroke && !stroke.mouse) {
+      const pressure = `pressure ${pressurePercent(stroke.pressure)}% · `;
+      status.textContent = pressure + status.textContent; statusDetail = pressure + statusDetail;
+    }
+    status.title = statusDetail;
   }
   function drawSelection() {
     if (shownSelection !== session.selection) {
@@ -1543,9 +1631,10 @@ export function openInfluenceFieldEditor({codes, settings, host, onDone, onCance
     if (chooserDialog) { chooserDialog.keyboard(event); return; }
     if (libraryDialog) { libraryDialog.keyboard(event); return; }
     if (maskDialog) { maskDialog.keyboard(event); return; }
+    if (event.target === contextChoice) return; // Preserve native select keyboard behavior.
     // The window capture handler isolates the editor from host shortcuts. Activate
     // these disclosure controls explicitly; Space must not start canvas panning.
-    if (([advancedToggle, summary, field.children[0], influenceSummary].includes(event.target) ||
+    if (([advancedToggle, summary, field.children[0], influenceSummary, fieldsView, contributionView].includes(event.target) ||
         (event.target.tagName === "BUTTON" && paintingOptions.contains(event.target))) && [" ", "Enter"].includes(event.key)) {
       event.preventDefault();
       if (!event.repeat && ((event.key === "Enter" && event.type === "keydown") ||
@@ -1590,6 +1679,8 @@ export function openInfluenceFieldEditor({codes, settings, host, onDone, onCance
   function close() {
     if (closed) return;
     closed = true;
+    previewEpoch++; previewQueue?.dispose();
+    if (previewPoll !== null) clearInterval(previewPoll);
     libraryDialog?.dispose(); libraryDialog = null;
     maskDialog?.dispose(); maskDialog = null; clearFieldToolsMessage();
     chooserDialog?.dispose(); chooserDialog = null;

@@ -65,7 +65,23 @@ export function displayState(view, hasReference) {
 }
 
 export function createViewSession() {
-  return {grid: false, heat: false, referenceOpacity: 50, comparing: false};
+  return {grid: false, heat: false, referenceOpacity: 50, comparing: false, contribution: false};
+}
+
+// Prepared weights are never rounded back into authored codes. Only display colours quantize.
+export function drawContribution(canvas, state) {
+  canvas.width = canvas.height = 128;
+  const context = canvas.getContext("2d"), pixels = context.createImageData(128, 128);
+  const weights = state.status === "ready" ? new Float32Array(Uint32Array.from(state.bits).buffer) : null;
+  const conflicts = new Set(state.status === "conflict" ? state.cells : []);
+  for (let i = 0; i < 16384; i++) {
+    const hatched = conflicts.has(i);
+    const color = hatched ? ((i % 128 + Math.floor(i / 128)) % 6 < 3 ? [255, 80, 80] : [255, 255, 255])
+      : weights ? heatColor(weights[i] * 255) : [0, 0, 0];
+    pixels.data.set(color, i * 4); pixels.data[i * 4 + 3] = 255;
+  }
+  context.putImageData(pixels, 0, 0);
+  return weights;
 }
 
 // Keep the side of an axis-aligned line where sign * (point[axis] - limit) >= 0.

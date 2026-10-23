@@ -18,6 +18,13 @@ LAYER_TYPE = "CONDITIONING_LAYER"
 LAYER_STACK_TYPE = "CONDITIONING_LAYER_STACK"
 
 
+def validate_blend_group(value: object) -> str:
+    """One literal group key; empty is the default group, never a membership list."""
+    if type(value) is not str or value != value.strip():
+        raise ValueError("Blend Group must be one string without leading or trailing whitespace")
+    return value
+
+
 class LayerMode(str, Enum):
     """Per-layer composition mode; see `composition` for the exact rule."""
 
@@ -35,6 +42,7 @@ class LayerDescriptor:
     strength: float
     mode: LayerMode
     enabled: bool = True
+    blend_group: str = ""
 
     def __post_init__(self) -> None:
         if type(self.layer_id) is not str or not self.layer_id.strip():
@@ -52,6 +60,7 @@ class LayerDescriptor:
         object.__setattr__(self, "mode", mode)
         if type(self.enabled) is not bool:
             raise ValueError(f"Layer {self.layer_id}: enabled must be a boolean")
+        validate_blend_group(self.blend_group)
 
 
 @dataclass(frozen=True, slots=True, eq=False)

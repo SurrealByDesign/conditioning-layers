@@ -240,6 +240,17 @@ if os.environ.get("CONDITIONING_LAYERS_P3D_QUALIFICATION_BRIDGE") == "1":
         P3D_QUALIFICATION_BRIDGE_REGISTRATION_ERROR = type(_bridge_error).__name__
         logging.warning("Conditioning Layers: optional qualification bridge registration failed: %s", P3D_QUALIFICATION_BRIDGE_REGISTRATION_ERROR)
 
+# Read-only CPU previews are optional; failure cannot affect editing or execution.
+COMPOSITION_PREVIEW_REGISTRATION_ERROR = None
+try:
+    from conditioning_layers.integrations.composition_preview import register_preview_route
+
+    register_preview_route()
+except Exception as _preview_error:
+    COMPOSITION_PREVIEW_REGISTRATION_ERROR = type(_preview_error).__name__
+
+    logging.warning("Conditioning Layers: optional composition preview registration failed: %s", COMPOSITION_PREVIEW_REGISTRATION_ERROR)
+
 __all__ = [
     "NODE_CLASS_MAPPINGS",
     "NODE_DISPLAY_NAME_MAPPINGS",

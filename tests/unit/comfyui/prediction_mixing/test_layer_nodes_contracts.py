@@ -30,7 +30,7 @@ from conditioning_layers.comfyui.prediction_mixing import blend_component, gener
 from conditioning_layers.comfyui.prediction_mixing.blend_node import ConditioningLayersNormalizedBlend
 from conditioning_layers.comfyui.prediction_mixing.layer_nodes import (
     FIELD_SHAPE, LAYER_NODE_CLASS_NAMES, LAYER_STACK_TYPE, LAYER_TYPE, UPSTREAM_METADATA,
-    ConditioningLayersAddLayer, ConditioningLayersCompose, ConditioningLayersLayer,
+    ConditioningLayersAddLayer, ConditioningLayersCompose, ConditioningLayersComposeGroups, ConditioningLayersLayer,
     LayerDescriptor, LayerMode, LayerStack, initialize_layer_node_registration, nodes,
 )
 from conditioning_layers.integrations import blend_readiness
@@ -95,16 +95,19 @@ class StackTests(unittest.TestCase):
 
 
 class NodeContractTests(unittest.TestCase):
-    def test_registration_is_exactly_three_nodes_with_fresh_mappings(self):
+    def test_registration_is_three_retained_nodes_plus_grouped_compose_with_fresh_mappings(self):
         mappings, names = initialize_layer_node_registration()
         self.assertEqual(LAYER_NODE_CLASS_NAMES,
-                         ("ConditioningLayersLayer", "ConditioningLayersAddLayer", "ConditioningLayersCompose"))
+                         ("ConditioningLayersLayer", "ConditioningLayersAddLayer", "ConditioningLayersCompose",
+                          "ConditioningLayersComposeGroups"))
         self.assertEqual(tuple(mappings), LAYER_NODE_CLASS_NAMES)
         self.assertEqual(tuple(mappings.values()),
-                         (ConditioningLayersLayer, ConditioningLayersAddLayer, ConditioningLayersCompose))
+                         (ConditioningLayersLayer, ConditioningLayersAddLayer, ConditioningLayersCompose,
+                          ConditioningLayersComposeGroups))
         self.assertEqual(names, {"ConditioningLayersLayer": "Conditioning Layer",
                                  "ConditioningLayersAddLayer": "Add Conditioning Layer",
-                                 "ConditioningLayersCompose": "Compose Conditioning Layers"})
+                                 "ConditioningLayersCompose": "Compose Conditioning Layers",
+                                 "ConditioningLayersComposeGroups": "Compose Blend Groups"})
         mappings.clear()
         self.assertEqual(tuple(initialize_layer_node_registration()[0]), LAYER_NODE_CLASS_NAMES)
 
@@ -120,7 +123,10 @@ class NodeContractTests(unittest.TestCase):
         self.assertEqual(required["mode"][1]["default"], "BLENDED")
         self.assertEqual((required["enabled"][0], required["enabled"][1]["default"]), ("BOOLEAN", True))
         self.assertEqual(declared["hidden"], {"unique_id": "UNIQUE_ID"})
-        self.assertEqual(set(declared), {"required", "hidden"})
+        self.assertEqual(set(declared), {"required", "optional", "hidden"})
+        self.assertEqual(tuple(declared["optional"]), ("blend_group",))
+        self.assertEqual(declared["optional"]["blend_group"][0], "STRING")
+        self.assertEqual(declared["optional"]["blend_group"][1]["default"], "")
         self.assertEqual((ConditioningLayersLayer.RETURN_TYPES, ConditioningLayersLayer.FUNCTION),
                          ((LAYER_TYPE,), "create"))
 
@@ -231,7 +237,7 @@ class BoundaryTests(unittest.TestCase):
                          if isinstance(function, ast.FunctionDef) for node in ast.walk(function)
                          if isinstance(node, (ast.Import, ast.ImportFrom))
                          for alias in (node.names if isinstance(node, ast.Import) else [ast.alias(node.module or "")])}
-                self.assertLessEqual(local, {"torch", "comfy"} if path.name == "nodes.py" else set())
+                self.assertLessEqual(local, {"torch", "comfy", "grouped_composition"} if path.name == "nodes.py" else set())
 
     def test_package_is_isolated_from_product_panel_admission_and_selectors(self):
         for path in sorted(PACKAGE.glob("*.py")):
@@ -274,6 +280,7 @@ class RootRegistrationTests(unittest.TestCase):
             {"side_effect": ImportError("offline Blend unavailable")}
         with patch.dict("os.environ", {}, clear=True), patch.object(routes, "register_routes", **(sidebar_patch or {})) as register, \
                 patch.object(blend_readiness, "register_readiness_route"), \
+                patch("conditioning_layers.integrations.composition_preview.register_preview_route"), \
                 patch.object(blend_component, "initialize_blend_node_registration", **blend), \
                 patch.object(layer_nodes, "initialize_layer_node_registration",
                              **(layer_patch or {"wraps": initialize_layer_node_registration})):
@@ -382,6 +389,7 @@ class RootRegistrationTests(unittest.TestCase):
                     patch.object(routes, "register_routes"), \
                     patch.object(blend_component, "initialize_blend_node_registration", return_value=({}, None)), \
                     patch.object(blend_readiness, "register_readiness_route"), \
+                    patch("conditioning_layers.integrations.composition_preview.register_preview_route"), \
                     patch.object(importlib.import_module(module), function, side_effect=RuntimeError("synthetic registration failure")), \
                     self.assertLogs(level="WARNING") as warnings:
                 exec(compile((ROOT / "__init__.py").read_text(encoding="utf-8"), "__init__.py", "exec"), namespace)
@@ -407,7 +415,8 @@ class RootRegistrationTests(unittest.TestCase):
                     patch.dict(sys.modules, {"p3d_blend_invocation_bridge": SimpleNamespace(register_invocation_route=failed_registration)}), \
                     patch.object(routes, "register_routes"), \
                     patch.object(blend_component, "initialize_blend_node_registration", return_value=({}, None)), \
-                    patch.object(blend_readiness, "register_readiness_route"), self.assertLogs(level="WARNING") as warnings:
+                    patch.object(blend_readiness, "register_readiness_route"), \
+                    patch("conditioning_layers.integrations.composition_preview.register_preview_route"), self.assertLogs(level="WARNING") as warnings:
                 exec(compile((ROOT / "__init__.py").read_text(encoding="utf-8"), "__init__.py", "exec"), namespace)
         finally:
             sys.path[:] = before

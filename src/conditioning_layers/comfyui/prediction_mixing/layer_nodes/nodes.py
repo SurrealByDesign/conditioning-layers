@@ -105,6 +105,11 @@ class ConditioningLayersLayer:
                     "default": True,
                     "tooltip": "Off keeps the layer in the stack but leaves it out of the composition."}),
             },
+            "optional": {"blend_group": ("STRING", {
+                "default": "", "multiline": False,
+                "tooltip": "Blend Group: one literal key for BLENDED layers. Empty is the default group. "
+                           "Use Compose Blend Groups for explicit assignments. FIXED ownership stays global; "
+                           "its saved group value has no effect there."})},
             "hidden": {"unique_id": "UNIQUE_ID"},
         }
 
@@ -113,8 +118,8 @@ class ConditioningLayersLayer:
     FUNCTION = "create"
     CATEGORY = CATEGORY
 
-    def create(self, conditioning, mask, strength, mode, enabled, unique_id=None):
-        layer = LayerDescriptor(unique_id, conditioning, mask, strength, mode, enabled)
+    def create(self, conditioning, mask, strength, mode, enabled, unique_id=None, blend_group=""):
+        layer = LayerDescriptor(unique_id, conditioning, mask, strength, mode, enabled, blend_group)
         if layer.enabled:
             # Fail at the authoring node; Compose validates again before use.
             _prepared_inputs(layer, _runtime_torch())
@@ -173,6 +178,9 @@ class ConditioningLayersCompose:
             raise ValueError("Compose Conditioning Layers requires binary32 intermediate execution")
         if type(layers) is not LayerStack:
             raise ValueError("Compose Conditioning Layers requires a stack from Add Conditioning Layer")
+        if any(layer.blend_group != "" for layer in LayerStack(layers.layers).layers):
+            raise ValueError("Explicit Blend Group assignments require Compose Blend Groups; clear all assignments "
+                             "to use Compose Conditioning Layers")
         # Re-check the stack invariants and every descriptor, then use only the checked values.
         active = tuple(LayerDescriptor(layer.layer_id, layer.conditioning, layer.mask, layer.strength,
                                        layer.mode, layer.enabled)
@@ -198,10 +206,61 @@ class ConditioningLayersCompose:
         return (conditioning,)
 
 
+class ConditioningLayersComposeGroups:
+    """Explicit opt-in to flat strongest-member grouping; ordinary CONDITIONING output."""
+
+    DESCRIPTION = ("Compose Blend Groups: normalize BLENDED members within each group, then share influence "
+                   "between groups in proportion to their strongest member. FIXED ownership remains global. "
+                   "Changing a dominant member can change the whole group's share. Empty keys form one default group.")
+    @classmethod
+    def INPUT_TYPES(cls):
+        return ConditioningLayersCompose.INPUT_TYPES()
+
+    RETURN_TYPES = ("CONDITIONING",)
+    RETURN_NAMES = ("conditioning",)
+    FUNCTION = "compose"
+    CATEGORY = CATEGORY
+
+    def compose(self, layers):
+        # Lazy import keeps grouped preparation out of legacy execution/registration.
+        from .grouped_composition import compose_grouped_field_codes
+
+        torch = _runtime_torch()
+        from comfy import model_management
+
+        if model_management.intermediate_dtype() != torch.float32:
+            raise ValueError("Compose Blend Groups requires binary32 intermediate execution")
+        if type(layers) is not LayerStack:
+            raise ValueError("Compose Blend Groups requires a stack from Add Conditioning Layer")
+        checked = tuple(LayerDescriptor(layer.layer_id, layer.conditioning, layer.mask, layer.strength,
+                                        layer.mode, layer.enabled, layer.blend_group)
+                        for layer in LayerStack(layers.layers).layers)
+        active = tuple(layer for layer in checked if layer.enabled)
+        if not active:
+            raise ValueError("Compose Blend Groups has no enabled layer")
+        entries, planes = [], []
+        for layer in active:
+            prompt, metadata, codes = _prepared_inputs(layer, torch)
+            entries.append((prompt, metadata))
+            planes.append(codes)
+        prepared = compose_grouped_field_codes(
+            tuple(planes), tuple(layer.strength for layer in active), tuple(layer.mode for layer in active),
+            tuple(layer.blend_group for layer in active), labels=tuple(layer.layer_id for layer in active))
+        conditioning = []
+        for (prompt, metadata), bits in zip(entries, prepared, strict=True):
+            output = metadata.copy()
+            output["mask"] = torch.tensor(bits, dtype=torch.int32, device="cpu").view(torch.float32).reshape(FIELD_SHAPE)
+            output["set_area_to_bounds"] = PREPARED_SET_AREA_TO_BOUNDS
+            output["mask_strength"] = PREPARED_MASK_STRENGTH
+            conditioning.append([prompt, output])
+        return (conditioning,)
+
+
 _NODES = (
     ("ConditioningLayersLayer", ConditioningLayersLayer, "Conditioning Layer"),
     ("ConditioningLayersAddLayer", ConditioningLayersAddLayer, "Add Conditioning Layer"),
     ("ConditioningLayersCompose", ConditioningLayersCompose, "Compose Conditioning Layers"),
+    ("ConditioningLayersComposeGroups", ConditioningLayersComposeGroups, "Compose Blend Groups"),
 )
 LAYER_NODE_CLASS_NAMES = tuple(name for name, _, _ in _NODES)
 

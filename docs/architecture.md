@@ -57,6 +57,16 @@ embedded implementation records and independently versioned embedded contracts
 have distinct version-propagation rules. Public alpha status does not erase
 existing identity obligations or promise a stable public migration scheme.
 
+## Contribution and grouped composition
+
+The optional host adapter resolves an entire selected native stack and literal layer metadata only while Contribution is active. Current editing buffers override stored field codes without committing. The transient CPU route `/conditioning-layers/composition-preview` reuses production preparation; browser code implements no composition arithmetic, sampling or general graph evaluation. Complete direct-Painted-Field stacks are required. View/context state is ephemeral; editing and its four-field membership limit are unchanged.
+
+Compose Blend Groups uses one literal `blend_group` per layer. FIXED owners are resolved globally first. Else, for BLENDED layer `i` in group `g`, `u_i = field_i × Strength_i`, `U_g = sum(u_i)`, `E_g = max(u_i)`, and `w_i = u_i × E_g / (U_g × sum(E_h))` when the denominators are positive, otherwise zero. Exact arithmetic is rounded once to binary32. At most one BLENDED group delegates to retained flat preparation. Changing the strongest member can change other groups' shares; no visual or resource improvement is promised.
+
+The new widget is appended with an empty default. Legacy Compose rejects explicit assignments rather than silently discarding their intent. Grouping changes no document/IR schema, sidebar admission, host profile, layer type, or historical identity. Registration remains optional and isolated; public sidebar-failure isolation and warning logs are retained.
+
+MOSS is limited to the [experimental example](../examples/moss-experimental/README.md). Its documented 1024×1024, aligned 2×2 field-block and FIXED-only restrictions do not create a supported backend.
+
 ## Architectural decisions
 
 | Accepted ADRs | Public architectural meaning |
@@ -75,6 +85,9 @@ existing identity obligations or promise a stable public migration scheme.
 | 0033 | Multi-field sessions and atomic Done. |
 | 0034 | Pairwise conserved Transfer and linked history. |
 | 0035 | Pairwise Balance, feasible split and shared linked history. |
+| 0036 | Opt-in read-only Contribution preview; complete direct-Painted-Field stacks, server-owned preparation, explicit unavailable/stale states. |
+| 0037 | One experimental MOSS FIXED example; no new backend adapter, supported profile or product admission. |
+| 0038 | Explicit Compose Blend Groups, strongest-member shares and global FIXED ownership; legacy Compose stays flat. |
 
 This table summarizes the decisions by number. The historical ADR archive is
 not included in this distribution.

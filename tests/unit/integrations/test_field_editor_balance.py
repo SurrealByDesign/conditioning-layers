@@ -1996,7 +1996,8 @@ activate('2');press('Undo');assert.equal(saved(),before);
             CORE / 'engine.js': '70d767a642ea7cda612c241aa9d9aeb364295a8d121cc33a2adb92a311c9a1de',
             CORE / 'brush.js': 'fc6cff66902efa3ad4d0fec7085f93f88996504f97e56ea29a947b6898b95afe',
             CORE / 'history.js': '1b65ef775b17fa8cee83d56b7b315f3149ebeffcef04f552cf0139fa5b5157bf',
-            ROOT / 'web/js/painted_field_node.js': 'f13daf18ad81c2ad96be350772e0afbdbc8ec60bf7a8b197f41dbf3e906ab690',
+            # ADR-0036 adds only the opt-in preview host interface; ordinary E10 discovery stays fenced.
+            ROOT / 'web/js/painted_field_node.js': '3afa910ad036abf20ecbafa736203f92e5e0309fae5b364693febb83913f1eb9',
         }.items():
             self.assertEqual(hashlib.sha256(path.read_bytes()).hexdigest(), digest, path.name)
         transfer = (CORE / 'transfer.js').read_bytes()

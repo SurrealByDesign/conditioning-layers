@@ -22,6 +22,7 @@ from offline_regressions import FENCES, ROOT, fence, python_probe_launcher
 
 
 GROUPS = {
+    "composition-preview": ("integrations", ("test_composition_preview.py", "test_composition_preview_groups.py")),
     "hotdog-template": ("integrations", ("test_field_editor_hotdog.py",)),
     "field-editor": ("integrations", ("test_field_editor_frontend.py", "test_field_editor_brush_engine.py",
                                       "test_field_editor_value_profile.py", "test_field_editor_custom_tip.py",
@@ -136,9 +137,9 @@ def main(argv=None):
         for target in FENCES:
             stack.enter_context(patch(target, side_effect=fence, create=True))
         stack.enter_context(patch("subprocess.Popen", side_effect=offline_probe_launcher(
-            original_popen, allow_node=args.group in {"panel", "field-editor", "hotdog-template"},
+            original_popen, allow_node=args.group in {"panel", "field-editor", "hotdog-template", "composition-preview"},
         )))
-        if args.group == "panel":
+        if args.group in {"panel", "composition-preview"}:
             # Windows' ordinary asyncio self-pipe opens loopback sockets. These
             # tests need callback/timer/thread scheduling only, not socket I/O.
             stack.enter_context(patch("asyncio.events.new_event_loop", MemoryWakeupLoop))

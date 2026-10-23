@@ -27,11 +27,11 @@ from conditioning_layers.comfyui.prediction_mixing.models import (
 from conditioning_layers.comfyui.prediction_mixing.multi_layer.canonical import fingerprint
 from conditioning_layers.comfyui.prediction_mixing.validation import _safe_relative_name, _validate_settings
 
-from .models import LayerMode
+from .models import LayerMode, validate_blend_group
 from .nodes import LAYER_NODE_CLASS_NAMES, initialize_layer_node_registration
 
 
-LAYER_NODE, ADD_LAYER_NODE, COMPOSE_NODE = LAYER_NODE_CLASS_NAMES
+LAYER_NODE, ADD_LAYER_NODE, COMPOSE_NODE, GROUPED_COMPOSE_NODE = LAYER_NODE_CLASS_NAMES
 SAMPLER_SETTINGS = ("seed", "steps", "cfg", "sampler_name", "scheduler", "denoise")
 _WIDGET_TYPES = frozenset({"INT", "FLOAT", "STRING", "BOOLEAN"})
 
@@ -46,6 +46,7 @@ class LayerWorkflowSpec:
     mode: LayerMode = LayerMode.BLENDED
     enabled: bool = True
     title: str = ""
+    blend_group: str = ""
 
 
 def _check_specs(layers):
@@ -58,11 +59,16 @@ def _check_specs(layers):
                 or type(strength) not in (int, float) or not math.isfinite(strength) or not 0 <= strength <= 1
                 or type(layer.mode) is not LayerMode or type(layer.enabled) is not bool):
             raise ValueError(f"Layer {ordinal} is not a valid workflow layer")
+        validate_blend_group(layer.blend_group)
 
 
-def build_layer_node_workflow(layers, inventory, settings) -> dict[str, dict[str, object]]:
+def build_layer_node_workflow(layers, inventory, settings, *, grouped=False) -> dict[str, dict[str, object]]:
     """Return the dense, deterministic API graph: 4N + 9 nodes, 5N + 8 links."""
     _check_specs(layers)
+    if type(grouped) is not bool:
+        raise ValueError("grouped must be a boolean")
+    if not grouped and any(layer.blend_group for layer in layers):
+        raise ValueError("Explicit Blend Group assignments require Compose Blend Groups")
     if type(inventory) is not ComfyUIComponentInventory or inventory.negative_prompt_policy is not NegativePromptPolicy.EMPTY:
         raise ValueError("An inventory with the empty negative prompt policy is required")
     if type(settings) is not RuntimeGenerationSettings or _validate_settings(settings):
@@ -91,11 +97,13 @@ def build_layer_node_workflow(layers, inventory, settings) -> dict[str, dict[str
     for i, layer in enumerate(layers):
         node(2 * n + 4 + i, LAYER_NODE, labels[i], conditioning=link(3 + i), mask=link(n + 4 + i),
              strength=0.0 if layer.strength == 0 else float(layer.strength),
-             mode=layer.mode.value, enabled=layer.enabled)
+             mode=layer.mode.value, enabled=layer.enabled,
+             **({"blend_group": layer.blend_group} if layer.blend_group else {}))
     for i in range(n):
         stack = {"layers": link(3 * n + 3 + i)} if i else {}
         node(3 * n + 4 + i, ADD_LAYER_NODE, f"Add {labels[i]}", layer=link(2 * n + 4 + i), **stack)
-    node(4 * n + 4, COMPOSE_NODE, "Compose Conditioning Layers", layers=link(4 * n + 3))
+    node(4 * n + 4, GROUPED_COMPOSE_NODE if grouped else COMPOSE_NODE,
+         "Compose Blend Groups" if grouped else "Compose Conditioning Layers", layers=link(4 * n + 3))
     node(4 * n + 5, "EmptyLatentImage", "Empty Latent Image", width=inventory.output_width,
          height=inventory.output_height, batch_size=inventory.batch_size)
     node(4 * n + 6, "KSampler", "KSampler", seed=settings.seed, steps=inventory.steps, cfg=inventory.cfg,
@@ -200,7 +208,12 @@ def _layer_workflow_semantics(graph, field_digests):
     samplers = [node_id for node_id, node in graph.items() if node.get("class_type") == "KSampler"]
     if len(samplers) != 1:
         raise ValueError("Exactly one KSampler is required")
-    compose = _linked(graph, graph[samplers[0]]["inputs"]["positive"], COMPOSE_NODE)
+    positive = graph[samplers[0]]["inputs"]["positive"]
+    compose_type = graph.get(positive[0], {}).get("class_type") if _is_link(positive) else None
+    if compose_type not in (COMPOSE_NODE, GROUPED_COMPOSE_NODE):
+        raise ValueError("Expected a link to Compose Conditioning Layers or Compose Blend Groups")
+    compose = _linked(graph, positive, compose_type)
+    grouped = compose_type == GROUPED_COMPOSE_NODE
     chain = [_linked(graph, graph[compose]["inputs"]["layers"], ADD_LAYER_NODE)]
     while "layers" in graph[chain[-1]]["inputs"]:
         chain.append(_linked(graph, graph[chain[-1]]["inputs"]["layers"], ADD_LAYER_NODE))
@@ -213,6 +226,9 @@ def _layer_workflow_semantics(graph, field_digests):
             raise ValueError(f"Layer node {layer} is added to the stack twice")
         authored.append(layer)
         inputs = graph[layer]["inputs"]
+        group = validate_blend_group(inputs.get("blend_group", ""))
+        if group and not grouped:
+            raise ValueError("Explicit Blend Group assignments require Compose Blend Groups")
         strength, enabled = inputs["strength"], inputs["enabled"]
         if (type(strength) is not float or not math.isfinite(strength) or not 0 <= strength <= 1
                 or type(enabled) is not bool):
@@ -223,8 +239,12 @@ def _layer_workflow_semantics(graph, field_digests):
             "strength": strength,
             "mode": LayerMode(inputs["mode"]).value,
             "enabled": enabled,
+            **({"blend_group": group} if grouped else {}),
         })
-    return sampler_semantics(graph, samplers[0], layers, field_digests)
+    semantics = sampler_semantics(graph, samplers[0], layers, field_digests)
+    if grouped:
+        semantics["composition"] = "strongest-member-groups.v1"
+    return semantics
 
 
 def fingerprint_semantics(semantics) -> str:

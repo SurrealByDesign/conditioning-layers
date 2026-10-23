@@ -5,6 +5,14 @@ import offline_regressions
 
 GROUPS = {
     **p2b_offline.GROUPS,
+    "selective-groups": ("comfyui/prediction_mixing", (
+        "test_selective_blend_groups.py", "test_selective_blend_workflow.py",
+        "test_layer_nodes_composition.py", "test_layer_nodes_contracts.py")),
+    "selective-groups-runtime": ("comfyui/prediction_mixing", (
+        "test_selective_blend_runtime.py", "test_selective_blend_preview_runtime.py",
+        "test_layer_node_runtime.py")),
+    "release-registration": ("comfyui/prediction_mixing", (
+        "test_layer_nodes_contracts.py", "test_blend_registration.py")),
     "nodes": ("comfyui/prediction_mixing", (
         "test_layer_nodes_contracts.py", "test_layer_nodes_composition.py",
         "test_field_*.py", "test_influence_field_*.py", "test_painted_field_*.py",

@@ -16,7 +16,7 @@ from .composition import LayerCompositionError, compose_field_codes, fixed_overl
 from .models import LAYER_STACK_TYPE, LAYER_TYPE, LayerDescriptor, LayerMode, LayerStack
 from .nodes import (
     FIELD_SHAPE, LAYER_NODE_CLASS_NAMES, UPSTREAM_METADATA,
-    ConditioningLayersAddLayer, ConditioningLayersCompose, ConditioningLayersLayer,
+    ConditioningLayersAddLayer, ConditioningLayersCompose, ConditioningLayersComposeGroups, ConditioningLayersLayer,
     initialize_layer_node_registration,
 )
 from .workflow import (
